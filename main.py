@@ -2,7 +2,7 @@
 Climate Finance project. It creates a set of charts for a base model run, 
 followed by a set of charts for scenarios where specific transmission expansion
 objects are assessed in terms of their climate finance impacts. For the
-script to function, the user is required to set required paths to the model 
+script to function, the user is required to set paths to the model 
 result folders in 'config.py' as well as to set the geographical scope. In 
 'config.py' the user can also set which charts to generate. In 'constants.py',
 the user can change the color mapping as used in different charts. Generated
@@ -14,8 +14,9 @@ from config import(
     base_dir_results,
     base_dir_results_summaries,
     base_model,
-    run_dict,
-    countries
+    base_run_dict,
+    countries,
+    scenarios
     )
 
 from constants import(
@@ -55,19 +56,22 @@ from read import (
 base_path = f'Figures/{base_model}/Base'
 
 '''Check for and create output paths'''
-try:
-    os.makedirs(base_path)
-except FileExistsError:
-    pass
-
 for country in countries:
     try:
         os.makedirs(os.path.join(base_path, country))
     except FileExistsError:
         pass
     
+for scenario in scenarios:
+    scen_path = f'Figures/{base_model}/{scenario}'
+    for country in countries:
+        try:
+            os.makedirs(os.path.join(scen_path, country))
+        except FileExistsError:
+            pass
+    
 '''Create charts for base model run.'''
-if run_dict.get('pwr_cap_bar_global') == 'yes':
+if base_run_dict.get('pwr_cap_bar_global') == 'yes':
     df = read_capacity_country(base_dir_results_summaries)
     
     chart_title = 'Installed Capacity'
@@ -80,7 +84,7 @@ if run_dict.get('pwr_cap_bar_global') == 'yes':
                            bar_tech_color_dict, unit, 
                            country = None)
 
-if run_dict.get('pwr_cap_bar_country') == 'yes':
+if base_run_dict.get('pwr_cap_bar_country') == 'yes':
     df = read_capacity_country(base_dir_results_summaries)
     
     chart_title = 'Installed Capacity'
@@ -95,7 +99,7 @@ if run_dict.get('pwr_cap_bar_country') == 'yes':
                                bar_tech_color_dict, unit, 
                                country = country)
         
-if run_dict.get('pwr_gen_bar_global') == 'yes':
+if base_run_dict.get('pwr_gen_bar_global') == 'yes':
     df = read_technology_annual_activity(base_dir_results)
     df = format_technology_col(df)
     df = convert_pj_to_twh(df)
@@ -110,7 +114,7 @@ if run_dict.get('pwr_gen_bar_global') == 'yes':
                            bar_tech_color_dict, unit, 
                            country = None)
     
-if run_dict.get('pwr_gen_bar_country') == 'yes':
+if base_run_dict.get('pwr_gen_bar_country') == 'yes':
     df = read_technology_annual_activity(base_dir_results)
     df = format_technology_col(df)
     df = convert_pj_to_twh(df)
@@ -126,7 +130,7 @@ if run_dict.get('pwr_gen_bar_country') == 'yes':
                                bar_tech_color_dict, unit, 
                                country = country)
 
-if run_dict.get('pwr_gen_shares_global') == 'yes':
+if base_run_dict.get('pwr_gen_shares_global') == 'yes':
     df = read_generation_shares_global(base_dir_results_summaries)
     
     chart_title = 'Generation Shares'
@@ -139,7 +143,7 @@ if run_dict.get('pwr_gen_shares_global') == 'yes':
                                   bar_gen_shares_color_dict, unit, 
                                   country = None)
     
-if run_dict.get('pwr_gen_shares_country') == 'yes':
+if base_run_dict.get('pwr_gen_shares_country') == 'yes':
     df = read_generation_shares_country(base_dir_results_summaries)
     
     chart_title = 'Generation Shares'
@@ -153,7 +157,7 @@ if run_dict.get('pwr_gen_shares_country') == 'yes':
                                       bar_gen_shares_color_dict, unit, 
                                       country = country)
         
-if run_dict.get('dual_costs_global') == 'yes':
+if base_run_dict.get('dual_costs_global') == 'yes':
     df1 = read_total_cost_global(base_dir_results_summaries)
     df2 = read_pwr_cost_global(base_dir_results_summaries)
     
@@ -168,7 +172,7 @@ if run_dict.get('dual_costs_global') == 'yes':
                           dual_costs_color_dict, unit1, 
                           unit2, country = None)
     
-if run_dict.get('dual_costs_country') == 'yes':
+if base_run_dict.get('dual_costs_country') == 'yes':
     df1 = read_total_cost_country(base_dir_results_summaries)
     df2 = read_pwr_cost_country(base_dir_results_summaries)
     
@@ -184,7 +188,7 @@ if run_dict.get('dual_costs_country') == 'yes':
                               dual_costs_color_dict, unit1, 
                               unit2, country = country)
         
-if run_dict.get('pwr_costs_multi_country') == 'yes':
+if base_run_dict.get('pwr_costs_multi_country') == 'yes':
     df = read_pwr_cost_country(base_dir_results_summaries)
     
     chart_title = 'Normalized Costs'
@@ -196,7 +200,7 @@ if run_dict.get('pwr_costs_multi_country') == 'yes':
                               legend_title, file_name, 
                               country_color_dict, unit)
     
-if run_dict.get('dual_emissions_global') == 'yes':
+if base_run_dict.get('dual_emissions_global') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
                                   country = False)
     
@@ -213,7 +217,7 @@ if run_dict.get('dual_emissions_global') == 'yes':
                               dual_emissions_color_dict, unit1, 
                               unit2, country = None)
     
-if run_dict.get('dual_emissions_country') == 'yes':
+if base_run_dict.get('dual_emissions_country') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
                                   country = True)
     
@@ -232,7 +236,7 @@ if run_dict.get('dual_emissions_country') == 'yes':
                                   dual_emissions_color_dict, unit1, 
                                   unit2, country = country)
         
-if run_dict.get('dual_emissions_stacked') == 'yes':
+if base_run_dict.get('dual_emissions_stacked') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
                                   country = True)
     
@@ -248,3 +252,6 @@ if run_dict.get('dual_emissions_stacked') == 'yes':
                                       legend_title, file_name, 
                                       country_color_dict, unit1, 
                                       unit2)
+    
+'''Create charts for single scenario comparison to base.'''
+
