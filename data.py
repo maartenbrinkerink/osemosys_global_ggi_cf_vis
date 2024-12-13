@@ -277,20 +277,10 @@ def format_stacked_bar_pwr_delta(df_in1, df_in2, out_dir,
              label=col, color = color_dict.get(col))
       bottom2 += np.array(df2[col])
     
-    # Set legend
-    handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
-    by_label = dict(sorted(by_label.items()))
-    
-    fig.legend(by_label.values(), by_label.keys(), 
-               bbox_to_anchor=(1.07, 0.91), frameon = False, 
-               reverse = True, title = legend_title)
-    
     # Axis formatting
     axs[0,1].xaxis.set_major_formatter(FormatStrFormatter('%d'))
     axs[0,1].margins(x=0)
     axs[0,1].set_ylim([min(df1.sum(axis=1)) * 1.1, max(df2.sum(axis=1)) * 1.1])
-    axs[0,1].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
     
     # SET TOTAL SUBPLOT
     
@@ -326,23 +316,28 @@ def format_stacked_bar_pwr_delta(df_in1, df_in2, out_dir,
              label=col, color = color_dict.get(col))
       bottom4 += np.array(df4[col])
     
-    
-    
-    
-    
+    # Axis formatting
     axs[0,0].margins(x=1)
     axs[0,0].set_ylim([min(df3.sum(axis=1)) * 1.1, max(df4.sum(axis=1)) * 1.1])
     axs[0,0].set_ylabel(unit)
-    axs[0,0].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
     
     # CONFIG BOTH SUBPLOTS
     
+    # Set legend
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    by_label = dict(sorted(by_label.items()))
+    
+    fig.legend(by_label.values(), by_label.keys(), 
+               bbox_to_anchor=(1.12, 0.91), frameon = False, 
+               reverse = True, title = legend_title)
     
     plt.suptitle(chart_title)
     
-    
-    
-    
-    
+    # Add 0 line
+    for i, ax in enumerate(fig.axes):
+        ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+        
+    fig.tight_layout()
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')

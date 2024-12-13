@@ -276,10 +276,10 @@ for scenario in scenarios:
         df2 = format_technology_col(df2)
         
         df3 = calculate_results_delta(df1, df2, ['TECH', 'YEAR'],
-                                     scenario)
+                                      scenario)
         
         df4 = calculate_results_delta(df1, df2, ['TECH'],
-                                     scenario)
+                                      scenario)
 
         chart_title = f'{scenario} New Capacity - Delta'
         legend_title = ''
@@ -291,3 +291,30 @@ for scenario in scenarios:
                                      BAR_TECH_COLOR_DICT, unit, start_year,
                                      end_year)
         
+    if scen_comparison_dict.get('pwr_gen_bar_dif') == 'yes':
+        df1 = read_technology_annual_activity(base_dir_results)
+        df1 = format_technology_col(df1)
+        df1 = convert_pj_to_twh(df1)
+        
+        df2 = read_technology_annual_activity(scen_dir_results.get(scenario))
+        df2 = format_technology_col(df2)
+        df2 = convert_pj_to_twh(df2)
+        
+        df3 = calculate_results_delta(df1, df2, ['TECH', 'YEAR'],
+                                      scenario)
+        
+        df4 = calculate_results_delta(df1, df2, ['TECH'],
+                                      scenario)
+        
+        df3.to_csv('temp1.csv')
+        df4.to_csv('temp2.csv')
+
+        chart_title = f'{scenario} Generation - Delta'
+        legend_title = ''
+        file_name = 'pwr_gen_bar_delta'
+        unit = 'TWh'
+        
+        format_stacked_bar_pwr_delta(df3, df4, scen_path[scenario], 
+                                     chart_title, legend_title, file_name, 
+                                     BAR_TECH_COLOR_DICT, unit, start_year,
+                                     end_year)
