@@ -13,34 +13,45 @@ import os
 from config import(
     base_dir_results,
     base_dir_results_summaries,
+    scen_dir_results,
+    scen_dir_results_summaries,
     base_model,
     base_run_dict,
+    scen_comparison_dict,
     countries,
-    scenarios
+    scenarios,
+    start_year,
+    end_year
     )
 
 from constants import(
-    bar_tech_color_dict,
-    bar_gen_shares_color_dict,
-    dual_costs_color_dict,
-    dual_emissions_color_dict,
-    country_color_dict
+    BAR_TECH_COLOR_DICT,
+    BAR_GEN_SHARES_COLOR_DICT,
+    DUAL_COSTS_COLOR_DICT,
+    DUAL_EMISSIONS_COLOR_DICT,
+    COUNTRY_COLOR_DICT
     )
 
 from data import(
-    convert_pj_to_twh,
-    format_technology_col,
-    format_annual_emissions,
     format_stacked_bar_pwr,
     format_stacked_bar_gen_shares,
     format_bar_line_costs,
     format_line_multi_country,
     format_bar_line_emissions,
-    format_stacked_bar_line_emissions
+    format_stacked_bar_line_emissions,
+    format_stacked_bar_pwr_delta
+    )
+
+from utils import(
+    convert_pj_to_twh,
+    format_technology_col,
+    format_annual_emissions,
+    calculate_results_delta
     )
 
 from read import (
     read_capacity_country,
+    read_new_capacity_country,
     read_technology_annual_activity,
     read_generation_shares_country,
     read_generation_shares_global,
@@ -61,12 +72,13 @@ for country in countries:
         os.makedirs(os.path.join(base_path, country))
     except FileExistsError:
         pass
-    
+
+scen_path = {}
 for scenario in scenarios:
-    scen_path = f'Figures/{base_model}/{scenario}'
+    scen_path[scenario] = f'Figures/{base_model}/{scenario}'
     for country in countries:
         try:
-            os.makedirs(os.path.join(scen_path, country))
+            os.makedirs(os.path.join(scen_path[scenario], country))
         except FileExistsError:
             pass
     
@@ -81,7 +93,7 @@ if base_run_dict.get('pwr_cap_bar_global') == 'yes':
     
     format_stacked_bar_pwr(df, base_path, chart_title, 
                            legend_title, file_name, 
-                           bar_tech_color_dict, unit, 
+                           BAR_TECH_COLOR_DICT, unit, 
                            country = None)
 
 if base_run_dict.get('pwr_cap_bar_country') == 'yes':
@@ -96,7 +108,7 @@ if base_run_dict.get('pwr_cap_bar_country') == 'yes':
    
         format_stacked_bar_pwr(df, base_path, chart_title, 
                                legend_title, file_name, 
-                               bar_tech_color_dict, unit, 
+                               BAR_TECH_COLOR_DICT, unit, 
                                country = country)
         
 if base_run_dict.get('pwr_gen_bar_global') == 'yes':
@@ -111,7 +123,7 @@ if base_run_dict.get('pwr_gen_bar_global') == 'yes':
     
     format_stacked_bar_pwr(df, base_path, chart_title, 
                            legend_title, file_name, 
-                           bar_tech_color_dict, unit, 
+                           BAR_TECH_COLOR_DICT, unit, 
                            country = None)
     
 if base_run_dict.get('pwr_gen_bar_country') == 'yes':
@@ -127,7 +139,7 @@ if base_run_dict.get('pwr_gen_bar_country') == 'yes':
     for country in countries:
         format_stacked_bar_pwr(df, base_path, chart_title, 
                                legend_title, file_name, 
-                               bar_tech_color_dict, unit, 
+                               BAR_TECH_COLOR_DICT, unit, 
                                country = country)
 
 if base_run_dict.get('pwr_gen_shares_global') == 'yes':
@@ -140,7 +152,7 @@ if base_run_dict.get('pwr_gen_shares_global') == 'yes':
     
     format_stacked_bar_gen_shares(df, base_path, chart_title, 
                                   legend_title, file_name, 
-                                  bar_gen_shares_color_dict, unit, 
+                                  BAR_GEN_SHARES_COLOR_DICT, unit, 
                                   country = None)
     
 if base_run_dict.get('pwr_gen_shares_country') == 'yes':
@@ -154,7 +166,7 @@ if base_run_dict.get('pwr_gen_shares_country') == 'yes':
     for country in countries:
         format_stacked_bar_gen_shares(df, base_path, chart_title, 
                                       legend_title, file_name, 
-                                      bar_gen_shares_color_dict, unit, 
+                                      BAR_GEN_SHARES_COLOR_DICT, unit, 
                                       country = country)
         
 if base_run_dict.get('dual_costs_global') == 'yes':
@@ -169,7 +181,7 @@ if base_run_dict.get('dual_costs_global') == 'yes':
     
     format_bar_line_costs(df1, df2, base_path, chart_title, 
                           legend_title, file_name, 
-                          dual_costs_color_dict, unit1, 
+                          DUAL_COSTS_COLOR_DICT, unit1, 
                           unit2, country = None)
     
 if base_run_dict.get('dual_costs_country') == 'yes':
@@ -185,7 +197,7 @@ if base_run_dict.get('dual_costs_country') == 'yes':
     for country in countries:
         format_bar_line_costs(df1, df2, base_path, chart_title, 
                               legend_title, file_name, 
-                              dual_costs_color_dict, unit1, 
+                              DUAL_COSTS_COLOR_DICT, unit1, 
                               unit2, country = country)
         
 if base_run_dict.get('pwr_costs_multi_country') == 'yes':
@@ -198,7 +210,7 @@ if base_run_dict.get('pwr_costs_multi_country') == 'yes':
     
     format_line_multi_country(df, base_path, chart_title, 
                               legend_title, file_name, 
-                              country_color_dict, unit)
+                              COUNTRY_COLOR_DICT, unit)
     
 if base_run_dict.get('dual_emissions_global') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
@@ -214,7 +226,7 @@ if base_run_dict.get('dual_emissions_global') == 'yes':
     
     format_bar_line_emissions(df1, df2, base_path, chart_title, 
                               legend_title, file_name, 
-                              dual_emissions_color_dict, unit1, 
+                              DUAL_EMISSIONS_COLOR_DICT, unit1, 
                               unit2, country = None)
     
 if base_run_dict.get('dual_emissions_country') == 'yes':
@@ -233,13 +245,13 @@ if base_run_dict.get('dual_emissions_country') == 'yes':
     for country in countries:
         format_bar_line_emissions(df1, df2, base_path, chart_title, 
                                   legend_title, file_name, 
-                                  dual_emissions_color_dict, unit1, 
+                                  DUAL_EMISSIONS_COLOR_DICT, unit1, 
                                   unit2, country = country)
         
 if base_run_dict.get('dual_emissions_stacked') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
                                   country = True)
-    
+
     df2 = read_annual_emission_intensity_global(base_dir_results_summaries)
     
     chart_title = 'Annual Emissions'
@@ -250,8 +262,32 @@ if base_run_dict.get('dual_emissions_stacked') == 'yes':
     
     format_stacked_bar_line_emissions(df1, df2, base_path, chart_title, 
                                       legend_title, file_name, 
-                                      country_color_dict, unit1, 
+                                      COUNTRY_COLOR_DICT, unit1, 
                                       unit2)
     
 '''Create charts for single scenario comparison to base.'''
+for scenario in scenarios:
 
+    if scen_comparison_dict.get('pwr_cap_bar_dif') == 'yes':
+        df1 = read_new_capacity_country(base_dir_results)
+        df1 = format_technology_col(df1)
+        
+        df2 = read_new_capacity_country(scen_dir_results.get(scenario))
+        df2 = format_technology_col(df2)
+        
+        df3 = calculate_results_delta(df1, df2, ['TECH', 'YEAR'],
+                                     scenario)
+        
+        df4 = calculate_results_delta(df1, df2, ['TECH'],
+                                     scenario)
+
+        chart_title = f'{scenario} New Capacity - Delta'
+        legend_title = ''
+        file_name = 'pwr_new_cap_bar_delta'
+        unit = 'GW'
+        
+        format_stacked_bar_pwr_delta(df3, df4, scen_path[scenario], 
+                                     chart_title, legend_title, file_name, 
+                                     BAR_TECH_COLOR_DICT, unit, start_year,
+                                     end_year)
+        

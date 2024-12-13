@@ -1,6 +1,6 @@
 '''constants for vis-script for GGI-Climate Finance project'''
 
-bar_tech_color_dict = {
+BAR_TECH_COLOR_DICT = {
     'BIO':'darkgreen',
     'CCG':'lightcoral',
     'COA':'black',
@@ -23,23 +23,23 @@ bar_tech_color_dict = {
     'CCS' : 'brown'
 }
 
-bar_gen_shares_color_dict = {
+BAR_GEN_SHARES_COLOR_DICT = {
     'FOSSIL':'lightcoral',
     'RENEWABLE':'darkgreen',
     'OTHER' : 'lightgrey',
 }
 
-dual_costs_color_dict = {
+DUAL_COSTS_COLOR_DICT = {
     'bar':'darkgreen',
     'line':'lightcoral',
 }
 
-dual_emissions_color_dict = {
+DUAL_EMISSIONS_COLOR_DICT = {
     'bar':'navy',
     'line':'lightcoral',
 }
 
-country_color_dict = {
+COUNTRY_COLOR_DICT = {
     'BRN' : 'darkgreen', 
     'IDN' : 'lightcoral',
     'KHM' : 'black', 

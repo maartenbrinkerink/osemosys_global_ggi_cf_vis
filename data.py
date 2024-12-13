@@ -1,43 +1,14 @@
 '''Functions as input to visualisations'''
 import os
 from matplotlib import pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 import numpy as np
+import pandas as pd
 
-def convert_pj_to_twh(df):
-    df['VALUE'] = df['VALUE'] / 3.6
-    
-    return df
-
-def convert_million_to_billion(df):
-    df['VALUE'] = df['VALUE'] / 1000
-    
-    return df
-
-def format_technology_col(df):
-    
-    df = df.loc[(df['TECHNOLOGY'].str.startswith('PWR')) & 
-                ~(df['TECHNOLOGY'].str.contains('TRN'))
-    ].copy()
-    
-    df['TECH'] = df['TECHNOLOGY'].str[3:6]
-    df['COUNTRY'] = df['TECHNOLOGY'].str[6:9]
-    
-    df = df.groupby(['TECH', 'COUNTRY', 'YEAR'])[
-        'VALUE'].sum().reset_index(drop = False)
-    
-    return df
-
-def format_annual_emissions(df, country : bool):
-    df['COUNTRY'] = df['EMISSION'].str[3:6]
-    
-    if not country:
-        df = df.groupby(['YEAR'])[
-            'VALUE'].sum().reset_index(drop = False)
-        
-    else:
-        df = df[['COUNTRY', 'YEAR', 'VALUE']]
-    
-    return df
+from utils import (
+    convert_million_to_billion,
+    get_years
+    )
 
 def format_stacked_bar_pwr(df, out_dir, chart_title, 
                            legend_title, file_name, 
@@ -259,5 +230,119 @@ def format_stacked_bar_line_emissions(df1, df2, out_dir, chart_title,
                title = legend_title)
     
     ax1.margins(x=0)
+
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_stacked_bar_pwr_delta(df_in1, df_in2, out_dir, 
+                                 chart_title, legend_title, 
+                                 file_name, color_dict, unit, 
+                                 start_year, end_year):
+    
+    years = get_years(start_year, end_year)
+    
+    fig, axs = plt.subplots(1, 2, squeeze = False,
+                            gridspec_kw = {'width_ratios' : [1, 10]})
+    
+    # SET TIMESERIES SUBPLOT
+    
+    df1 = df_in1.loc[df_in1['DELTA'] < 0]
+    df2 = df_in1.loc[df_in1['DELTA'] > 0]
+
+    df1 = df1.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
+    df2 = df2.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
+
+    for idx in years:
+        if not idx in df1.index:
+            df1.loc[idx] = 0
+            
+        if not idx in df2.index:
+            df2.loc[idx] = 0
+            
+    df1.sort_index(inplace = True)
+    df2.sort_index(inplace = True)
+
+    # Initialize the bottom at zero for the first set of bars.
+    bottom1 = np.zeros(len(df1))
+    bottom2 = np.zeros(len(df2))
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    for i, col in enumerate(df1.columns):
+      axs[0,1].bar(df1.index, df1[col], bottom=bottom1, 
+             label=col, color = color_dict.get(col))
+      bottom1 += np.array(df1[col])
+      
+    for i, col in enumerate(df2.columns):
+      axs[0,1].bar(df2.index, df2[col], bottom=bottom2, 
+             label=col, color = color_dict.get(col))
+      bottom2 += np.array(df2[col])
+    
+    # Set legend
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    by_label = dict(sorted(by_label.items()))
+    
+    fig.legend(by_label.values(), by_label.keys(), 
+               bbox_to_anchor=(1.07, 0.91), frameon = False, 
+               reverse = True, title = legend_title)
+    
+    # Axis formatting
+    axs[0,1].xaxis.set_major_formatter(FormatStrFormatter('%d'))
+    axs[0,1].margins(x=0)
+    axs[0,1].set_ylim([min(df1.sum(axis=1)) * 1.1, max(df2.sum(axis=1)) * 1.1])
+    axs[0,1].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    
+    # SET TOTAL SUBPLOT
+    
+    df3 = df_in2.loc[df_in2['DELTA'] < 0]
+    df4 = df_in2.loc[df_in2['DELTA'] > 0]
+
+    df3 = df3.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    df4 = df4.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    
+    for idx in df_in2.index:
+        if not idx in df3.index:
+            df3.loc[idx] = 0
+            
+        if not idx in df4.index:
+            df4.loc[idx] = 0
+    
+    df3 = pd.DataFrame(df3.sort_index()).transpose()
+    df4 = pd.DataFrame(df4.sort_index()).transpose()
+
+    # Initialize the bottom at zero for the first set of bars.
+    bottom3 = np.zeros(len(df3))
+    bottom4 = np.zeros(len(df4))
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    for i, col in enumerate(df3.columns):
+      axs[0,0].bar('Total', df3[col], bottom=bottom3, 
+             label=col, color = color_dict.get(col))
+      bottom3 += np.array(df3[col])
+      
+    for i, col in enumerate(df4.columns):
+      axs[0,0].bar('Total', df4[col], bottom=bottom4, 
+             label=col, color = color_dict.get(col))
+      bottom4 += np.array(df4[col])
+    
+    
+    
+    
+    
+    axs[0,0].margins(x=1)
+    axs[0,0].set_ylim([min(df3.sum(axis=1)) * 1.1, max(df4.sum(axis=1)) * 1.1])
+    axs[0,0].set_ylabel(unit)
+    axs[0,0].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    
+    # CONFIG BOTH SUBPLOTS
+    
+    
+    plt.suptitle(chart_title)
+    
+    
+    
+    
+    
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')

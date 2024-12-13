@@ -8,6 +8,11 @@ def read_capacity_country(path):
     
     return df
 
+def read_new_capacity_country(path):
+    df = pd.read_csv(os.path.join(path, 'NewCapacity.csv'))
+    
+    return df
+
 def read_technology_annual_activity(path):
     df = pd.read_csv(os.path.join(path, 'TotalTechnologyAnnualActivity.csv'))
     
