@@ -50,7 +50,22 @@ def calculate_results_delta(df1, df2, cols : list, scenario):
     df = pd.merge(df1, df2, left_index = True, 
                   right_index = True, how = 'outer').fillna(0)
     
-    df['DELTA'] = round(df[scenario] - df['Base'], 3)
+    df['DELTA'] = round(df[scenario] - df['Base'], 2)
     df = df.loc[df['DELTA'] != 0]
     
     return df
+
+def make_space_above(axes, topmargin=1):
+    """ increase figure size to make topmargin (in inches) space for 
+        titles, without changing the axes sizes"""
+    fig = axes.flatten()[0].figure
+    s = fig.subplotpars
+    w, h = fig.get_size_inches()
+
+    figh = h - (1-s.top)*h  + topmargin
+    fig.subplots_adjust(bottom=s.bottom*h/figh, top=1-topmargin/figh)
+    fig.set_figheight(figh)
+    
+def plot_is_empty(ax):
+    contained_artists = ax.get_children()
+    return len(contained_artists) <= 1

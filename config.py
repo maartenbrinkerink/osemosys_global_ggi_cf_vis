@@ -51,6 +51,8 @@ base_run_dict = {
     }
 
 scen_comparison_dict = {
-    'pwr_cap_bar_dif' : 'yes',
-    'pwr_gen_bar_dif' : 'yes',
+    'pwr_cap_bar_dif_global' : 'yes',
+    'pwr_gen_bar_dif_global' : 'yes',
+    'pwr_cap_bar_dif_country' : 'yes',
+    'pwr_gen_bar_dif_country' : 'yes',
     }
