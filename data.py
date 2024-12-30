@@ -523,3 +523,95 @@ def format_stacked_bar_pwr_delta_country(df_in1, df_in2, out_dir,
         ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_bar_delta_country(df_in1, df_in2, out_dir, 
+                             chart_title, legend_title, 
+                             file_name, color_dict, 
+                             unit):
+
+    countries = list(df_in1["COUNTRY"].unique())
+    
+    df_years = {}
+    df_total = {}
+    n = 0
+
+    for country in countries:
+        df1 = df_in1.loc[df_in1['COUNTRY'] == country][['YEAR', 'VALUE']
+                                                 ].set_index('YEAR')
+        df2 = df_in2.loc[df_in2['COUNTRY'] == country][['YEAR', 'VALUE']
+                                                 ].set_index('YEAR')
+
+        # Calculate Delta by year
+        df = df2 - df1
+        
+        # Calculate model horizon Delta
+        df3 = round(df.sum(), 3)
+
+        if abs(df3.iloc[0]) > 0:
+            df_years[country] = df.copy()
+            df_total[country] = df3.copy()
+            n = n + 1
+
+    rows = math.ceil(n / 2)
+    
+    fig, axs = plt.subplots(rows, 4, squeeze = False,
+                            figsize = (9, rows * 2.5),
+                            gridspec_kw = {
+                                'width_ratios' : [1, 10, 1, 10]})
+    axs = axs.ravel()
+
+    x, y, z = 0, 1, 1
+    
+    legend_dict = {}
+    
+    for country in df_years.keys():
+
+        axs[y].bar(df_years[country].index, df_years[country]['VALUE'], 
+                   color = color_dict.get(country),
+                   label = country)
+        
+        axs[x].bar('Total', df_total[country]['VALUE'],
+                   color = color_dict.get(country))
+        
+        axs[y].margins(x=0)
+        axs[x].margins(x=1)
+        
+        axs[x].set_title(country, fontsize = 10)
+        
+        axs[y].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+        
+        if z % 2:
+            axs[x].set_ylabel(unit)
+            
+        # Add unique legend entries
+        handles, labels = axs[y].get_legend_handles_labels()
+        by_label = dict(zip(labels, handles))
+
+        for handle, label in by_label.items():
+            legend_dict[handle] = label
+        
+        x, y, z = x + 2, y + 2, z + 1
+
+    # CONFIG BOTH SUBPLOTS
+    # Remove empty subplots
+    for ax in range(x, (rows * 4)):
+        fig.delaxes(axs[ax])
+        
+    plt.ticklabel_format(style='plain')
+
+    # Adjust subplot whitespace
+    plt.subplots_adjust(wspace=0.5, hspace=0.3)
+    
+    # Set legend
+    legend_dict = dict(sorted(legend_dict.items()))
+
+    fig.legend(legend_dict.values(), legend_dict.keys(), 
+               bbox_to_anchor=(0.7, (0.025 * rows)), frameon = False, 
+               title = legend_title, ncols = 4)
+    
+    # Add plot title
+    if chart_title:
+        make_space_above(axs, topmargin=0.7) 
+        plt.suptitle(chart_title)
+
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')

@@ -40,7 +40,8 @@ from data import(
     format_line_multi_country,
     format_stacked_bar_line_emissions,
     format_stacked_bar_pwr_delta,
-    format_stacked_bar_pwr_delta_country
+    format_stacked_bar_pwr_delta_country,
+    format_bar_delta_country
     )
 
 from utils import(
@@ -403,3 +404,36 @@ for scenario in scenarios:
                          chart_title, legend_title, 
                          file_name, DUAL_EMISSIONS_COLOR_DICT, 
                          unit, country = None)
+        
+    if scen_comparison_dict.get('costs_dif_country') == 'yes':
+        df1 = read_total_cost_country(base_dir_results_summaries)
+        df2 = read_total_cost_country(scen_dir_results_summaries.get(scenario))
+        convert_million_to_billion(df1)
+        convert_million_to_billion(df2)
+        
+        chart_title = f'{scenario} System Costs - Delta'
+        legend_title = ''
+        file_name = 'costs_delta_country'
+        unit = 'Billion $'
+
+        format_bar_delta_country(df1, df2, scen_path[scenario], 
+                                 chart_title, legend_title, 
+                                 file_name, COUNTRY_COLOR_DICT, 
+                                 unit)
+        
+    if scen_comparison_dict.get('emissions_dif_country') == 'yes':
+        df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
+                                      country = True)
+        df2 = format_annual_emissions(read_annual_emissions(
+            scen_dir_results.get(scenario)), 
+            country = True)
+        
+        chart_title = f'{scenario} Emissions - Delta'
+        legend_title = ''
+        file_name = 'emissions_delta_country'
+        unit = 'Mt CO2'
+        
+        format_bar_delta_country(df1, df2, scen_path[scenario], 
+                                 chart_title, legend_title, 
+                                 file_name, COUNTRY_COLOR_DICT, 
+                                 unit)

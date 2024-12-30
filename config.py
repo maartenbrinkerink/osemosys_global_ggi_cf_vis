@@ -58,4 +58,6 @@ scen_comparison_dict = {
     'pwr_gen_bar_dif_country' : 'no',
     'costs_dif_global' : 'yes',
     'emissions_dif_global' : 'yes',
+    'costs_dif_country' : 'yes',
+    'emissions_dif_country' : 'yes',
     }
