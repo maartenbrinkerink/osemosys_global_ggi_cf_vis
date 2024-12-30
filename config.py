@@ -8,7 +8,8 @@ base_dir_results_summaries = f'{OG_path}\\results\\{base_model}\\result_summarie
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = [
     'MYSPESGPXX',
-    'MYSPETHASO'
+    'MYSPETHASO',
+    'IDNSMMYSPE'
     ]
 
 '''Set start and end year of model horizon.'''
@@ -36,23 +37,25 @@ countries = ['BRN',
 
 '''Set which visualisations to run.'''
 base_run_dict = {
-    'pwr_cap_bar_global' : 'yes',
-    'pwr_cap_bar_country' : 'yes',
-    'pwr_gen_bar_global' : 'yes',
-    'pwr_gen_bar_country' : 'yes',
-    'pwr_gen_shares_global' : 'yes',
-    'pwr_gen_shares_country' : 'yes',
-    'dual_costs_global' : 'yes',
-    'dual_costs_country' : 'yes',
-    'pwr_costs_multi_country' : 'yes',
-    'dual_emissions_global' : 'yes',
-    'dual_emissions_country' : 'yes',
-    'dual_emissions_stacked' : 'yes',
+    'pwr_cap_bar_global' : 'no',
+    'pwr_cap_bar_country' : 'no',
+    'pwr_gen_bar_global' : 'no',
+    'pwr_gen_bar_country' : 'no',
+    'pwr_gen_shares_global' : 'no',
+    'pwr_gen_shares_country' : 'no',
+    'dual_costs_global' : 'no',
+    'dual_costs_country' : 'no',
+    'pwr_costs_multi_country' : 'no',
+    'dual_emissions_global' : 'no',
+    'dual_emissions_country' : 'no',
+    'dual_emissions_stacked' : 'no',
     }
 
 scen_comparison_dict = {
-    'pwr_cap_bar_dif_global' : 'yes',
-    'pwr_gen_bar_dif_global' : 'yes',
-    'pwr_cap_bar_dif_country' : 'yes',
-    'pwr_gen_bar_dif_country' : 'yes',
+    'pwr_cap_bar_dif_global' : 'no',
+    'pwr_gen_bar_dif_global' : 'no',
+    'pwr_cap_bar_dif_country' : 'no',
+    'pwr_gen_bar_dif_country' : 'no',
+    'costs_dif_global' : 'yes',
+    'emissions_dif_global' : 'yes',
     }

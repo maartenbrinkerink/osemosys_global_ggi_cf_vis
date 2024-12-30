@@ -89,10 +89,10 @@ def format_stacked_bar_gen_shares(df, out_dir, chart_title,
 
     return fig.savefig(os.path.join(path, file_name), bbox_inches = 'tight')
 
-def format_bar_line_costs(df1, df2, out_dir, chart_title, 
-                          legend_title, file_name, 
-                          color_dict, unit1, 
-                          unit2, country):
+def format_bar_line(df1, df2, out_dir, chart_title, 
+                    legend_title, file_name, 
+                    color_dict, unit1, 
+                    unit2, country):
     
     if country:
         df1 = df1.loc[df1['COUNTRY'] == country][['YEAR', 'VALUE']]
@@ -104,7 +104,6 @@ def format_bar_line_costs(df1, df2, out_dir, chart_title,
         path = out_dir
 
     df1.set_index('YEAR', inplace = True)
-    convert_million_to_billion(df1)
     df2.set_index('YEAR', inplace = True)
     
     fig, ax1 = plt.subplots()
@@ -120,13 +119,65 @@ def format_bar_line_costs(df1, df2, out_dir, chart_title,
     ax1.set_title(chart_title)
     ax1.set_ylabel(unit1)
     ax2.set_ylabel(unit2)
-    ax1.legend(bbox_to_anchor=(1, 1.02), frameon = False, 
+    ax1.legend(bbox_to_anchor=(0.5, -0.05), frameon = False, 
                title = legend_title)
     
-    ax2.legend(bbox_to_anchor=(0.905, 0.95), frameon = False, 
+    ax2.legend(bbox_to_anchor=(0.8, -0.05), frameon = False, 
                title = legend_title)
     
     ax1.margins(x=0)
+    if country:
+        plt.close(fig)
+
+    return fig.savefig(os.path.join(path, file_name), bbox_inches = 'tight')
+
+def format_bar_delta(df1, df2, out_dir, 
+                     chart_title, legend_title, 
+                     file_name, color_dict, 
+                     unit, country):
+    
+    if country:
+        df1 = df1.loc[df1['COUNTRY'] == country][['YEAR', 'VALUE']]
+        df2 = df2.loc[df2['COUNTRY'] == country][['YEAR', 'VALUE']]
+
+        chart_title = f'{country} {chart_title}'
+        path = os.path.join(out_dir, country)
+        
+    else:
+        path = out_dir
+
+    df1.set_index('YEAR', inplace = True)
+    df2.set_index('YEAR', inplace = True)
+    
+    # Calculate Delta by year
+    df = df2 - df1
+    
+    # Calculate model horizon Delta
+    df3 = df.sum().fillna(0)
+    
+    fig, axs = plt.subplots(1, 2, squeeze = False,
+                            gridspec_kw = {'width_ratios' : [1, 10]})
+    
+    axs[0, 1].bar(df.index, df['VALUE'], 
+           color = color_dict.get('bar'))
+    
+    axs[0, 0].bar('Total', df3['VALUE'],
+                 color = color_dict.get('bar'))
+    
+    axs[0, 1].margins(x=0)
+    axs[0, 0].margins(x=1)
+    
+    axs[0, 1].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    axs[0, 0].set_ylabel(unit)
+    
+    # Adjust subplot whitespace
+    plt.subplots_adjust(wspace=0.3)
+    
+    # Add plot title
+    if chart_title:
+        make_space_above(axs, topmargin=0.3) 
+        plt.suptitle(chart_title)
+    
     if country:
         plt.close(fig)
 
@@ -155,48 +206,6 @@ def format_line_multi_country(df, out_dir, chart_title,
     ax.margins(x=0)
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
-
-def format_bar_line_emissions(df1, df2, out_dir, chart_title, 
-                              legend_title, file_name, 
-                              color_dict, unit1, 
-                              unit2, country):
-    
-    if country:
-        df1 = df1.loc[df1['COUNTRY'] == country][['YEAR', 'VALUE']]
-        df2 = df2.loc[df2['COUNTRY'] == country][['YEAR', 'VALUE']]
-        chart_title = f'{country} {chart_title}'
-        path = os.path.join(out_dir, country)
-        
-    else:
-        path = out_dir
-
-    df1.set_index('YEAR', inplace = True)
-    df2.set_index('YEAR', inplace = True)
-    
-    fig, ax1 = plt.subplots()
-    
-    ax1.bar(df1.index, df1['VALUE'], label= unit1, 
-           color = color_dict.get('bar'))
-    
-    ax2 = ax1.twinx()
-    
-    ax2.plot(df2.index, df2['VALUE'], label= unit2, 
-             color = color_dict.get('line'))
-
-    ax1.set_title(chart_title)
-    ax1.set_ylabel(unit1)
-    ax2.set_ylabel(unit2)
-    ax1.legend(bbox_to_anchor=(0.95, 1.02), frameon = False, 
-               title = legend_title)
-    
-    ax2.legend(bbox_to_anchor=(1, 0.95), frameon = False, 
-               title = legend_title)
-    
-    ax1.margins(x=0)
-    if country:
-        plt.close(fig)
-
-    return fig.savefig(os.path.join(path, file_name), bbox_inches = 'tight')
 
 def format_stacked_bar_line_emissions(df1, df2, out_dir, chart_title, 
                                       legend_title, file_name, 

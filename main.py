@@ -35,9 +35,9 @@ from constants import(
 from data import(
     format_stacked_bar_pwr,
     format_stacked_bar_gen_shares,
-    format_bar_line_costs,
+    format_bar_line,
+    format_bar_delta,
     format_line_multi_country,
-    format_bar_line_emissions,
     format_stacked_bar_line_emissions,
     format_stacked_bar_pwr_delta,
     format_stacked_bar_pwr_delta_country
@@ -47,7 +47,8 @@ from utils import(
     convert_pj_to_twh,
     format_technology_col,
     format_annual_emissions,
-    calculate_results_delta
+    calculate_results_delta,
+    convert_million_to_billion
     )
 
 from read import (
@@ -77,11 +78,11 @@ for country in countries:
 scen_path = {}
 for scenario in scenarios:
     scen_path[scenario] = f'Figures/{base_model}/{scenario}'
-    for country in countries:
-        try:
-            os.makedirs(os.path.join(scen_path[scenario], country))
-        except FileExistsError:
-            pass
+    
+    try:
+        os.makedirs(scen_path[scenario])
+    except FileExistsError:
+        pass
     
 '''Create charts for base model run.'''
 if base_run_dict.get('pwr_cap_bar_global') == 'yes':
@@ -174,20 +175,24 @@ if base_run_dict.get('dual_costs_global') == 'yes':
     df1 = read_total_cost_global(base_dir_results_summaries)
     df2 = read_pwr_cost_global(base_dir_results_summaries)
     
+    convert_million_to_billion(df1)
+    
     chart_title = 'System Costs'
     legend_title = ''
     file_name = 'dual_costs'
     unit1 = 'Billion $/Year'
     unit2 = '$/MWh'
     
-    format_bar_line_costs(df1, df2, base_path, chart_title, 
-                          legend_title, file_name, 
-                          DUAL_COSTS_COLOR_DICT, unit1, 
-                          unit2, country = None)
+    format_bar_line(df1, df2, base_path, chart_title, 
+                    legend_title, file_name, 
+                    DUAL_COSTS_COLOR_DICT, unit1, 
+                    unit2, country = None)
     
 if base_run_dict.get('dual_costs_country') == 'yes':
     df1 = read_total_cost_country(base_dir_results_summaries)
     df2 = read_pwr_cost_country(base_dir_results_summaries)
+    
+    convert_million_to_billion(df1)
     
     chart_title = 'System Costs'
     legend_title = ''
@@ -196,10 +201,10 @@ if base_run_dict.get('dual_costs_country') == 'yes':
     unit2 = '$/MWh'
     
     for country in countries:
-        format_bar_line_costs(df1, df2, base_path, chart_title, 
-                              legend_title, file_name, 
-                              DUAL_COSTS_COLOR_DICT, unit1, 
-                              unit2, country = country)
+        format_bar_line(df1, df2, base_path, chart_title, 
+                        legend_title, file_name, 
+                        DUAL_COSTS_COLOR_DICT, unit1, 
+                        unit2, country = country)
         
 if base_run_dict.get('pwr_costs_multi_country') == 'yes':
     df = read_pwr_cost_country(base_dir_results_summaries)
@@ -225,10 +230,10 @@ if base_run_dict.get('dual_emissions_global') == 'yes':
     unit1 = 'Mt CO2'
     unit2 = 'gCO2/kWh'
     
-    format_bar_line_emissions(df1, df2, base_path, chart_title, 
-                              legend_title, file_name, 
-                              DUAL_EMISSIONS_COLOR_DICT, unit1, 
-                              unit2, country = None)
+    format_bar_line(df1, df2, base_path, chart_title, 
+                    legend_title, file_name, 
+                    DUAL_EMISSIONS_COLOR_DICT, unit1, 
+                    unit2, country = None)
     
 if base_run_dict.get('dual_emissions_country') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
@@ -244,10 +249,10 @@ if base_run_dict.get('dual_emissions_country') == 'yes':
     unit2 = 'gCO2/kWh'
     
     for country in countries:
-        format_bar_line_emissions(df1, df2, base_path, chart_title, 
-                                  legend_title, file_name, 
-                                  DUAL_EMISSIONS_COLOR_DICT, unit1, 
-                                  unit2, country = country)
+        format_bar_line(df1, df2, base_path, chart_title, 
+                        legend_title, file_name, 
+                        DUAL_EMISSIONS_COLOR_DICT, unit1, 
+                        unit2, country = country)
         
 if base_run_dict.get('dual_emissions_stacked') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
@@ -360,8 +365,41 @@ for scenario in scenarios:
         legend_title = ''
         file_name = 'pwr_gen_bar_delta_country'
         unit = 'TWh'
-        
+
         format_stacked_bar_pwr_delta_country(df3, df4, scen_path[scenario], 
                                              chart_title, legend_title, file_name, 
                                              BAR_TECH_COLOR_DICT, unit, start_year,
                                              end_year)
+
+    if scen_comparison_dict.get('costs_dif_global') == 'yes':
+        df1 = read_total_cost_global(base_dir_results_summaries)
+        df2 = read_total_cost_global(scen_dir_results_summaries.get(scenario))
+        convert_million_to_billion(df1)
+        convert_million_to_billion(df2)
+        
+        chart_title = f'{scenario} System Costs - Delta'
+        legend_title = ''
+        file_name = 'costs_delta_global'
+        unit = 'Billion $'
+
+        format_bar_delta(df1, df2, scen_path[scenario], 
+                         chart_title, legend_title, 
+                         file_name, DUAL_COSTS_COLOR_DICT, 
+                         unit, country = None)
+
+    if scen_comparison_dict.get('emissions_dif_global') == 'yes':
+        df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
+                                      country = False)
+        df2 = format_annual_emissions(read_annual_emissions(
+            scen_dir_results.get(scenario)), 
+            country = False)
+        
+        chart_title = f'{scenario} Emissions - Delta'
+        legend_title = ''
+        file_name = 'emissions_delta_global'
+        unit = 'Mt CO2'
+        
+        format_bar_delta(df1, df2, scen_path[scenario], 
+                         chart_title, legend_title, 
+                         file_name, DUAL_EMISSIONS_COLOR_DICT, 
+                         unit, country = None)
