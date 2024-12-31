@@ -62,3 +62,8 @@ def read_annual_emission_intensity_global(path):
     df = pd.read_csv(os.path.join(path, 'AnnualEmissionIntensityGlobal.csv'))
     
     return df
+
+def read_headline_metrics(path):
+    df = pd.read_csv(os.path.join(path, 'Metrics.csv'))
+    
+    return df

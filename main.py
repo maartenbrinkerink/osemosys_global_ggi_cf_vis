@@ -35,6 +35,7 @@ from constants import(
 from data import(
     format_stacked_bar_pwr,
     format_stacked_bar_gen_shares,
+    format_stacked_bar_gen_shares_delta,
     format_bar_line,
     format_bar_delta,
     format_line_multi_country,
@@ -64,7 +65,8 @@ from read import (
     read_total_cost_global,
     read_annual_emissions,
     read_annual_emission_intensity_country,
-    read_annual_emission_intensity_global
+    read_annual_emission_intensity_global,
+    read_headline_metrics
     )
 
 base_path = f'Figures/{base_model}/Base'
@@ -437,3 +439,20 @@ for scenario in scenarios:
                                  chart_title, legend_title, 
                                  file_name, COUNTRY_COLOR_DICT, 
                                  unit)
+        
+        
+    if scen_comparison_dict.get('pwr_gen_shares_dif_global') == 'yes':
+        df1 = read_generation_shares_global(base_dir_results_summaries)
+        df2 = read_generation_shares_global(scen_dir_results_summaries.get(scenario))
+        
+        df3 = read_headline_metrics(base_dir_results_summaries)
+        df4 = read_headline_metrics(scen_dir_results_summaries.get(scenario))
+        
+        chart_title = 'Generation Shares - Delta'
+        legend_title = ''
+        file_name = 'pwr_gen_shares_delta'
+        unit = '%'    
+        
+        format_stacked_bar_gen_shares_delta(df1, df2, df3, df4, scen_path[scenario], 
+                                            chart_title, legend_title, file_name, 
+                                            BAR_GEN_SHARES_COLOR_DICT, unit)

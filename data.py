@@ -7,7 +7,6 @@ import pandas as pd
 import math
 
 from utils import (
-    convert_million_to_billion,
     get_years,
     make_space_above
     )
@@ -88,6 +87,105 @@ def format_stacked_bar_gen_shares(df, out_dir, chart_title,
         plt.close(fig)
 
     return fig.savefig(os.path.join(path, file_name), bbox_inches = 'tight')
+
+def format_stacked_bar_gen_shares_delta(df_in1, df_in2, df_in3, df_in4, 
+                                        out_dir, chart_title, legend_title, 
+                                        file_name, color_dict, unit):
+    
+    # Calculate Delta's for timeseries (ts)
+    df_in1['OTHER'] = 100 - df_in1['RENEWABLE'] - df_in1['FOSSIL']
+    df_in1 = df_in1[['YEAR', 'RENEWABLE', 'FOSSIL', 'OTHER']].groupby(['YEAR']).sum()
+    
+    df_in2['OTHER'] = 100 - df_in2['RENEWABLE'] - df_in2['FOSSIL']
+    df_in2 = df_in2[['YEAR', 'RENEWABLE', 'FOSSIL', 'OTHER']].groupby(['YEAR']).sum()
+    
+    df_ts_in = df_in2 - df_in1
+    
+    # Calculate Delta's for horizon (hz)
+    for df in [df_in3, df_in4]:
+        df['Metric'] = df['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                          'Fossil energy share' : 'FOSSIL'})
+
+        df.set_index('Metric', inplace = True)
+        df.drop(columns = ['Unit'], inplace = True)
+        df.loc['OTHER'] = 100 - df.loc[df.index == 'RENEWABLE'
+                                       ].iloc[0] - df.loc[df.index == 'FOSSIL'
+                                                          ].iloc[0]
+                                                          
+    df_hz_in = df_in4 - df_in3
+    df_hz_in = df_hz_in.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']]
+    
+    fig, axs = plt.subplots(1, 2, squeeze = False,
+                            gridspec_kw = {'width_ratios' : [1, 10]})
+
+    # SET TIMESERIES SUBPLOT
+    df1 = df_ts_in.clip(upper = 0)
+    df2 = df_ts_in.clip(lower = 0)
+
+    # Initialize the bottom at zero for the first set of bars.
+    bottom1 = np.zeros(len(df1))
+    bottom2 = np.zeros(len(df2))
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+
+    for i, col in enumerate(df1.columns):
+      axs[0, 1].bar(df1.index, df1[col], bottom=bottom1, 
+             label=col, color = color_dict.get(col))
+      bottom1 += np.array(df1[col])
+      
+    for i, col in enumerate(df2.columns):
+      axs[0, 1].bar(df2.index, df2[col], bottom=bottom2, 
+                   color = color_dict.get(col))
+      bottom2 += np.array(df2[col])
+      
+    # SET HORIZON SUBPLOT
+    df3 = df_hz_in.clip(upper = 0)
+    df4 = df_hz_in.clip(lower = 0)
+    
+    # Initialize the bottom at zero for the first set of bars.
+    bottom3 = np.zeros(len(df3))
+    bottom4 = np.zeros(len(df4))
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    
+    for i, col in enumerate(df3.columns):
+      axs[0, 0].bar('Total', df3[col], bottom=bottom3, 
+                    color = color_dict.get(col))
+      bottom3 += np.array(df3[col])
+      
+    for i, col in enumerate(df4.columns):
+      axs[0, 0].bar('Total', df4[col], bottom=bottom4, 
+                    color = color_dict.get(col))
+      bottom4 += np.array(df4[col])
+   
+    fig.legend(bbox_to_anchor=(0.8, 0.05), frameon = False, 
+              reverse = True, title = legend_title, ncols = 3)
+    
+    axs[0, 1].margins(x=0)
+    axs[0, 0].margins(x=1)
+
+    axs[0, 1].set_ylim([min(df1.sum(axis=1), default = 0) * 1.1, 
+                       max(df2.sum(axis=1), default = 0) * 1.1])
+    
+    axs[0, 0].set_ylim([min(df3.sum(axis=1), default = 0) * 1.1, 
+                       max(df4.sum(axis=1), default = 0) * 1.1])
+    
+    axs[0, 0].set_ylabel(unit)
+    
+    axs[0, 1].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    axs[0, 0].axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    
+    # Adjust subplot whitespace
+    plt.subplots_adjust(wspace=0.3)
+    
+    # Add plot title
+    if chart_title:
+        make_space_above(axs, topmargin=0.3) 
+        plt.suptitle(chart_title)
+
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 
 def format_bar_line(df1, df2, out_dir, chart_title, 
                     legend_title, file_name, 
