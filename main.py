@@ -10,9 +10,10 @@ charts are saved to file.'''
 
 import os
 
-from config import(
+from user_config import(
     base_dir_results,
     base_dir_results_summaries,
+    scen_dir_data,
     scen_dir_results,
     scen_dir_results_summaries,
     base_model,
@@ -42,7 +43,8 @@ from data import(
     format_stacked_bar_line_emissions,
     format_stacked_bar_pwr_delta,
     format_stacked_bar_pwr_delta_country,
-    format_bar_delta_country
+    format_bar_delta_country,
+    format_headline_metrics_global
     )
 
 from utils import(
@@ -66,7 +68,8 @@ from read import (
     read_annual_emissions,
     read_annual_emission_intensity_country,
     read_annual_emission_intensity_global,
-    read_headline_metrics
+    read_headline_metrics,
+    read_max_capacity_investment
     )
 
 base_path = f'Figures/{base_model}/Base'
@@ -456,3 +459,73 @@ for scenario in scenarios:
         format_stacked_bar_gen_shares_delta(df1, df2, df3, df4, scen_path[scenario], 
                                             chart_title, legend_title, file_name, 
                                             BAR_GEN_SHARES_COLOR_DICT, unit)
+        
+    if scen_comparison_dict.get('headline_metrics_dif_global') == 'yes':
+        
+        # Set inputs for capacity subplot
+        capacity_base = read_new_capacity_country(base_dir_results)
+        capacity_base = format_technology_col(capacity_base)
+        
+        capacity_scen = read_new_capacity_country(scen_dir_results.get(scenario))
+        capacity_scen = format_technology_col(capacity_scen)
+        
+        capacity = calculate_results_delta(capacity_base, capacity_scen, ['TECH'],
+                                      scenario)
+        capacity_title = 'Capacity (GW)'
+
+        # Set inputs for generation subplot
+        production_base = read_technology_annual_activity(base_dir_results)
+        production_base = format_technology_col(production_base)
+        production_base = convert_pj_to_twh(production_base)
+        
+        production_scen = read_technology_annual_activity(scen_dir_results.get(scenario))
+        production_scen = format_technology_col(production_scen)
+        production_scen = convert_pj_to_twh(production_scen)
+
+        production = calculate_results_delta(production_base, production_scen, ['TECH'],
+                                      scenario)
+        production_title = 'Generation (TWh)'
+         
+        # Set inputs for generation shares subplot
+        gen_shares_base = read_headline_metrics(base_dir_results_summaries)
+        gen_shares_scen = read_headline_metrics(scen_dir_results_summaries.get(scenario))
+        gen_shares_title = 'Generation Share (%)'
+        
+        # Set inputs for emissions subplot
+        emissions_base = format_annual_emissions(read_annual_emissions(base_dir_results), 
+                                      country = True)
+        emissions_scen = format_annual_emissions(read_annual_emissions(
+            scen_dir_results.get(scenario)), 
+            country = True)
+        emissions_title = 'Emissions (Mt CO2)'
+        
+        # Set inputs for costs subplot
+        costs_base = read_total_cost_global(base_dir_results_summaries)
+        costs_scen = read_total_cost_global(scen_dir_results_summaries.get(scenario))
+        convert_million_to_billion(costs_base)
+        convert_million_to_billion(costs_scen)
+        costs_title = 'Total Costs (Billion $)'
+        
+        # Set inputs for transmission capacity subplot
+        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        max_capacity_trn = read_max_capacity_investment(scen_dir_data.get(scenario))
+        trn_title = f'{scenario} Capacity (GW)'
+
+        # Set chart inputs
+        chart_title = ''
+        file_name = 'headline_metrics_delta'
+
+        # Create chart
+        format_headline_metrics_global(capacity, production,
+                                       capacity_title, production_title, 
+                                       BAR_TECH_COLOR_DICT, BAR_TECH_COLOR_DICT,
+                                       gen_shares_base, gen_shares_scen, 
+                                       gen_shares_title, BAR_GEN_SHARES_COLOR_DICT,
+                                       emissions_base, emissions_scen,
+                                       emissions_title, DUAL_EMISSIONS_COLOR_DICT,
+                                       costs_base, costs_scen,
+                                       costs_title, DUAL_COSTS_COLOR_DICT,
+                                       capacity_trn, max_capacity_trn,
+                                       trn_title, scen_path[scenario], 
+                                       chart_title, file_name, scenario
+                                       )

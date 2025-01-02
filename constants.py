@@ -2,7 +2,7 @@
 
 BAR_TECH_COLOR_DICT = {
     'BIO':'darkgreen',
-    'CCG':'lightcoral',
+    'CCG':'brown',
     'COA':'black',
     'COG':'peru',
     'CSP':'wheat',
@@ -20,17 +20,17 @@ BAR_TECH_COLOR_DICT = {
     'WON':'blueviolet',
     'SDS' : 'navy',
     'BCK' : 'orange',
-    'CCS' : 'brown'
+    'CCS' : 'khaki'
 }
 
 BAR_GEN_SHARES_COLOR_DICT = {
     'FOSSIL':'lightcoral',
-    'RENEWABLE':'darkgreen',
+    'RENEWABLE':'palegreen',
     'OTHER' : 'lightgrey',
 }
 
 DUAL_COSTS_COLOR_DICT = {
-    'bar':'darkgreen',
+    'bar':'cadetblue',
     'line':'lightcoral',
 }
 

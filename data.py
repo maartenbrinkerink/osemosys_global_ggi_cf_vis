@@ -713,3 +713,230 @@ def format_bar_delta_country(df_in1, df_in2, out_dir,
         plt.suptitle(chart_title)
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_headline_metrics_global(capacity_in, production_in, 
+                                   capacity_title, production_title,
+                                   capacity_dict, production_dict,
+                                   gen_shares_in1, gen_shares_in2, 
+                                   gen_shares_title, gen_shares_dict,
+                                   emissions_in1, emissions_in2, 
+                                   emissions_title, emissions_dict,
+                                   costs_in1, costs_in2, 
+                                   costs_title, costs_dict,
+                                   capacity_trn, max_capacity_trn,
+                                   trn_title, out_dir, chart_title, 
+                                   file_name, scenario):
+    
+    # SET PLOT BASE
+    fig, axs = plt.subplots(3, 2, squeeze = False, 
+                            gridspec_kw = {'height_ratios' : [1, 1, 1], 
+                                           'width_ratios' : [1, 1]},
+                            figsize = (12, 4)
+                            )
+    
+    # SUBPLOT - CAPACITY
+    capacity1 = capacity_in.loc[capacity_in['DELTA'] < 0]
+    capacity2 = capacity_in.loc[capacity_in['DELTA'] > 0]
+
+    capacity1 = capacity1.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    capacity2 = capacity2.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    
+    for idx in capacity_in.index:
+        if not capacity1.empty:
+            if not idx in capacity1.index:
+                capacity1.loc[idx] = 0
+         
+        if not capacity2.empty:
+            if not idx in capacity2.index:
+                capacity2.loc[idx] = 0
+    
+    capacity1 = pd.DataFrame(capacity1.sort_index()).transpose()
+    capacity2 = pd.DataFrame(capacity2.sort_index()).transpose()
+
+    # Initialize the bottom at zero for the first set of bars.
+    capacity_bot1 = 0
+    capacity_bot2 = 0
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    for i, col in enumerate(capacity1.columns):
+      axs[0, 0].barh('Total', capacity1[col], left=capacity_bot1, 
+             label=col, color = capacity_dict.get(col))
+      capacity_bot1 += capacity1[col].iloc[0]
+      
+    for i, col in enumerate(capacity2.columns):
+      axs[0, 0].barh('Total', capacity2[col], left=capacity_bot2, 
+             label=col, color = capacity_dict.get(col))
+      capacity_bot2 += capacity2[col].iloc[0]
+    
+    # Axis formatting
+    axs[0, 0].set_xlim([min(capacity1.sum(axis=1), default = 0) * 1.1, 
+                       max(capacity2.sum(axis=1), default = 0) * 1.1])
+    axs[0, 0].title.set_text(capacity_title)
+    
+    # SUBPLOT - Generation
+    production1 = production_in.loc[production_in['DELTA'] < 0]
+    production2 = production_in.loc[production_in['DELTA'] > 0]
+
+    production1 = production1.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    production2 = production2.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    
+    for idx in production_in.index:
+        if not production1.empty:
+            if not idx in production1.index:
+                production1.loc[idx] = 0
+         
+        if not production2.empty:
+            if not idx in production2.index:
+                production2.loc[idx] = 0
+    
+    production1 = pd.DataFrame(production1.sort_index()).transpose()
+    production2 = pd.DataFrame(production2.sort_index()).transpose()
+
+    # Initialize the bottom at zero for the first set of bars.
+    production_bot1 = 0
+    production_bot2 = 0
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    for i, col in enumerate(production1.columns):
+      axs[0, 1].barh('Total', production1[col], left=production_bot1, 
+             label=col, color = production_dict.get(col))
+      production_bot1 += production1[col].iloc[0]
+      
+    for i, col in enumerate(production2.columns):
+      axs[0, 1].barh('Total', production2[col], left=production_bot2, 
+             label=col, color = production_dict.get(col))
+      production_bot2 += production2[col].iloc[0]
+    
+    # Axis formatting
+    axs[0, 1].set_xlim([min(production1.sum(axis=1), default = 0) * 1.1, 
+                       max(production2.sum(axis=1), default = 0) * 1.1])
+    axs[0, 1].title.set_text(production_title)    
+    
+    # Set combined legend for capacity & production subplots
+    legend_dict = {}
+    
+    for ax in [axs[0, 0], axs[0, 1]]:
+        # Add unique legend entries
+        handles, labels = ax.get_legend_handles_labels()
+        by_label = dict(zip(labels, handles))
+    
+        for handle, label in by_label.items():
+            legend_dict[handle] = label
+
+    legend_dict = dict(sorted(legend_dict.items()))
+    axs[0, 0].legend(legend_dict.values(), legend_dict.keys(), 
+               bbox_to_anchor=(1.5, -0.55), frameon = False, 
+               ncols = math.ceil(len(legend_dict.keys()) / 2))
+
+    # SUBPLOT - GENERATION SHARES
+    # Calculate Delta's for horizon (hz)
+    for df in [gen_shares_in1, gen_shares_in2]:
+        df['Metric'] = df['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                          'Fossil energy share' : 'FOSSIL'})
+
+        df.set_index('Metric', inplace = True)
+        df.drop(columns = ['Unit'], inplace = True)
+        df.loc['OTHER'] = 100 - df.loc[df.index == 'RENEWABLE'
+                                       ].iloc[0] - df.loc[df.index == 'FOSSIL'
+                                                          ].iloc[0]
+                                                          
+    df_hz_in = gen_shares_in2 - gen_shares_in1
+    df_hz_in = df_hz_in.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']]
+
+    gen_shares1 = df_hz_in.clip(upper = 0)
+    gen_shares2 = df_hz_in.clip(lower = 0)
+
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    gen_shares_bot1 = 0
+    gen_shares_bot2 = 0
+    
+    for i, col in enumerate(gen_shares1.columns):           
+      axs[1, 0].barh('Total', gen_shares1[col], left = gen_shares_bot1,
+                    color = gen_shares_dict.get(col), label = col)
+      gen_shares_bot1 += np.array(gen_shares1[col])
+      
+    for i, col in enumerate(gen_shares2.columns):
+      axs[1, 0].barh('Total', gen_shares2[col], left = gen_shares_bot2,
+                    color = gen_shares_dict.get(col))
+      gen_shares_bot2 += np.array(gen_shares2[col])
+      
+    # Subplot formatting
+    axs[1, 0].set_xlim([min(gen_shares1.sum(axis=1), default = 0) * 1.1, 
+                       max(gen_shares2.sum(axis=1), default = 0) * 1.1])
+    axs[1, 0].title.set_text(gen_shares_title)
+    axs[1, 0].legend(bbox_to_anchor=(0.95, -0.7), frameon = False, 
+              reverse = True, ncols = 3)
+    
+    # SUBPLOTS - Emissions and Costs
+    for df in [emissions_in1, emissions_in2, costs_in1, costs_in2]:
+        df.set_index('YEAR', inplace = True)
+
+    # Calculate and set Emissions subplot
+    emissions = emissions_in2['VALUE'] - emissions_in1['VALUE']
+    emissions = emissions.sum()
+    
+    costs = costs_in2['VALUE'] - costs_in1['VALUE']
+    costs = costs.sum()
+    
+    axs[1, 1].barh('Total', emissions,
+                 color = emissions_dict.get('bar'))
+    
+    axs[2, 0].barh('Total', costs,
+                 color = costs_dict.get('bar'))
+    
+    # Subplot formatting
+    axs[1, 1].title.set_text(emissions_title)
+    axs[2, 0].title.set_text(costs_title)
+    
+    if emissions < 0:
+        emissions = emissions * -1
+        
+    if costs < 0:
+        costs = costs * -1
+       
+    axs[1, 1].set_xlim(emissions * -1.1, emissions * 1.1)
+    axs[2, 0].set_xlim(costs * -1.1, costs * 1.1)
+    
+    #SUBPLOT - Transmission Capacity 
+    capacity_trn = capacity_trn.loc[capacity_trn['TECHNOLOGY'
+                                                 ] == f'TRN{scenario}'
+                                    ].reset_index(drop = True)
+    
+    max_capacity_trn = max_capacity_trn.loc[(max_capacity_trn['TECHNOLOGY'
+                                                 ] == f'TRN{scenario}') & 
+                                            (max_capacity_trn['VALUE'] != 
+                                             0)
+                                            ].reset_index(drop = True)
+
+    axs[2, 1].barh('Total', capacity_trn['VALUE'].iloc[0],
+                 color = 'maroon', label = 'Capacity Built')
+    
+    axs[2, 1].barh('Total', max_capacity_trn['VALUE'].iloc[0], 
+                   height = 0.1, color = 'aqua', label = 'Max Capacity')
+    
+    # Subplot formatting
+    axs[2, 1].title.set_text(trn_title)
+    axs[2, 1].set_xlim(0, max_capacity_trn['VALUE'].iloc[0] * 1.1)
+    axs[2, 1].legend(bbox_to_anchor=(0.85, 2.77), frameon = False, 
+              ncols = 2)
+    
+    # FIGURE ADJUSTMENTS
+    # Make changes to all subplots
+    for ax in axs.ravel():
+        ax.set_yticks([])
+        ax.axvline(x=0, color='black', linestyle='-', linewidth = 0.1)
+        ax.margins(x = 0, y = 0.8)
+    
+    # Subplot spacing
+   # fig.tight_layout()
+    plt.subplots_adjust(hspace=2.5, wspace = 0.05)
+    
+    # Add plot title
+    if chart_title:
+        make_space_above(axs, topmargin=0.3) 
+        plt.suptitle(chart_title)
+
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')

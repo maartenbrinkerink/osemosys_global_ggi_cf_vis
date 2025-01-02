@@ -67,3 +67,8 @@ def read_headline_metrics(path):
     df = pd.read_csv(os.path.join(path, 'Metrics.csv'))
     
     return df
+
+def read_max_capacity_investment(path):
+    df = pd.read_csv(os.path.join(path, 'TotalAnnualMaxCapacityInvestment.csv'))
+    
+    return df

@@ -16,10 +16,12 @@ scenarios = [
 start_year = 2023
 end_year = 2050
 
+scen_dir_data = {}
 scen_dir_results = {}
 scen_dir_results_summaries = {}
 
 for scenario in scenarios:
+    scen_dir_data[scenario] = f'{OG_path}\\results\\{scenario}\\data'
     scen_dir_results[scenario] = f'{OG_path}\\results\\{scenario}\\results'
     scen_dir_results_summaries[scenario] = f'{OG_path}\\results\\{scenario}\\result_summaries'
 
@@ -60,5 +62,6 @@ scen_comparison_dict = {
     'emissions_dif_global' : 'no',
     'costs_dif_country' : 'no',
     'emissions_dif_country' : 'no',
-    'pwr_gen_shares_dif_global' : 'yes',
+    'pwr_gen_shares_dif_global' : 'no',
+    'headline_metrics_dif_global' : 'yes',
     }
