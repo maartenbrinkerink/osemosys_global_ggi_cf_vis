@@ -39,8 +39,8 @@ DUAL_EMISSIONS_COLOR_DICT = {
 }
 
 DUAL_TRANSMISSION_COLOR_DICT = {
-    'new':'navy',
-    'max':'lightcoral',
+    'new' : 'maroon',
+    'max' : 'aqua',
 }
 
 COUNTRY_COLOR_DICT = {

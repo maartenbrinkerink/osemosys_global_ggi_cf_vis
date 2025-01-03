@@ -79,13 +79,14 @@ base_scen_comparison_dict = {
     'costs_dif_country' : 'no',
     'emissions_dif_country' : 'no',
     'pwr_gen_shares_dif_global' : 'no',
-    'headline_metrics_dif_global' : 'yes',
+    'headline_metrics_dif_global' : 'no',
     }
 
 multi_scen_comparison_dict = {
-    'emissions_dif' : 'yes',
-    'costs_dif' : 'yes',
-    'gen_shares_dif' : 'yes',
-    'trn_cap_dif' : 'yes',
-    
+    'emissions_dif' : 'no',
+    'costs_dif' : 'no',
+    'gen_shares_dif' : 'no',
+    'trn_cap_dif' : 'no',
+    'capacity_dif' : 'yes',
+    'generation_dif' : 'yes'
     }

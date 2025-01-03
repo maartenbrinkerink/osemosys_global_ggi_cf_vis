@@ -726,8 +726,8 @@ def format_headline_metrics_global(capacity_in, production_in,
                                    costs_in1, costs_in2, 
                                    costs_title, costs_dict,
                                    capacity_trn, max_capacity_trn,
-                                   trn_title, out_dir, chart_title, 
-                                   file_name, scenario):
+                                   trn_title, trn_dict, out_dir, 
+                                   chart_title, file_name, scenario):
     
     # SET PLOT BASE
     fig, axs = plt.subplots(3, 2, squeeze = False, 
@@ -906,10 +906,11 @@ def format_headline_metrics_global(capacity_in, production_in,
                                             ].reset_index(drop = True)
 
     axs[2, 1].barh('Total', capacity_trn['VALUE'].iloc[0],
-                 color = 'maroon', label = 'Capacity Built')
+                 color = trn_dict.get('new'), label = 'Capacity Built')
     
     axs[2, 1].barh('Total', max_capacity_trn['VALUE'].iloc[0], 
-                   height = 0.1, color = 'aqua', label = 'Max Capacity')
+                   height = 0.1, color = trn_dict.get('max'), 
+                   label = 'Max Capacity')
     
     # Subplot formatting
     axs[2, 1].title.set_text(trn_title)
@@ -1043,3 +1044,119 @@ def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir,
     
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_transmission_capacity_multi_scenario(df1_dict, df2_dict, out_dir, 
+                                                chart_title, file_name, 
+                                                color_dict, unit):
+    
+    plot_df1 = pd.DataFrame(columns = ['VALUE'])
+    plot_df2 = pd.DataFrame(columns = ['VALUE'])
+    
+    
+    for key, value in df1_dict.items():
+        df1 = value.loc[value['TECHNOLOGY'] == f'TRN{key}'
+                        ].reset_index(drop = True)
+        if not df1.empty:
+            plot_df1.loc[key] = df1['VALUE'].iloc[0]
+        else:
+            plot_df1.loc[key] = 0
+            
+    for key, value in df2_dict.items():
+        df2 = value.loc[(value['TECHNOLOGY'] == f'TRN{key}') & 
+                        (value['VALUE'] != 0)
+                        ].reset_index(drop = True)
+        
+        plot_df2.loc[key] = df2['VALUE'].iloc[0]
+        
+    plot_df2 = plot_df2.sort_values(by = ['VALUE'], ascending=[False])
+    plot_df1 = plot_df1.reindex(plot_df2.index)
+
+    fig, ax = plt.subplots()
+    
+    ax.bar(plot_df1.index, plot_df1['VALUE'],
+           color = color_dict.get('new'), label = 'Capacity Built')
+    
+    ax.bar(plot_df2.index, plot_df2['VALUE'],
+           color = color_dict.get('max'), label = 'Max Capacity',
+           width = 0.1)
+    
+    ax.legend(frameon = False, ncols = 1)
+
+    plt.xticks(rotation = 75)
+    ax.margins(x=0)
+    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    ax.set_ylabel(unit)
+    ax.set_title(chart_title)
+    
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+
+def format_stacked_bar_pwr_delta_multi_scenario(df_dict, out_dir, 
+                                                chart_title, file_name, 
+                                                color_dict, unit):
+    
+    
+    
+    for key, value in df_dict.items():
+        
+        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                          'Fossil energy share' : 'FOSSIL'})
+    
+        value.set_index('Metric', inplace = True)
+        value.drop(columns = ['Unit'], inplace = True)
+        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
+                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
+                                                          ].iloc[0]
+                                                          
+        value = (value - df1)
+        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+                                  ].rename(index={'Value': key})
+        
+        gen_shares1 = value.clip(upper = 0)
+        gen_shares2 = value.clip(lower = 0)
+        
+        if plot_df1.empty:
+            plot_df1 = gen_shares1
+            plot_df2 = gen_shares2
+        else:
+            plot_df1 = pd.concat([plot_df1, gen_shares1])
+            plot_df2 = pd.concat([plot_df2, gen_shares2])
+
+    capacity1 = capacity_in.loc[capacity_in['DELTA'] < 0]
+    capacity2 = capacity_in.loc[capacity_in['DELTA'] > 0]
+   
+    capacity1 = capacity1.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    capacity2 = capacity2.groupby(['TECH'])['DELTA'].sum().fillna(0)
+    
+    for idx in capacity_in.index:
+        if not capacity1.empty:
+            if not idx in capacity1.index:
+                capacity1.loc[idx] = 0
+         
+        if not capacity2.empty:
+            if not idx in capacity2.index:
+                capacity2.loc[idx] = 0
+    
+    capacity1 = pd.DataFrame(capacity1.sort_index()).transpose()
+    capacity2 = pd.DataFrame(capacity2.sort_index()).transpose()
+   
+    # Initialize the bottom at zero for the first set of bars.
+    capacity_bot1 = 0
+    capacity_bot2 = 0
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    for i, col in enumerate(capacity1.columns):
+      axs[0, 0].barh('Total', capacity1[col], left=capacity_bot1, 
+             label=col, color = capacity_dict.get(col))
+      capacity_bot1 += capacity1[col].iloc[0]
+      
+    for i, col in enumerate(capacity2.columns):
+      axs[0, 0].barh('Total', capacity2[col], left=capacity_bot2, 
+             label=col, color = capacity_dict.get(col))
+      capacity_bot2 += capacity2[col].iloc[0]
+    
+    # Axis formatting
+    axs[0, 0].set_xlim([min(capacity1.sum(axis=1), default = 0) * 1.1, 
+                       max(capacity2.sum(axis=1), default = 0) * 1.1])
+    axs[0, 0].title.set_text(capacity_title)

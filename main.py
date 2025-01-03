@@ -50,6 +50,8 @@ from data import(
     format_headline_metrics_global,
     format_bar_delta_multi_scenario,
     format_stacked_bar_gen_shares_delta_multi_scenario,
+    format_transmission_capacity_multi_scenario,
+    format_stacked_bar_pwr_delta_multi_scenario
     )
 
 from utils import(
@@ -539,8 +541,9 @@ for scenario in scenarios:
                                            costs_base, costs_scen,
                                            costs_title, DUAL_COSTS_COLOR_DICT,
                                            capacity_trn, max_capacity_trn,
-                                           trn_title, scen_path[scenario], 
-                                           chart_title, file_name, scenario
+                                           trn_title, DUAL_TRANSMISSION_COLOR_DICT,
+                                           scen_path[scenario], chart_title, 
+                                           file_name, scenario
                                            )
             
 '''Create charts for multi scenario comparison.'''
@@ -606,15 +609,35 @@ if multi_scen_comparison_dict.get('trn_cap_dif') == 'yes':
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
-        if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
-            df1_dict[scenario] = read_new_capacity_country(scen_dir_results.get(scenario))
-            df2_dict[scenario] = read_max_capacity_investment(scen_dir_data.get(scenario))
+        df1_dict[scenario] = read_new_capacity_country(scen_dir_results.get(scenario))
+        df2_dict[scenario] = read_max_capacity_investment(scen_dir_data.get(scenario))
 
-    chart_title = 'Transmission Capacity - Delta'
+    chart_title = 'Transmission Capacity'
     file_name = 'transmission_capacity_delta_global'
     unit = 'GW'
     
-    format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, multi_scenario_path, 
-                                                       chart_title, file_name, 
-                                                       BAR_GEN_SHARES_COLOR_DICT, unit)
+    format_transmission_capacity_multi_scenario(df1_dict, df2_dict, multi_scenario_path, 
+                                                chart_title, file_name, 
+                                                DUAL_TRANSMISSION_COLOR_DICT, unit)
+    
+if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
+    df1 = read_new_capacity_country(base_dir_results)
+    df1 = format_technology_col(df1)
+    df2_dict = {}
+    
+    for scenario in scenarios:
+        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
+            df2 = read_new_capacity_country(scen_dir_results.get(scenario))
+            df2 = format_technology_col(df2)
+            
+            df2_dict[scenario] = calculate_results_delta(df1, df2, ['TECH'],
+                                                         scenario)
+            
+    chart_title = 'Capacity - Delta'
+    file_name = 'capacity_delta_global'
+    unit = 'GW'
+    
+    format_stacked_bar_pwr_delta_multi_scenario(df2_dict, multi_scenario_path, 
+                                                chart_title, file_name, 
+                                                BAR_TECH_COLOR_DICT, unit)
