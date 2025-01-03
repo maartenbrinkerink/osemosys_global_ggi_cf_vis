@@ -3,24 +3,23 @@
 BAR_TECH_COLOR_DICT = {
     'BIO':'darkgreen',
     'CCG':'brown',
+    'CCS': 'khaki',
     'COA':'black',
-    'COG':'peru',
-    'CSP':'wheat',
+    #'COG':'peru',
+    #'CSP':'wheat',
     'GEO':'darkseagreen',
     'HYD':'dodgerblue',
-    'OCG':'firebrick',
+    'OCG':'lightsalmon',
     'OIL':'lightgrey',
-    'OTH':'teal',
-    'PET':'grey',
+    #'OTH':'teal',
+    #'PET':'grey',
     'SPV':'gold',
     'URN':'mediumseagreen',
     'WAS':'darkkhaki',
-    'WAV':'red',
+    #'WAV':'red',
     'WOF':'violet',
     'WON':'blueviolet',
-    'SDS' : 'navy',
-    'BCK' : 'orange',
-    'CCS' : 'khaki'
+    'SDS': 'navy',
 }
 
 BAR_GEN_SHARES_COLOR_DICT = {
@@ -37,6 +36,11 @@ DUAL_COSTS_COLOR_DICT = {
 DUAL_EMISSIONS_COLOR_DICT = {
     'bar':'navy',
     'line':'lightcoral',
+}
+
+DUAL_TRANSMISSION_COLOR_DICT = {
+    'new':'navy',
+    'max':'lightcoral',
 }
 
 COUNTRY_COLOR_DICT = {

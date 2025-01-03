@@ -7,9 +7,25 @@ base_dir_results_summaries = f'{OG_path}\\results\\{base_model}\\result_summarie
 
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = [
-    'MYSPESGPXX',
-    'MYSPETHASO',
-    'IDNSMMYSPE'
+  'MYSPESGPXX',
+  'MYSPETHASO',
+  'IDNSMMYSPE',
+  'MYSSHPHLLU',
+  'BRNXXMYSSK',
+  'LAOXXTHANO',
+  'LAOXXVNMNO',
+  'MMRXXTHANO',
+  'KHMXXLAOXX',
+  'KHMXXTHACE',
+  'IDNKAMYSSH',
+  'IDNSMSGPXX',
+  'LAOXXMMRXX',
+  'SGPXXVNMSO',
+  'KHMXXSGPXX',
+  'MYSPEMYSSK',
+  'MYSSHMYSSK',
+  'IDNJWIDNKA',
+  'IDNJWIDNSM',
     ]
 
 '''Set start and end year of model horizon.'''
@@ -53,7 +69,7 @@ base_run_dict = {
     'dual_emissions_stacked' : 'no',
     }
 
-scen_comparison_dict = {
+base_scen_comparison_dict = {
     'pwr_cap_bar_dif_global' : 'no',
     'pwr_gen_bar_dif_global' : 'no',
     'pwr_cap_bar_dif_country' : 'no',
@@ -64,4 +80,12 @@ scen_comparison_dict = {
     'emissions_dif_country' : 'no',
     'pwr_gen_shares_dif_global' : 'no',
     'headline_metrics_dif_global' : 'yes',
+    }
+
+multi_scen_comparison_dict = {
+    'emissions_dif' : 'yes',
+    'costs_dif' : 'yes',
+    'gen_shares_dif' : 'yes',
+    'trn_cap_dif' : 'yes',
+    
     }

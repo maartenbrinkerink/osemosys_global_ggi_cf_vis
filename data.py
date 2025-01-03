@@ -2,6 +2,8 @@
 import os
 from matplotlib import pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+from matplotlib.patches import Patch
+from collections import OrderedDict
 import numpy as np
 import pandas as pd
 import math
@@ -815,20 +817,12 @@ def format_headline_metrics_global(capacity_in, production_in,
     axs[0, 1].title.set_text(production_title)    
     
     # Set combined legend for capacity & production subplots
-    legend_dict = {}
-    
-    for ax in [axs[0, 0], axs[0, 1]]:
-        # Add unique legend entries
-        handles, labels = ax.get_legend_handles_labels()
-        by_label = dict(zip(labels, handles))
-    
-        for handle, label in by_label.items():
-            legend_dict[handle] = label
-
-    legend_dict = dict(sorted(legend_dict.items()))
-    axs[0, 0].legend(legend_dict.values(), legend_dict.keys(), 
-               bbox_to_anchor=(1.5, -0.55), frameon = False, 
-               ncols = math.ceil(len(legend_dict.keys()) / 2))
+    legend = []
+    for key, value in capacity_dict.items():
+        legend.append(Patch(facecolor = value, label = key))
+        
+    axs[0, 0].legend(handles = legend, bbox_to_anchor=(1.75, -0.55), 
+                     frameon = False, ncols = 7)
 
     # SUBPLOT - GENERATION SHARES
     # Calculate Delta's for horizon (hz)
@@ -938,5 +932,114 @@ def format_headline_metrics_global(capacity_in, production_in,
     if chart_title:
         make_space_above(axs, topmargin=0.3) 
         plt.suptitle(chart_title)
+
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_bar_delta_multi_scenario(df1, df2_dict, out_dir, 
+                                    chart_title, file_name, 
+                                    color_dict, unit):
+
+    df1.set_index('YEAR', inplace = True)
+    plot_df = pd.DataFrame(columns = ['VALUE'])
+    
+    fig, ax = plt.subplots()
+    
+    for key in df2_dict:
+
+        df2_dict[key].set_index('YEAR', inplace = True)
+           
+        # Calculate Delta by year
+        df = df2_dict[key] - df1
+        
+        # Calculate model horizon Delta
+        df3 = df.sum().fillna(0)
+        plot_df.loc[key] = df3
+      
+    plot_df = plot_df.sort_values(by = ['VALUE'])
+    
+    
+    ax.bar(plot_df.index, plot_df['VALUE'],
+            color = color_dict.get('bar'))
+    
+    plt.xticks(rotation = 75)
+    ax.margins(x=0)
+    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    ax.set_ylabel(unit)
+    ax.set_title(chart_title)
+
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir, 
+                                                       chart_title, file_name, 
+                                                       color_dict, unit):
+
+    df1['Metric'] = df1['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                      'Fossil energy share' : 'FOSSIL'})
+
+    df1.set_index('Metric', inplace = True)
+    df1.drop(columns = ['Unit'], inplace = True)
+    df1.loc['OTHER'] = 100 - df1.loc[df1.index == 'RENEWABLE'
+                                   ].iloc[0] - df1.loc[df1.index == 'FOSSIL'
+                                                      ].iloc[0]
+    
+    plot_df1 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df2 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    
+    for key, value in df2_dict.items():
+        
+        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                          'Fossil energy share' : 'FOSSIL'})
+    
+        value.set_index('Metric', inplace = True)
+        value.drop(columns = ['Unit'], inplace = True)
+        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
+                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
+                                                          ].iloc[0]
+                                                          
+        value = (value - df1)
+        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+                                  ].rename(index={'Value': key})
+        
+        gen_shares1 = value.clip(upper = 0)
+        gen_shares2 = value.clip(lower = 0)
+        
+        if plot_df1.empty:
+            plot_df1 = gen_shares1
+            plot_df2 = gen_shares2
+        else:
+            plot_df1 = pd.concat([plot_df1, gen_shares1])
+            plot_df2 = pd.concat([plot_df2, gen_shares2])
+
+    plot_df1['sum'] = plot_df1.sum(axis=1)
+    plot_df1 = plot_df1.sort_values(by = ['sum']).drop(columns = ['sum'])
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    gen_shares_bot1 = 0
+    gen_shares_bot2 = 0
+    
+    fig, ax = plt.subplots()
+    
+    for i, col in enumerate(plot_df1.columns):           
+      ax.bar(plot_df1.index, plot_df1[col], bottom = gen_shares_bot1,
+              color = color_dict.get(col), label = col)
+      gen_shares_bot1 += np.array(plot_df1[col])
+      
+    for i, col in enumerate(plot_df2.columns):
+      ax.bar(plot_df2.index, plot_df2[col], bottom = gen_shares_bot2,
+             color = color_dict.get(col))
+      gen_shares_bot2 += np.array(plot_df2[col])
+      
+    # Subplot formatting
+    ax.set_ylim([min(plot_df1.sum(axis=1), default = 0) * 1.1, 
+                 max(plot_df2.sum(axis=1), default = 0) * 1.1])
+    ax.legend(frameon = False, reverse = True, ncols = 1)
+    
+    plt.xticks(rotation = 75)
+    ax.margins(x=0)
+    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    ax.set_ylabel(unit)
+    ax.set_title(chart_title)
+    
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
