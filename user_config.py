@@ -1,6 +1,6 @@
 '''Set paths.'''
 base_model = 'ASEAN'
-OG_path = 'C:\\Users\\maart\\Github\\osemosys_global'
+OG_path = ''
 
 base_dir_results = f'{OG_path}\\results\\{base_model}\\results'
 base_dir_results_summaries = f'{OG_path}\\results\\{base_model}\\result_summaries'
@@ -55,38 +55,38 @@ countries = ['BRN',
 
 '''Set which visualisations to run.'''
 base_run_dict = {
-    'pwr_cap_bar_global' : 'no',
-    'pwr_cap_bar_country' : 'no',
-    'pwr_gen_bar_global' : 'no',
-    'pwr_gen_bar_country' : 'no',
-    'pwr_gen_shares_global' : 'no',
-    'pwr_gen_shares_country' : 'no',
-    'dual_costs_global' : 'no',
-    'dual_costs_country' : 'no',
-    'pwr_costs_multi_country' : 'no',
-    'dual_emissions_global' : 'no',
-    'dual_emissions_country' : 'no',
-    'dual_emissions_stacked' : 'no',
+    'pwr_cap_bar_global' : 'yes',
+    'pwr_cap_bar_country' : 'yes',
+    'pwr_gen_bar_global' : 'yes',
+    'pwr_gen_bar_country' : 'yes',
+    'pwr_gen_shares_global' : 'yes',
+    'pwr_gen_shares_country' : 'yes',
+    'dual_costs_global' : 'yes',
+    'dual_costs_country' : 'yes',
+    'pwr_costs_multi_country' : 'yes',
+    'dual_emissions_global' : 'yes',
+    'dual_emissions_country' : 'yes',
+    'dual_emissions_stacked' : 'yes',
     }
 
 base_scen_comparison_dict = {
-    'pwr_cap_bar_dif_global' : 'no',
-    'pwr_gen_bar_dif_global' : 'no',
-    'pwr_cap_bar_dif_country' : 'no',
-    'pwr_gen_bar_dif_country' : 'no',
-    'costs_dif_global' : 'no',
-    'emissions_dif_global' : 'no',
-    'costs_dif_country' : 'no',
-    'emissions_dif_country' : 'no',
-    'pwr_gen_shares_dif_global' : 'no',
-    'headline_metrics_dif_global' : 'no',
+    'pwr_cap_bar_dif_global' : 'yes',
+    'pwr_gen_bar_dif_global' : 'yes',
+    'pwr_cap_bar_dif_country' : 'yes',
+    'pwr_gen_bar_dif_country' : 'yes',
+    'costs_dif_global' : 'yes',
+    'emissions_dif_global' : 'yes',
+    'costs_dif_country' : 'yes',
+    'emissions_dif_country' : 'yes',
+    'pwr_gen_shares_dif_global' : 'yes',
+    'headline_metrics_dif_global' : 'yes',
     }
 
 multi_scen_comparison_dict = {
-    'emissions_dif' : 'no',
-    'costs_dif' : 'no',
-    'gen_shares_dif' : 'no',
-    'trn_cap_dif' : 'no',
+    'emissions_dif' : 'yes',
+    'costs_dif' : 'yes',
+    'gen_shares_dif' : 'yes',
+    'trn_cap_dif' : 'yes',
     'capacity_dif' : 'yes',
     'generation_dif' : 'yes'
     }

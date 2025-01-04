@@ -1095,68 +1095,76 @@ def format_stacked_bar_pwr_delta_multi_scenario(df_dict, out_dir,
                                                 chart_title, file_name, 
                                                 color_dict, unit):
     
-    
+    plot_df1 = None
     
     for key, value in df_dict.items():
-        
-        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                          'Fossil energy share' : 'FOSSIL'})
-    
-        value.set_index('Metric', inplace = True)
-        value.drop(columns = ['Unit'], inplace = True)
-        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
-                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
-                                                          ].iloc[0]
-                                                          
-        value = (value - df1)
-        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
-                                  ].rename(index={'Value': key})
-        
-        gen_shares1 = value.clip(upper = 0)
-        gen_shares2 = value.clip(lower = 0)
-        
-        if plot_df1.empty:
-            plot_df1 = gen_shares1
-            plot_df2 = gen_shares2
-        else:
-            plot_df1 = pd.concat([plot_df1, gen_shares1])
-            plot_df2 = pd.concat([plot_df2, gen_shares2])
 
-    capacity1 = capacity_in.loc[capacity_in['DELTA'] < 0]
-    capacity2 = capacity_in.loc[capacity_in['DELTA'] > 0]
-   
-    capacity1 = capacity1.groupby(['TECH'])['DELTA'].sum().fillna(0)
-    capacity2 = capacity2.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        capacity1 = value.loc[value['DELTA'] < 0]
+        capacity2 = value.loc[value['DELTA'] > 0]
+       
+        capacity1 = capacity1.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        capacity2 = capacity2.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        
+        for idx in value.index:
+            if not capacity1.empty:
+                if not idx in capacity1.index:
+                    capacity1.loc[idx] = 0
+             
+            if not capacity2.empty:
+                if not idx in capacity2.index:
+                    capacity2.loc[idx] = 0
+        
+        capacity1 = pd.DataFrame(capacity1).transpose()
+        capacity2 = pd.DataFrame(capacity2).transpose()
+        
+        capacity1.rename(index = {'DELTA' : key}, inplace = True)
+        capacity2.rename(index = {'DELTA' : key}, inplace = True)
+
+        if plot_df1 is None:
+            plot_df1 = capacity1.copy()
+            plot_df2 = capacity2.copy()
+        else:
+            plot_df1 = pd.concat([plot_df1, capacity1])
+            plot_df2 = pd.concat([plot_df2, capacity2])
+        
+    plot_df1 = plot_df1.fillna(0)
+    plot_df2 = plot_df2.fillna(0)
     
-    for idx in capacity_in.index:
-        if not capacity1.empty:
-            if not idx in capacity1.index:
-                capacity1.loc[idx] = 0
-         
-        if not capacity2.empty:
-            if not idx in capacity2.index:
-                capacity2.loc[idx] = 0
+    plot_sum = (plot_df1.sum(axis=1) * -1 + plot_df2.sum(axis=1)
+                ).sort_values(ascending = False)
+
+    plot_df1 = plot_df1.reindex(plot_sum.index
+                                ).reindex(sorted(plot_df1.columns), axis=1)
+    plot_df2 = plot_df2.reindex(plot_sum.index
+                                ).reindex(sorted(plot_df2.columns), axis=1)
     
-    capacity1 = pd.DataFrame(capacity1.sort_index()).transpose()
-    capacity2 = pd.DataFrame(capacity2.sort_index()).transpose()
-   
     # Initialize the bottom at zero for the first set of bars.
     capacity_bot1 = 0
     capacity_bot2 = 0
     
+    fig, ax = plt.subplots()
+    
     # Plot each layer of the bar, adding each bar to the 'bottom' so
     # the next bar starts higher.
-    for i, col in enumerate(capacity1.columns):
-      axs[0, 0].barh('Total', capacity1[col], left=capacity_bot1, 
-             label=col, color = capacity_dict.get(col))
-      capacity_bot1 += capacity1[col].iloc[0]
+    for i, col in enumerate(plot_df1.columns):
+      ax.bar(plot_df1.index, plot_df1[col], bottom=capacity_bot1, 
+             label=col, color = color_dict.get(col))
+      capacity_bot1 += np.array(plot_df1[col])
       
-    for i, col in enumerate(capacity2.columns):
-      axs[0, 0].barh('Total', capacity2[col], left=capacity_bot2, 
-             label=col, color = capacity_dict.get(col))
-      capacity_bot2 += capacity2[col].iloc[0]
+    for i, col in enumerate(plot_df2.columns):
+      ax.bar(plot_df2.index, plot_df2[col], bottom=capacity_bot2, 
+             color = color_dict.get(col))
+      capacity_bot2 += np.array(plot_df2[col])
+      
+    ax.legend(frameon = False, ncols = 1, bbox_to_anchor=(1, 1.03))
+
+    plt.xticks(rotation = 75)
+    ax.margins(x=0)
+    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.3)
+    ax.set_ylabel(unit)
+    ax.set_title(chart_title)
+    ax.set_ylim([min(plot_df1.sum(axis=1), default = 0) * 1.1, 
+                 max(plot_df2.sum(axis=1), default = 0) * 1.1])
     
-    # Axis formatting
-    axs[0, 0].set_xlim([min(capacity1.sum(axis=1), default = 0) * 1.1, 
-                       max(capacity2.sum(axis=1), default = 0) * 1.1])
-    axs[0, 0].title.set_text(capacity_title)
+      
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')

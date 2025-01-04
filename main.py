@@ -9,7 +9,6 @@ the user can change the color mapping as used in different charts. Generated
 charts are saved to file.'''
 
 import os
-os.chdir(r'C:\Users\maart\Github\osemosys_global_ggi_cf_vis')
 
 from user_config import(
     base_dir_results,
@@ -637,6 +636,30 @@ if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
     chart_title = 'Capacity - Delta'
     file_name = 'capacity_delta_global'
     unit = 'GW'
+    
+    format_stacked_bar_pwr_delta_multi_scenario(df2_dict, multi_scenario_path, 
+                                                chart_title, file_name, 
+                                                BAR_TECH_COLOR_DICT, unit)
+    
+if multi_scen_comparison_dict.get('generation_dif') == 'yes':
+    df1 = read_technology_annual_activity(base_dir_results)
+    df1 = format_technology_col(df1)
+    df1 = convert_pj_to_twh(df1)
+    df2_dict = {}
+    
+    for scenario in scenarios:
+        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
+            df2 = read_technology_annual_activity(scen_dir_results.get(scenario))
+            df2 = format_technology_col(df2)
+            df2 = convert_pj_to_twh(df2)
+            
+            df2_dict[scenario] = calculate_results_delta(df1, df2, ['TECH'],
+                                                         scenario)
+            
+    chart_title = 'Generation - Delta'
+    file_name = 'generation_delta_global'
+    unit = 'TWh'
     
     format_stacked_bar_pwr_delta_multi_scenario(df2_dict, multi_scenario_path, 
                                                 chart_title, file_name, 
