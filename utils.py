@@ -13,17 +13,23 @@ def convert_million_to_billion(df):
     
     return df
 
-def format_technology_col(df):
+def format_technology_col(df, node : bool):
     
     df = df.loc[(df['TECHNOLOGY'].str.startswith('PWR')) & 
                 ~(df['TECHNOLOGY'].str.contains('TRN'))
     ].copy()
     
     df['TECH'] = df['TECHNOLOGY'].str[3:6]
-    df['COUNTRY'] = df['TECHNOLOGY'].str[6:9]
     
-    df = df.groupby(['TECH', 'COUNTRY', 'YEAR'])[
-        'VALUE'].sum().reset_index(drop = False)
+    if not node:
+        df['COUNTRY'] = df['TECHNOLOGY'].str[6:9]
+        df = df.groupby(['TECH', 'COUNTRY', 'YEAR'])[
+            'VALUE'].sum().reset_index(drop = False)
+        
+    else:
+        df['NODE'] = df['TECHNOLOGY'].str[6:11]
+        df = df.groupby(['TECH', 'NODE', 'YEAR'])[
+            'VALUE'].sum().reset_index(drop = False)
     
     return df
 
@@ -39,7 +45,26 @@ def format_annual_emissions(df, country : bool):
     
     return df
 
-def calculate_results_delta(df1, df2, cols : list, scenario):
+def calculate_power_costs(df1, df2, storage_list):
+    df2 = df2.loc[~df2['TECH'].isin(storage_list)]
+    df2 = df2.groupby(['YEAR'])[
+        'VALUE'].sum().reset_index(drop = False)
+    
+    df2['VALUE'] = df1['VALUE'] / df2['VALUE']
+
+    return df2
+    
+
+def calculate_results_delta(df1, df2, cols : list, scenario, 
+                            nodal_results,  node : bool):
+    
+    if node:
+        '''Only keep nodal level values for requires countries.'''
+        for df in [df1, df2]:
+            data = df.loc[~df['NODE'].str.startswith(
+                tuple(nodal_results.get(scenario)))]
+            data.loc[:, 'NODE'] = data['NODE'].str[:3] + 'XX'
+            df.update(data)
     
     df1 = df1.groupby(cols)['VALUE'].sum().reset_index(
         drop = False).set_index(cols).rename(columns = {'VALUE' : 'Base'})
@@ -52,7 +77,7 @@ def calculate_results_delta(df1, df2, cols : list, scenario):
     
     df['DELTA'] = round(df[scenario] - df['Base'], 2)
     df = df.loc[df['DELTA'] != 0]
-    
+
     return df
 
 def make_space_above(axes, topmargin=1):

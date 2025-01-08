@@ -250,7 +250,7 @@ def format_bar_delta(df1, df2, out_dir,
     df2.set_index('YEAR', inplace = True)
     
     # Calculate Delta by year
-    df = df2 - df1
+    df = df2[['VALUE']] - df1[['VALUE']]
     
     # Calculate model horizon Delta
     df3 = df.sum().fillna(0)
@@ -459,16 +459,16 @@ def format_stacked_bar_pwr_delta(df_in1, df_in2, out_dir,
 
     return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 
-def format_stacked_bar_pwr_delta_country(df_in1, df_in2, out_dir, 
+def format_stacked_bar_pwr_delta_spatial(df_in1, df_in2, out_dir, 
                                          chart_title, legend_title, 
                                          file_name, color_dict, unit, 
-                                         start_year, end_year):
-    
+                                         start_year, end_year, spatial):
+
     years = get_years(start_year, end_year)
     
-    countries = list(df_in1.index.get_level_values("COUNTRY").unique())
+    spatial_list = list(df_in1.index.get_level_values(spatial).unique())
     
-    rows = math.ceil(len(countries) / 2)
+    rows = math.ceil(len(spatial_list) / 2)
     
     fig, axs = plt.subplots(rows, 4, squeeze = False,
                             figsize = (9, rows * 2.5),
@@ -481,13 +481,13 @@ def format_stacked_bar_pwr_delta_country(df_in1, df_in2, out_dir,
     
     legend_dict = {}
 
-    for country in countries:
+    for entry in spatial_list:
     
         # SET TIMESERIES SUBPLOT
         df1 = df_in1.loc[(df_in1['DELTA'] < 0) & 
-                         (df_in1.index.get_level_values("COUNTRY") == country)]
+                         (df_in1.index.get_level_values(spatial) == entry)]
         df2 = df_in1.loc[(df_in1['DELTA'] > 0) & 
-                         (df_in1.index.get_level_values("COUNTRY") == country)]
+                         (df_in1.index.get_level_values(spatial) == entry)]
     
         df1 = df1.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
         df2 = df2.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
@@ -526,7 +526,7 @@ def format_stacked_bar_pwr_delta_country(df_in1, df_in2, out_dir,
         axs[y].margins(x=0)
         axs[y].set_ylim([min(df1.sum(axis=1), default = -.1) * 1.1, 
                          max(df2.sum(axis=1), default = .1) * 1.1])
-        axs[y].set_title(country, fontsize = 10)
+        axs[y].set_title(entry, fontsize = 10)
         
         # Add unique legend entries
         handles, labels = axs[y].get_legend_handles_labels()
@@ -537,9 +537,9 @@ def format_stacked_bar_pwr_delta_country(df_in1, df_in2, out_dir,
         
         # SET TOTAL SUBPLOT  
         df3 = df_in2.loc[(df_in2['DELTA'] < 0) & 
-                         (df_in2.index.get_level_values("COUNTRY") == country)]
+                         (df_in2.index.get_level_values(spatial) == entry)]
         df4 = df_in2.loc[(df_in2['DELTA'] > 0) & 
-                         (df_in2.index.get_level_values("COUNTRY") == country)]
+                         (df_in2.index.get_level_values(spatial) == entry)]
     
         df3 = df3.groupby(['TECH'])['DELTA'].sum().fillna(0)
         df4 = df4.groupby(['TECH'])['DELTA'].sum().fillna(0)
@@ -585,7 +585,7 @@ def format_stacked_bar_pwr_delta_country(df_in1, df_in2, out_dir,
         if z % 2:
             axs[x].set_ylabel(unit)
             
-        axs[x].set_title(country, fontsize = 10)
+        axs[x].set_title(entry, fontsize = 10)
 
         # Add unique legend entries
         handles, labels = axs[x].get_legend_handles_labels()
@@ -598,7 +598,7 @@ def format_stacked_bar_pwr_delta_country(df_in1, df_in2, out_dir,
     
     # CONFIG BOTH SUBPLOTS
     # Remove empty subplots
-    if len(countries) % 2:
+    if len(spatial_list) % 2:
         fig.delaxes(axs[x])
         fig.delaxes(axs[y])
     
@@ -950,7 +950,7 @@ def format_bar_delta_multi_scenario(df1, df2_dict, out_dir,
         df2_dict[key].set_index('YEAR', inplace = True)
            
         # Calculate Delta by year
-        df = df2_dict[key] - df1
+        df = df2_dict[key][['VALUE']] - df1[['VALUE']]
         
         # Calculate model horizon Delta
         df3 = df.sum().fillna(0)
@@ -1156,7 +1156,8 @@ def format_stacked_bar_pwr_delta_multi_scenario(df_dict, out_dir,
              color = color_dict.get(col))
       capacity_bot2 += np.array(plot_df2[col])
       
-    ax.legend(frameon = False, ncols = 1, bbox_to_anchor=(1, 1.03))
+    ax.legend(frameon = False, ncols = 1, bbox_to_anchor=(1, 1.03),
+              reverse = True)
 
     plt.xticks(rotation = 75)
     ax.margins(x=0)

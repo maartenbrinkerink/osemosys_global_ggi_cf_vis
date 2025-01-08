@@ -22,6 +22,8 @@ BAR_TECH_COLOR_DICT = {
     'SDS': 'navy',
 }
 
+STORAGE_LIST = ['SDS']
+
 BAR_GEN_SHARES_COLOR_DICT = {
     'FOSSIL':'lightcoral',
     'RENEWABLE':'palegreen',

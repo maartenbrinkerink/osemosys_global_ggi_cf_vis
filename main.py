@@ -20,6 +20,7 @@ from user_config import(
     base_run_dict,
     base_scen_comparison_dict,
     multi_scen_comparison_dict,
+    nodal_results,
     countries,
     scenarios,
     start_year,
@@ -32,7 +33,8 @@ from constants import(
     DUAL_COSTS_COLOR_DICT,
     DUAL_EMISSIONS_COLOR_DICT,
     DUAL_TRANSMISSION_COLOR_DICT,
-    COUNTRY_COLOR_DICT
+    COUNTRY_COLOR_DICT,
+    STORAGE_LIST
     )
 
 from data import(
@@ -44,7 +46,7 @@ from data import(
     format_line_multi_country,
     format_stacked_bar_line_emissions,
     format_stacked_bar_pwr_delta,
-    format_stacked_bar_pwr_delta_country,
+    format_stacked_bar_pwr_delta_spatial,
     format_bar_delta_country,
     format_headline_metrics_global,
     format_bar_delta_multi_scenario,
@@ -57,13 +59,14 @@ from utils import(
     convert_pj_to_twh,
     format_technology_col,
     format_annual_emissions,
+    calculate_power_costs,
     calculate_results_delta,
     convert_million_to_billion
     )
 
 from read import (
     read_capacity_country,
-    read_new_capacity_country,
+    read_new_capacity,
     read_technology_annual_activity,
     read_generation_shares_country,
     read_generation_shares_global,
@@ -71,6 +74,7 @@ from read import (
     read_total_cost_country,
     read_pwr_cost_global,
     read_total_cost_global,
+    read_total_discounted_cost,
     read_annual_emissions,
     read_annual_emission_intensity_country,
     read_annual_emission_intensity_global,
@@ -133,7 +137,7 @@ if base_run_dict.get('pwr_cap_bar_country') == 'yes':
         
 if base_run_dict.get('pwr_gen_bar_global') == 'yes':
     df = read_technology_annual_activity(base_dir_results)
-    df = format_technology_col(df)
+    df = format_technology_col(df, node = None)
     df = convert_pj_to_twh(df)
     
     chart_title = 'Generation'
@@ -148,7 +152,7 @@ if base_run_dict.get('pwr_gen_bar_global') == 'yes':
     
 if base_run_dict.get('pwr_gen_bar_country') == 'yes':
     df = read_technology_annual_activity(base_dir_results)
-    df = format_technology_col(df)
+    df = format_technology_col(df, node = None)
     df = convert_pj_to_twh(df)
     
     chart_title = 'Generation'
@@ -190,11 +194,15 @@ if base_run_dict.get('pwr_gen_shares_country') == 'yes':
                                       country = country)
         
 if base_run_dict.get('dual_costs_global') == 'yes':
-    df1 = read_total_cost_global(base_dir_results_summaries)
-    df2 = read_pwr_cost_global(base_dir_results_summaries)
+    df1 = read_total_discounted_cost(base_dir_results)
+    
+    df2 = read_technology_annual_activity(base_dir_results)
+    df2 = format_technology_col(df2, node = None)
+    df2 = convert_pj_to_twh(df2)
+    df2 = calculate_power_costs(df1, df2, STORAGE_LIST)
     
     convert_million_to_billion(df1)
-    
+
     chart_title = 'System Costs'
     legend_title = ''
     file_name = 'dual_costs'
@@ -291,21 +299,21 @@ if base_run_dict.get('dual_emissions_stacked') == 'yes':
     
 '''Create charts for single scenario comparison to base.'''
 for scenario in scenarios:
-    capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+    capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
     if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
 
         if base_scen_comparison_dict.get('pwr_cap_bar_dif_global') == 'yes':
-            df1 = read_new_capacity_country(base_dir_results)
-            df1 = format_technology_col(df1)
+            df1 = read_new_capacity(base_dir_results)
+            df1 = format_technology_col(df1, node = None)
             
-            df2 = read_new_capacity_country(scen_dir_results.get(scenario))
-            df2 = format_technology_col(df2)
+            df2 = read_new_capacity(scen_dir_results.get(scenario))
+            df2 = format_technology_col(df2, node = None)
             
             df3 = calculate_results_delta(df1, df2, ['TECH', 'YEAR'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
             
             df4 = calculate_results_delta(df1, df2, ['TECH'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
     
             chart_title = f'{scenario} New Capacity - Delta'
             legend_title = ''
@@ -319,42 +327,67 @@ for scenario in scenarios:
             
     
         if base_scen_comparison_dict.get('pwr_cap_bar_dif_country') == 'yes':
-            df1 = read_new_capacity_country(base_dir_results)
-            df1 = format_technology_col(df1)
+            df1 = read_new_capacity(base_dir_results)
+            df1 = format_technology_col(df1, node = None)
             
-            df2 = read_new_capacity_country(scen_dir_results.get(scenario))
-            df2 = format_technology_col(df2)
+            df2 = read_new_capacity(scen_dir_results.get(scenario))
+            df2 = format_technology_col(df2, node = None)
             
             df3 = calculate_results_delta(df1, df2, ['COUNTRY', 'TECH', 'YEAR'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
             
             df4 = calculate_results_delta(df1, df2, ['COUNTRY', 'TECH'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
     
             chart_title = f'{scenario} New Capacity - Delta'
             legend_title = ''
             file_name = 'pwr_new_cap_bar_delta_country'
             unit = 'GW'
             
-            format_stacked_bar_pwr_delta_country(df3, df4, scen_path[scenario], 
+            format_stacked_bar_pwr_delta_spatial(df3, df4, scen_path[scenario], 
                                                  chart_title, legend_title, file_name, 
                                                  BAR_TECH_COLOR_DICT, unit, start_year,
-                                                 end_year)
+                                                 end_year, 'COUNTRY')
+        
+        if scenario in nodal_results.keys():
+        
+            if base_scen_comparison_dict.get('pwr_cap_bar_dif_node') == 'yes':
+                df1 = read_new_capacity(base_dir_results)
+                df1 = format_technology_col(df1, node = True)
+                
+                df2 = read_new_capacity(scen_dir_results.get(scenario))
+                df2 = format_technology_col(df2, node = True)
+                
+                df3 = calculate_results_delta(df1, df2, ['NODE', 'TECH', 'YEAR'],
+                                              scenario, nodal_results, node = True)
+                
+                df4 = calculate_results_delta(df1, df2, ['NODE', 'TECH'],
+                                              scenario, nodal_results, node = True)
+        
+                chart_title = f'{scenario} New Capacity - Delta'
+                legend_title = ''
+                file_name = 'pwr_new_cap_bar_delta_node'
+                unit = 'GW'
+                
+                format_stacked_bar_pwr_delta_spatial(df3, df4, scen_path[scenario], 
+                                                     chart_title, legend_title, file_name, 
+                                                     BAR_TECH_COLOR_DICT, unit, start_year,
+                                                     end_year, 'NODE')
             
         if base_scen_comparison_dict.get('pwr_gen_bar_dif_global') == 'yes':
             df1 = read_technology_annual_activity(base_dir_results)
-            df1 = format_technology_col(df1)
+            df1 = format_technology_col(df1, node = None)
             df1 = convert_pj_to_twh(df1)
             
             df2 = read_technology_annual_activity(scen_dir_results.get(scenario))
-            df2 = format_technology_col(df2)
+            df2 = format_technology_col(df2, node = None)
             df2 = convert_pj_to_twh(df2)
             
             df3 = calculate_results_delta(df1, df2, ['TECH', 'YEAR'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
             
             df4 = calculate_results_delta(df1, df2, ['TECH'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
     
             chart_title = f'{scenario} Generation - Delta'
             legend_title = ''
@@ -368,32 +401,59 @@ for scenario in scenarios:
             
         if base_scen_comparison_dict.get('pwr_gen_bar_dif_country') == 'yes':
             df1 = read_technology_annual_activity(base_dir_results)
-            df1 = format_technology_col(df1)
+            df1 = format_technology_col(df1, node = None)
             df1 = convert_pj_to_twh(df1)
             
             df2 = read_technology_annual_activity(scen_dir_results.get(scenario))
-            df2 = format_technology_col(df2)
+            df2 = format_technology_col(df2, node = None)
             df2 = convert_pj_to_twh(df2)
             
             df3 = calculate_results_delta(df1, df2, ['COUNTRY', 'TECH', 'YEAR'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
             
             df4 = calculate_results_delta(df1, df2, ['COUNTRY', 'TECH'],
-                                          scenario)
+                                          scenario, nodal_results, node = None)
     
             chart_title = f'{scenario} Generation - Delta'
             legend_title = ''
             file_name = 'pwr_gen_bar_delta_country'
             unit = 'TWh'
     
-            format_stacked_bar_pwr_delta_country(df3, df4, scen_path[scenario], 
+            format_stacked_bar_pwr_delta_spatial(df3, df4, scen_path[scenario], 
                                                  chart_title, legend_title, file_name, 
                                                  BAR_TECH_COLOR_DICT, unit, start_year,
-                                                 end_year)
+                                                 end_year, 'COUNTRY')
+            
+        if scenario in nodal_results.keys():
+            
+            if base_scen_comparison_dict.get('pwr_gen_bar_dif_node') == 'yes':
+                df1 = read_technology_annual_activity(base_dir_results)
+                df1 = format_technology_col(df1, node = True)
+                df1 = convert_pj_to_twh(df1)
+                
+                df2 = read_technology_annual_activity(scen_dir_results.get(scenario))
+                df2 = format_technology_col(df2, node = True)
+                df2 = convert_pj_to_twh(df2)
+                
+                df3 = calculate_results_delta(df1, df2, ['NODE', 'TECH', 'YEAR'],
+                                              scenario, nodal_results, node = True)
+                
+                df4 = calculate_results_delta(df1, df2, ['NODE', 'TECH'],
+                                              scenario, nodal_results, node = True)
+        
+                chart_title = f'{scenario} Generation - Delta'
+                legend_title = ''
+                file_name = 'pwr_gen_bar_delta_node'
+                unit = 'TWh'
+        
+                format_stacked_bar_pwr_delta_spatial(df3, df4, scen_path[scenario], 
+                                                     chart_title, legend_title, file_name, 
+                                                     BAR_TECH_COLOR_DICT, unit, start_year,
+                                                     end_year, 'NODE')
     
         if base_scen_comparison_dict.get('costs_dif_global') == 'yes':
-            df1 = read_total_cost_global(base_dir_results_summaries)
-            df2 = read_total_cost_global(scen_dir_results_summaries.get(scenario))
+            df1 = read_total_discounted_cost(base_dir_results)
+            df2 = read_total_discounted_cost(scen_dir_results.get(scenario))
             convert_million_to_billion(df1)
             convert_million_to_billion(df2)
             
@@ -406,7 +466,7 @@ for scenario in scenarios:
                              chart_title, legend_title, 
                              file_name, DUAL_COSTS_COLOR_DICT, 
                              unit, country = None)
-    
+
         if base_scen_comparison_dict.get('emissions_dif_global') == 'yes':
             df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
                                           country = False)
@@ -455,8 +515,7 @@ for scenario in scenarios:
             format_bar_delta_country(df1, df2, scen_path[scenario], 
                                      chart_title, legend_title, 
                                      file_name, COUNTRY_COLOR_DICT, 
-                                     unit)
-            
+                                     unit)           
             
         if base_scen_comparison_dict.get('pwr_gen_shares_dif_global') == 'yes':
             df1 = read_generation_shares_global(base_dir_results_summaries)
@@ -477,27 +536,27 @@ for scenario in scenarios:
         if base_scen_comparison_dict.get('headline_metrics_dif_global') == 'yes':
     
             # Set inputs for capacity subplot
-            capacity_base = read_new_capacity_country(base_dir_results)
-            capacity_base = format_technology_col(capacity_base)
+            capacity_base = read_new_capacity(base_dir_results)
+            capacity_base = format_technology_col(capacity_base, node = None)
             
-            capacity_scen = read_new_capacity_country(scen_dir_results.get(scenario))
-            capacity_scen = format_technology_col(capacity_scen)
+            capacity_scen = read_new_capacity(scen_dir_results.get(scenario))
+            capacity_scen = format_technology_col(capacity_scen, node = None)
             
             capacity = calculate_results_delta(capacity_base, capacity_scen, ['TECH'],
-                                          scenario)
+                                               scenario, nodal_results,  node = None)
             capacity_title = 'Capacity (GW)'
     
             # Set inputs for generation subplot
             production_base = read_technology_annual_activity(base_dir_results)
-            production_base = format_technology_col(production_base)
+            production_base = format_technology_col(production_base, node = None)
             production_base = convert_pj_to_twh(production_base)
             
             production_scen = read_technology_annual_activity(scen_dir_results.get(scenario))
-            production_scen = format_technology_col(production_scen)
+            production_scen = format_technology_col(production_scen, node = None)
             production_scen = convert_pj_to_twh(production_scen)
     
             production = calculate_results_delta(production_base, production_scen, ['TECH'],
-                                          scenario)
+                                                 scenario, nodal_results,  node = None)
             production_title = 'Generation (TWh)'
              
             # Set inputs for generation shares subplot
@@ -514,14 +573,14 @@ for scenario in scenarios:
             emissions_title = 'Emissions (Mt CO2)'
             
             # Set inputs for costs subplot
-            costs_base = read_total_cost_global(base_dir_results_summaries)
-            costs_scen = read_total_cost_global(scen_dir_results_summaries.get(scenario))
+            costs_base = read_total_discounted_cost(base_dir_results)
+            costs_scen = read_total_discounted_cost(scen_dir_results.get(scenario))           
             convert_million_to_billion(costs_base)
             convert_million_to_billion(costs_scen)
             costs_title = 'Total Costs (Billion $)'
             
             # Set inputs for transmission capacity subplot
-            capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+            capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
             max_capacity_trn = read_max_capacity_investment(scen_dir_data.get(scenario))
             trn_title = f'{scenario} Capacity (GW)'
     
@@ -552,7 +611,7 @@ if multi_scen_comparison_dict.get('emissions_dif') == 'yes':
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
             df2_dict[scenario] = format_annual_emissions(read_annual_emissions(
                 scen_dir_results.get(scenario)), 
@@ -567,15 +626,15 @@ if multi_scen_comparison_dict.get('emissions_dif') == 'yes':
                                     DUAL_EMISSIONS_COLOR_DICT, unit)
     
 if multi_scen_comparison_dict.get('costs_dif') == 'yes':
-    df1 = read_total_cost_global(base_dir_results_summaries)
+    df1 = read_total_discounted_cost(base_dir_results)
     convert_million_to_billion(df1)    
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
-            df2_dict[scenario] = read_total_cost_global(
-                scen_dir_results_summaries.get(scenario))
+            df2_dict[scenario] = read_total_discounted_cost(
+                scen_dir_results.get(scenario))
             convert_million_to_billion(df2_dict[scenario])
 
     chart_title = 'System Costs - Delta'
@@ -591,7 +650,7 @@ if multi_scen_comparison_dict.get('gen_shares_dif') == 'yes':
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
             df2_dict[scenario] = read_headline_metrics(scen_dir_results_summaries.get(scenario))
 
@@ -608,7 +667,7 @@ if multi_scen_comparison_dict.get('trn_cap_dif') == 'yes':
     df2_dict = {}
     
     for scenario in scenarios:
-        df1_dict[scenario] = read_new_capacity_country(scen_dir_results.get(scenario))
+        df1_dict[scenario] = read_new_capacity(scen_dir_results.get(scenario))
         df2_dict[scenario] = read_max_capacity_investment(scen_dir_data.get(scenario))
 
     chart_title = 'Transmission Capacity'
@@ -620,18 +679,19 @@ if multi_scen_comparison_dict.get('trn_cap_dif') == 'yes':
                                                 DUAL_TRANSMISSION_COLOR_DICT, unit)
     
 if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
-    df1 = read_new_capacity_country(base_dir_results)
-    df1 = format_technology_col(df1)
+    df1 = read_new_capacity(base_dir_results)
+    df1 = format_technology_col(df1, node = None)
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
-            df2 = read_new_capacity_country(scen_dir_results.get(scenario))
-            df2 = format_technology_col(df2)
+            df2 = read_new_capacity(scen_dir_results.get(scenario))
+            df2 = format_technology_col(df2, node = None)
             
             df2_dict[scenario] = calculate_results_delta(df1, df2, ['TECH'],
-                                                         scenario)
+                                                         scenario, nodal_results,
+                                                         node = None)
             
     chart_title = 'Capacity - Delta'
     file_name = 'capacity_delta_global'
@@ -643,19 +703,20 @@ if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
     
 if multi_scen_comparison_dict.get('generation_dif') == 'yes':
     df1 = read_technology_annual_activity(base_dir_results)
-    df1 = format_technology_col(df1)
+    df1 = format_technology_col(df1, node = None)
     df1 = convert_pj_to_twh(df1)
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity_country(scen_dir_results.get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
             df2 = read_technology_annual_activity(scen_dir_results.get(scenario))
-            df2 = format_technology_col(df2)
+            df2 = format_technology_col(df2, node = None)
             df2 = convert_pj_to_twh(df2)
             
             df2_dict[scenario] = calculate_results_delta(df1, df2, ['TECH'],
-                                                         scenario)
+                                                         scenario, nodal_results,
+                                                         node = None)
             
     chart_title = 'Generation - Delta'
     file_name = 'generation_delta_global'
