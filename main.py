@@ -9,10 +9,15 @@ the user can change the color mapping as used in different charts. Generated
 charts are saved to file.'''
 
 import os
+os.chdir(r'C:\Users\maart\Github\osemosys_global_ggi_cf_vis')
+import pandas as pd
 
 from user_config import(
     base_dir_results,
     base_dir_results_summaries,
+    base_dir_data,
+    resources_data,
+    custom_nodes_data,
     scen_dir_data,
     scen_dir_results,
     scen_dir_results_summaries,
@@ -24,7 +29,8 @@ from user_config import(
     countries,
     scenarios,
     start_year,
-    end_year
+    end_year,
+    axis_sort_delta,
     )
 
 from constants import(
@@ -44,6 +50,8 @@ from data import(
     format_bar_line,
     format_bar_delta,
     format_line_multi_country,
+    format_line_emission_limit,
+    format_spatial_map_ASEAN,
     format_stacked_bar_line_emissions,
     format_stacked_bar_pwr_delta,
     format_stacked_bar_pwr_delta_spatial,
@@ -52,7 +60,10 @@ from data import(
     format_bar_delta_multi_scenario,
     format_stacked_bar_gen_shares_delta_multi_scenario,
     format_transmission_capacity_multi_scenario,
-    format_stacked_bar_pwr_delta_multi_scenario
+    format_stacked_bar_pwr_delta_multi_scenario,
+    format_multi_plot_cap_gen_genshares_emissions,
+    format_multi_plot_country_charts,
+    format_multi_plot_scen_comparison
     )
 
 from utils import(
@@ -61,7 +72,8 @@ from utils import(
     format_annual_emissions,
     calculate_power_costs,
     calculate_results_delta,
-    convert_million_to_billion
+    convert_million_to_billion,
+    get_node_list,
     )
 
 from read import (
@@ -76,10 +88,12 @@ from read import (
     read_total_cost_global,
     read_total_discounted_cost,
     read_annual_emissions,
+    read_annual_emission_limit,
     read_annual_emission_intensity_country,
     read_annual_emission_intensity_global,
     read_headline_metrics,
-    read_max_capacity_investment
+    read_max_capacity_investment,
+    read_centerpoints
     )
 
 base_path = f'Figures/{base_model}/Base'
@@ -290,12 +304,97 @@ if base_run_dict.get('dual_emissions_stacked') == 'yes':
     legend_title = ''
     file_name = 'dual_emissions_stacked'
     unit1 = 'Mt CO2'
-    unit2 = 'gCO2/kWh (system)'
+    unit2 = 'gCO2/kWh'
     
     format_stacked_bar_line_emissions(df1, df2, base_path, chart_title, 
                                       legend_title, file_name, 
                                       COUNTRY_COLOR_DICT, unit1, 
                                       unit2)
+    
+if base_run_dict.get('emissions_limit') == 'yes':
+    df = read_annual_emission_limit(base_dir_data)
+    
+    chart_title = 'Emission Limit'
+    legend_title = ''
+    file_name = 'emission_limit'
+    unit = 'Mt CO2'
+    
+    format_line_emission_limit(df, base_path, chart_title, 
+                           legend_title, file_name, 
+                           COUNTRY_COLOR_DICT, unit)
+    
+if base_run_dict.get('spatial_map') == 'yes':
+    df1 = read_centerpoints(resources_data)
+    df2 = read_centerpoints(custom_nodes_data)
+    nodes = get_node_list(read_technology_annual_activity(base_dir_results))
+
+    chart_title = 'System Map'
+    file_name = 'system_map'
+    
+    test = format_spatial_map_ASEAN(df1, df2, nodes, base_path, 
+                                    chart_title, file_name, 
+                                    COUNTRY_COLOR_DICT)
+    
+if base_run_dict.get('multi_plot_cap_gen_genshares_emisssions') == 'yes':
+    
+    df1 = read_capacity_country(base_dir_results_summaries)
+    unit1 = 'GW'
+
+    df2 = read_technology_annual_activity(base_dir_results)
+    df2 = format_technology_col(df2, node = None)
+    df2 = convert_pj_to_twh(df2)
+    unit2 = 'TWh'    
+    
+    df3 = read_generation_shares_global(base_dir_results_summaries)
+    unit3 = '%'    
+    
+    df4 = format_annual_emissions(read_annual_emissions(base_dir_results), 
+                                  country = True)
+    unit4 = 'Mt CO2'
+
+    df5 = read_annual_emission_intensity_global(base_dir_results_summaries)
+    unit5 = 'gCO2/kWh'
+    file_name = 'multi_plot_cap_gen_genshares_emissions'
+    
+    format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
+                                                   unit1, unit2, unit3, unit4, unit5,
+                                                   base_path, file_name, 
+                                                   BAR_TECH_COLOR_DICT,
+                                                   BAR_GEN_SHARES_COLOR_DICT, 
+                                                   COUNTRY_COLOR_DICT)
+    
+if base_run_dict.get('multi_plot_country_charts') == 'yes':
+    
+    df1 = read_capacity_country(base_dir_results_summaries)
+    unit1 = 'GW'
+    
+    df2 = read_technology_annual_activity(base_dir_results)
+    df2 = format_technology_col(df2, node = None)
+    df2 = convert_pj_to_twh(df2)
+    unit2 = 'TWh'
+    
+    df3 = read_generation_shares_country(base_dir_results_summaries)
+    unit3 = '%'
+    
+    df4 = format_annual_emissions(read_annual_emissions(base_dir_results), 
+                              country = True)
+    unit4 = 'Mt CO2'
+
+    df5 = format_annual_emissions(read_annual_emission_intensity_country(
+    base_dir_results_summaries), country = True)
+    unit5 = 'gCO2/kWh'
+    
+    file_name = 'multi_plot_country_charts'
+    
+    for country in countries:
+
+        format_multi_plot_country_charts(df1, df2, df3, df4, df5,
+                                         unit1, unit2, unit3, unit4, unit5,
+                                         base_path, file_name, 
+                                         BAR_TECH_COLOR_DICT,
+                                         BAR_GEN_SHARES_COLOR_DICT, 
+                                         DUAL_EMISSIONS_COLOR_DICT, country)
+        
     
 '''Create charts for single scenario comparison to base.'''
 for scenario in scenarios:
@@ -623,7 +722,7 @@ if multi_scen_comparison_dict.get('emissions_dif') == 'yes':
             
     format_bar_delta_multi_scenario(df1, df2_dict, multi_scenario_path, 
                                     chart_title, file_name, 
-                                    DUAL_EMISSIONS_COLOR_DICT, unit)
+                                    DUAL_EMISSIONS_COLOR_DICT, unit, axis_sort_delta)
     
 if multi_scen_comparison_dict.get('costs_dif') == 'yes':
     df1 = read_total_discounted_cost(base_dir_results)
@@ -643,7 +742,7 @@ if multi_scen_comparison_dict.get('costs_dif') == 'yes':
 
     format_bar_delta_multi_scenario(df1, df2_dict, multi_scenario_path, 
                                     chart_title, file_name, 
-                                    DUAL_COSTS_COLOR_DICT, unit)
+                                    DUAL_COSTS_COLOR_DICT, unit, axis_sort_delta)
     
 if multi_scen_comparison_dict.get('gen_shares_dif') == 'yes':
     df1 = read_headline_metrics(base_dir_results_summaries) 
@@ -660,7 +759,8 @@ if multi_scen_comparison_dict.get('gen_shares_dif') == 'yes':
     
     format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, multi_scenario_path, 
                                                        chart_title, file_name, 
-                                                       BAR_GEN_SHARES_COLOR_DICT, unit)
+                                                       BAR_GEN_SHARES_COLOR_DICT, unit,
+                                                       axis_sort_delta)
     
 if multi_scen_comparison_dict.get('trn_cap_dif') == 'yes':
     df1_dict = {}
@@ -676,7 +776,8 @@ if multi_scen_comparison_dict.get('trn_cap_dif') == 'yes':
     
     format_transmission_capacity_multi_scenario(df1_dict, df2_dict, multi_scenario_path, 
                                                 chart_title, file_name, 
-                                                DUAL_TRANSMISSION_COLOR_DICT, unit)
+                                                DUAL_TRANSMISSION_COLOR_DICT, unit,
+                                                axis_sort_delta)
     
 if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
     df1 = read_new_capacity(base_dir_results)
@@ -699,7 +800,8 @@ if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
     
     format_stacked_bar_pwr_delta_multi_scenario(df2_dict, multi_scenario_path, 
                                                 chart_title, file_name, 
-                                                BAR_TECH_COLOR_DICT, unit)
+                                                BAR_TECH_COLOR_DICT, unit, 
+                                                axis_sort_delta)
     
 if multi_scen_comparison_dict.get('generation_dif') == 'yes':
     df1 = read_technology_annual_activity(base_dir_results)
@@ -724,4 +826,60 @@ if multi_scen_comparison_dict.get('generation_dif') == 'yes':
     
     format_stacked_bar_pwr_delta_multi_scenario(df2_dict, multi_scenario_path, 
                                                 chart_title, file_name, 
-                                                BAR_TECH_COLOR_DICT, unit)
+                                                BAR_TECH_COLOR_DICT, unit,
+                                                axis_sort_delta)
+    
+if multi_scen_comparison_dict.get('multi_plot_scen_comparison') == 'yes':
+    df1a = read_new_capacity(base_dir_results)
+    df1a = format_technology_col(df1a, node = None)
+    
+    df2a = read_technology_annual_activity(base_dir_results)
+    df2a = format_technology_col(df2a, node = None)
+    df2a = convert_pj_to_twh(df2a)
+    
+    df3 = read_headline_metrics(base_dir_results_summaries) 
+    df4 = format_annual_emissions(read_annual_emissions(base_dir_results), 
+                                  country = False)
+    
+    df1_dict = {}
+    df2_dict = {}
+    df3_dict = {}
+    df4_dict = {}
+    
+    unit1 = 'GW'
+    unit2 = 'TWh'
+    unit3 = '%'
+    unit4 = 'Mt CO2'
+    
+    file_name = 'multi_plot_scen_comparison'
+
+    for scenario in scenarios:
+        capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
+        if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
+            df1b = read_new_capacity(scen_dir_results.get(scenario))
+            df1b = format_technology_col(df1b, node = None)
+            
+            df2b = read_technology_annual_activity(scen_dir_results.get(scenario))
+            df2b = format_technology_col(df2b, node = None)
+            df2b = convert_pj_to_twh(df2b)
+            
+            df1_dict[scenario] = calculate_results_delta(df1a, df1b, ['TECH'],
+                                                         scenario, nodal_results,
+                                                         node = None)
+            
+            df2_dict[scenario] = calculate_results_delta(df2a, df2b, ['TECH'],
+                                                         scenario, nodal_results,
+                                                         node = None)
+            
+            df3_dict[scenario] = read_headline_metrics(scen_dir_results_summaries.get(scenario))
+            
+            df4_dict[scenario] = format_annual_emissions(read_annual_emissions(
+                scen_dir_results.get(scenario)), country = False)
+
+    format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict, 
+                                      df4, df4_dict, unit1, unit2, unit3, 
+                                      unit4, BAR_TECH_COLOR_DICT,
+                                      BAR_GEN_SHARES_COLOR_DICT,
+                                      DUAL_EMISSIONS_COLOR_DICT,
+                                      multi_scenario_path, file_name, 
+                                      axis_sort_delta)

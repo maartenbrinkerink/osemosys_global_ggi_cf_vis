@@ -1,9 +1,13 @@
 '''Set paths.'''
 base_model = 'ASEAN'
-results_path = r''
+results_path = r'C:\Users\maart\OneDrive\Documenten\Work\Consulting\CCG\Climate Finance\results\ASEAN_2hourly4seasons_BAU'
+og_path = r'C:\Users\maart\Github\osemosys_global'
 
 base_dir_results = f'{results_path}\\{base_model}\\results'
 base_dir_results_summaries = f'{results_path}\\{base_model}\\result_summaries'
+base_dir_data = f'{results_path}\\{base_model}\\data'
+resources_data = f'{og_path}\\resources\\data'
+custom_nodes_data = f'{resources_data}\\custom_nodes'
 
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = [
@@ -67,6 +71,10 @@ base_run_dict = {
     'dual_emissions_global' : 'yes',
     'dual_emissions_country' : 'yes',
     'dual_emissions_stacked' : 'yes',
+    'emissions_limit' : 'yes',
+    'spatial_map' : 'yes',
+    'multi_plot_cap_gen_genshares_emisssions' : 'yes',
+    'multi_plot_country_charts' : 'yes',
     }
 
 base_scen_comparison_dict = {
@@ -90,7 +98,8 @@ multi_scen_comparison_dict = {
     'gen_shares_dif' : 'yes',
     'trn_cap_dif' : 'yes',
     'capacity_dif' : 'yes',
-    'generation_dif' : 'yes'
+    'generation_dif' : 'yes',
+    'multi_plot_scen_comparison' : 'yes',
     }
 
 '''Set for which scenarios nodal level results to show and list which 
@@ -101,3 +110,7 @@ nodal_results = {
     'IDNJWIDNKA' : ['IDN'],
     'IDNJWIDNSM' : ['IDN'],
     }
+
+'''Set to True if the axis labels need to be ordered by absolute size of the Delta.
+Set to False if the labels need to be ordered alphabetically.'''
+axis_sort_delta = False

@@ -33,6 +33,14 @@ def format_technology_col(df, node : bool):
     
     return df
 
+def get_node_list(df):
+    df = df.loc[(df['TECHNOLOGY'].str.startswith('PWR'))
+                ].replace({'01' : ''}, regex = True)
+    
+    df = sorted(list(df['TECHNOLOGY'].str.strip().str[-5:].unique()))
+    
+    return df
+
 def format_annual_emissions(df, country : bool):
     df['COUNTRY'] = df['EMISSION'].str[3:6]
     

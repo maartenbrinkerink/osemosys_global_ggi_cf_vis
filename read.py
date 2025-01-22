@@ -63,6 +63,11 @@ def read_annual_emissions(path):
     
     return df
 
+def read_annual_emission_limit(path):
+    df = pd.read_csv(os.path.join(path, 'AnnualEmissionLimit.csv'))
+    
+    return df
+
 def read_annual_emission_intensity_country(path):
     df = pd.read_csv(os.path.join(path, 'AnnualEmissionIntensity.csv'))
     
@@ -80,5 +85,10 @@ def read_headline_metrics(path):
 
 def read_max_capacity_investment(path):
     df = pd.read_csv(os.path.join(path, 'TotalAnnualMaxCapacityInvestment.csv'))
+    
+    return df
+
+def read_centerpoints(path):
+    df = pd.read_csv(os.path.join(path, 'centerpoints.csv'))
     
     return df

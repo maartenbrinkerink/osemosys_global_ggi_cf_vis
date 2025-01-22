@@ -7,19 +7,19 @@ BAR_TECH_COLOR_DICT = {
     'COA':'black',
     #'COG':'peru',
     #'CSP':'wheat',
-    'GEO':'darkseagreen',
-    'HYD':'dodgerblue',
+    'GEO':'red',
+    'HYD':'blue',
     'OCG':'lightsalmon',
     'OIL':'lightgrey',
     #'OTH':'teal',
     #'PET':'grey',
     'SPV':'gold',
-    'URN':'mediumseagreen',
+    'URN':'limegreen',
     'WAS':'darkkhaki',
     #'WAV':'red',
     'WOF':'violet',
     'WON':'blueviolet',
-    'SDS': 'navy',
+    'SDS': 'aqua',
 }
 
 STORAGE_LIST = ['SDS']
@@ -46,14 +46,14 @@ DUAL_TRANSMISSION_COLOR_DICT = {
 }
 
 COUNTRY_COLOR_DICT = {
-    'BRN' : 'darkgreen', 
+    'BRN' : 'lightgrey', 
     'IDN' : 'lightcoral',
     'KHM' : 'black', 
     'LAO' : 'peru', 
     'MMR' : 'dodgerblue', 
-    'MYS' : 'firebrick', 
-    'PHL' : 'lightgrey', 
-    'SGP' : 'navy', 
+    'MYS' : 'darkgreen', 
+    'PHL' : 'indigo', 
+    'SGP' : 'firebrick', 
     'THA' : 'violet', 
     'VNM' : 'gold',
     }
