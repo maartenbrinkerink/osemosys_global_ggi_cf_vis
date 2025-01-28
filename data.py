@@ -1749,3 +1749,47 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
 
     
     return fig.savefig(os.path.join(base_path, file_name), bbox_inches = 'tight')
+
+def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir, 
+                                                  chart_title, file_name, 
+                                                  color_dict, unit, axis_sort,
+                                                  runs):
+    
+    fig, ax = plt.subplots()
+    
+    plot_df = {}
+    
+    for run in runs:
+        df1_dict[run].set_index('YEAR', inplace = True)
+
+        plot_df[run] = pd.DataFrame(columns = ['VALUE'])
+
+        for key in df2_dict[run]:
+    
+            df2_dict[run][key].set_index('YEAR', inplace = True)
+               
+            # Calculate Delta by year
+            df = df2_dict[run][key][['VALUE']] - df1_dict[run][['VALUE']]
+            
+            # Calculate model horizon Delta
+            df3 = df.sum().fillna(0)
+            plot_df[run].loc[key] = df3
+            
+    return plot_df
+    
+    '''if axis_sort == True:
+        plot_df = plot_df.sort_values(by = ['VALUE'])
+    else:
+        plot_df = plot_df.sort_index()
+    
+    ax.bar(plot_df.index, plot_df['VALUE'],
+            color = color_dict.get('bar'))
+    
+    plt.xticks(rotation = 75)
+    ax.margins(x=0)
+    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    ax.set_ylabel(unit)
+    ax.set_title(chart_title)
+
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')'''
+

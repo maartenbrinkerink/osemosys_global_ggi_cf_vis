@@ -1,11 +1,26 @@
 '''Set paths.'''
 base_model = 'ASEAN'
-results_path = r'C:\Users\maart\OneDrive\Documenten\Work\Consulting\CCG\Climate Finance\results\ASEAN_2hourly4seasons_BAU'
-og_path = r'C:\Users\maart\Github\osemosys_global'
+results_extension = 'ASEAN_2hourly4seasons_'
+results_folder = r'C:\Users\maart\OneDrive\Documenten\Work\Consulting\CCG\Climate Finance\results'
 
-base_dir_results = f'{results_path}\\{base_model}\\results'
-base_dir_results_summaries = f'{results_path}\\{base_model}\\result_summaries'
-base_dir_data = f'{results_path}\\{base_model}\\data'
+BAU = 'BAU'
+
+runs = ['BAU', 
+        'NoNuclear'
+                 ]
+
+results_path = {}
+base_dir_results = {}
+base_dir_results_summaries = {}
+base_dir_data = {}
+
+for run in runs:
+    results_path[run] = f'{results_folder}\\{results_extension}{run}'
+    base_dir_results[run] = f'{results_path[run]}\\{base_model}\\results'
+    base_dir_results_summaries[run] = f'{results_path[run]}\\{base_model}\\result_summaries'
+    base_dir_data[run] = f'{results_path[run]}\\{base_model}\\data'
+    
+og_path = r'C:\Users\maart\Github\osemosys_global'
 resources_data = f'{og_path}\\resources\\data'
 custom_nodes_data = f'{resources_data}\\custom_nodes'
 
@@ -40,10 +55,14 @@ scen_dir_data = {}
 scen_dir_results = {}
 scen_dir_results_summaries = {}
 
-for scenario in scenarios:
-    scen_dir_data[scenario] = f'{results_path}\\{scenario}\\data'
-    scen_dir_results[scenario] = f'{results_path}\\{scenario}\\results'
-    scen_dir_results_summaries[scenario] = f'{results_path}\\{scenario}\\result_summaries'
+for run in runs:
+    scen_dir_data[run] = {}
+    scen_dir_results[run] = {}
+    scen_dir_results_summaries[run] = {}
+    for scenario in scenarios:
+        scen_dir_data[run][scenario] = f'{results_path[run]}\\{scenario}\\data'
+        scen_dir_results[run][scenario] = f'{results_path[run]}\\{scenario}\\results'
+        scen_dir_results_summaries[run][scenario] = f'{results_path[run]}\\{scenario}\\result_summaries'
 
 '''Set default model data.'''
 countries = ['BRN', 
@@ -59,47 +78,55 @@ countries = ['BRN',
 
 '''Set which visualisations to run.'''
 base_run_dict = {
-    'pwr_cap_bar_global' : 'yes',
-    'pwr_cap_bar_country' : 'yes',
-    'pwr_gen_bar_global' : 'yes',
-    'pwr_gen_bar_country' : 'yes',
-    'pwr_gen_shares_global' : 'yes',
-    'pwr_gen_shares_country' : 'yes',
-    'dual_costs_global' : 'yes',
-   #'dual_costs_country' : 'yes', # Sub-global level costs incomplete
-   #'pwr_costs_multi_country' : 'yes', # Sub-global level costs incomplete
-    'dual_emissions_global' : 'yes',
-    'dual_emissions_country' : 'yes',
-    'dual_emissions_stacked' : 'yes',
-    'emissions_limit' : 'yes',
-    'spatial_map' : 'yes',
-    'multi_plot_cap_gen_genshares_emisssions' : 'yes',
-    'multi_plot_country_charts' : 'yes',
+    'pwr_cap_bar_global' : 'no',
+    'pwr_cap_bar_country' : 'no',
+    'pwr_gen_bar_global' : 'no',
+    'pwr_gen_bar_country' : 'no',
+    'pwr_gen_shares_global' : 'no',
+    'pwr_gen_shares_country' : 'no',
+    'dual_costs_global' : 'no',
+   #'dual_costs_country' : 'no', # Sub-global level costs incomplete
+   #'pwr_costs_multi_country' : 'no', # Sub-global level costs incomplete
+    'dual_emissions_global' : 'no',
+    'dual_emissions_country' : 'no',
+    'dual_emissions_stacked' : 'no',
+    'emissions_limit' : 'no',
+    'spatial_map' : 'no',
+    'multi_plot_cap_gen_genshares_emisssions' : 'no',
+    'multi_plot_country_charts' : 'no',
     }
 
 base_scen_comparison_dict = {
-    'pwr_cap_bar_dif_global' : 'yes',
-    'pwr_gen_bar_dif_global' : 'yes',
-    'pwr_cap_bar_dif_country' : 'yes',
-    'pwr_gen_bar_dif_country' : 'yes',
-    'pwr_cap_bar_dif_node' : 'yes',
-    'pwr_gen_bar_dif_node' : 'yes',
-    'costs_dif_global' : 'yes',
-    'emissions_dif_global' : 'yes',
-    #'costs_dif_country' : 'yes', # Sub-global level costs incomplete
-    'emissions_dif_country' : 'yes',
-    'pwr_gen_shares_dif_global' : 'yes',
-    'headline_metrics_dif_global' : 'yes',
+    'pwr_cap_bar_dif_global' : 'no',
+    'pwr_gen_bar_dif_global' : 'no',
+    'pwr_cap_bar_dif_country' : 'no',
+    'pwr_gen_bar_dif_country' : 'no',
+    'pwr_cap_bar_dif_node' : 'no',
+    'pwr_gen_bar_dif_node' : 'no',
+    'costs_dif_global' : 'no',
+    'emissions_dif_global' : 'no',
+    #'costs_dif_country' : 'no', # Sub-global level costs incomplete
+    'emissions_dif_country' : 'no',
+    'pwr_gen_shares_dif_global' : 'no',
+    'headline_metrics_dif_global' : 'no',
     }
 
 multi_scen_comparison_dict = {
+    'emissions_dif' : 'no',
+    'costs_dif' : 'no',
+    'gen_shares_dif' : 'no',
+    'trn_cap_dif' : 'no',
+    'capacity_dif' : 'no',
+    'generation_dif' : 'no',
+    'multi_plot_scen_comparison' : 'no',
+    }
+
+sensitivity_dict = {
     'emissions_dif' : 'yes',
-    'costs_dif' : 'yes',
-    'gen_shares_dif' : 'yes',
-    'trn_cap_dif' : 'yes',
-    'capacity_dif' : 'yes',
-    'generation_dif' : 'yes',
-    'multi_plot_scen_comparison' : 'yes',
+    
+    
+    
+    
     }
 
 '''Set for which scenarios nodal level results to show and list which 

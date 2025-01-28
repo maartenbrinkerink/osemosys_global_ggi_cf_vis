@@ -57,3 +57,10 @@ COUNTRY_COLOR_DICT = {
     'THA' : 'violet', 
     'VNM' : 'gold',
     }
+
+SENSITIVTIES_COLOR_DICT = {
+    'BAU' : 'blue',
+    'NoNuclear' : 'red'
+    
+    
+    }
