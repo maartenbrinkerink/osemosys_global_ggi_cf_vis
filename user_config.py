@@ -1,12 +1,14 @@
 '''Set paths.'''
 base_model = 'ASEAN'
-results_extension = 'ASEAN_2hourly4seasons_'
-results_folder = r'C:\Users\maart\OneDrive\Documenten\Work\Consulting\CCG\Climate Finance\results'
+results_extension = ''
+results_folder = r'C:\Users\mbrinkerink\ASEAN'
+og_path = r'C:\Users\mbrinkerink\GitHub\osemosys_global'
 
-BAU = 'BAU'
+BASE = 'Baseline'
 
-runs = ['BAU', 
-        'NoNuclear'
+runs = ['Baseline', 
+        'NoNuclear',
+        'PointTarget'
                  ]
 
 results_path = {}
@@ -19,8 +21,7 @@ for run in runs:
     base_dir_results[run] = f'{results_path[run]}\\{base_model}\\results'
     base_dir_results_summaries[run] = f'{results_path[run]}\\{base_model}\\result_summaries'
     base_dir_data[run] = f'{results_path[run]}\\{base_model}\\data'
-    
-og_path = r'C:\Users\maart\Github\osemosys_global'
+
 resources_data = f'{og_path}\\resources\\data'
 custom_nodes_data = f'{resources_data}\\custom_nodes'
 
@@ -76,6 +77,21 @@ countries = ['BRN',
              'THA', 
              'VNM']
 
+zizabona_countries = [
+    'AGO',
+    'BWA',
+    'COD',
+    'LSO',
+    'MOZ',
+    'MWI',
+    'NAM',
+    'SWZ',
+    'TZA',
+    'ZAF',
+    'ZMB',
+    'ZWE',
+    ]
+
 '''Set which visualisations to run.'''
 base_run_dict = {
     'pwr_cap_bar_global' : 'no',
@@ -91,7 +107,8 @@ base_run_dict = {
     'dual_emissions_country' : 'no',
     'dual_emissions_stacked' : 'no',
     'emissions_limit' : 'no',
-    'spatial_map' : 'no',
+    'spatial_map_ASEAN' : 'no',
+    'spatial_map_ZIZABONA' : 'no',    
     'multi_plot_cap_gen_genshares_emisssions' : 'no',
     'multi_plot_country_charts' : 'no',
     }
@@ -140,4 +157,4 @@ nodal_results = {
 
 '''Set to True if the axis labels need to be ordered by absolute size of the Delta.
 Set to False if the labels need to be ordered alphabetically.'''
-axis_sort_delta = False
+axis_sort_delta = True

@@ -9,10 +9,10 @@ the user can change the color mapping as used in different charts. Generated
 charts are saved to file.'''
 
 import os
-os.chdir(r'C:\Users\maart\Github\osemosys_global_ggi_cf_vis')
+os.chdir(r'C:\Users\mbrinkerink\GitHub\osemosys_global_ggi_cf_vis')
 
 from user_config import(
-    BAU,
+    BASE,
     runs,
     base_dir_results,
     base_dir_results_summaries,
@@ -29,6 +29,7 @@ from user_config import(
     sensitivity_dict,
     nodal_results,
     countries,
+    zizabona_countries,
     scenarios,
     start_year,
     end_year,
@@ -55,6 +56,7 @@ from data import(
     format_line_multi_country,
     format_line_emission_limit,
     format_spatial_map_ASEAN,
+    format_spatial_map_ZIZABONA,    
     format_stacked_bar_line_emissions,
     format_stacked_bar_pwr_delta,
     format_stacked_bar_pwr_delta_spatial,
@@ -132,7 +134,7 @@ except FileExistsError:
 
 '''Create charts for base model run.'''
 if base_run_dict.get('pwr_cap_bar_global') == 'yes':
-    df = read_capacity_country(base_dir_results_summaries[BAU])
+    df = read_capacity_country(base_dir_results_summaries[BASE])
     
     chart_title = 'Installed Capacity'
     legend_title = ''
@@ -145,7 +147,7 @@ if base_run_dict.get('pwr_cap_bar_global') == 'yes':
                            country = None)
 
 if base_run_dict.get('pwr_cap_bar_country') == 'yes':
-    df = read_capacity_country(base_dir_results_summaries[BAU])
+    df = read_capacity_country(base_dir_results_summaries[BASE])
     
     chart_title = 'Installed Capacity'
     legend_title = ''
@@ -160,7 +162,7 @@ if base_run_dict.get('pwr_cap_bar_country') == 'yes':
                                country = country)
         
 if base_run_dict.get('pwr_gen_bar_global') == 'yes':
-    df = read_technology_annual_activity(base_dir_results[BAU])
+    df = read_technology_annual_activity(base_dir_results[BASE])
     df = format_technology_col(df, node = None)
     df = convert_pj_to_twh(df)
     
@@ -175,7 +177,7 @@ if base_run_dict.get('pwr_gen_bar_global') == 'yes':
                            country = None)
     
 if base_run_dict.get('pwr_gen_bar_country') == 'yes':
-    df = read_technology_annual_activity(base_dir_results[BAU])
+    df = read_technology_annual_activity(base_dir_results[BASE])
     df = format_technology_col(df, node = None)
     df = convert_pj_to_twh(df)
     
@@ -191,7 +193,7 @@ if base_run_dict.get('pwr_gen_bar_country') == 'yes':
                                country = country)
 
 if base_run_dict.get('pwr_gen_shares_global') == 'yes':
-    df = read_generation_shares_global(base_dir_results_summaries[BAU])
+    df = read_generation_shares_global(base_dir_results_summaries[BASE])
     
     chart_title = 'Generation Shares'
     legend_title = ''
@@ -204,7 +206,7 @@ if base_run_dict.get('pwr_gen_shares_global') == 'yes':
                                   country = None)
     
 if base_run_dict.get('pwr_gen_shares_country') == 'yes':
-    df = read_generation_shares_country(base_dir_results_summaries[BAU])
+    df = read_generation_shares_country(base_dir_results_summaries[BASE])
     
     chart_title = 'Generation Shares'
     legend_title = ''
@@ -218,9 +220,9 @@ if base_run_dict.get('pwr_gen_shares_country') == 'yes':
                                       country = country)
         
 if base_run_dict.get('dual_costs_global') == 'yes':
-    df1 = read_total_discounted_cost(base_dir_results[BAU])
+    df1 = read_total_discounted_cost(base_dir_results[BASE])
     
-    df2 = read_technology_annual_activity(base_dir_results[BAU])
+    df2 = read_technology_annual_activity(base_dir_results[BASE])
     df2 = format_technology_col(df2, node = None)
     df2 = convert_pj_to_twh(df2)
     df2 = calculate_power_costs(df1, df2, STORAGE_LIST)
@@ -239,8 +241,8 @@ if base_run_dict.get('dual_costs_global') == 'yes':
                     unit2, country = None)
     
 if base_run_dict.get('dual_costs_country') == 'yes':
-    df1 = read_total_cost_country(base_dir_results_summaries[BAU])
-    df2 = read_pwr_cost_country(base_dir_results_summaries[BAU])
+    df1 = read_total_cost_country(base_dir_results_summaries[BASE])
+    df2 = read_pwr_cost_country(base_dir_results_summaries[BASE])
     
     convert_million_to_billion(df1)
     
@@ -257,7 +259,7 @@ if base_run_dict.get('dual_costs_country') == 'yes':
                         unit2, country = country)
         
 if base_run_dict.get('pwr_costs_multi_country') == 'yes':
-    df = read_pwr_cost_country(base_dir_results_summaries[BAU])
+    df = read_pwr_cost_country(base_dir_results_summaries[BASE])
     
     chart_title = 'Normalized Costs'
     legend_title = ''
@@ -269,10 +271,10 @@ if base_run_dict.get('pwr_costs_multi_country') == 'yes':
                               COUNTRY_COLOR_DICT, unit)
     
 if base_run_dict.get('dual_emissions_global') == 'yes':
-    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                   country = False)
     
-    df2 = read_annual_emission_intensity_global(base_dir_results_summaries[BAU])
+    df2 = read_annual_emission_intensity_global(base_dir_results_summaries[BASE])
     
     chart_title = 'Annual Emissions'
     legend_title = ''
@@ -286,11 +288,11 @@ if base_run_dict.get('dual_emissions_global') == 'yes':
                     unit2, country = None)
     
 if base_run_dict.get('dual_emissions_country') == 'yes':
-    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                   country = True)
     
     df2 = format_annual_emissions(read_annual_emission_intensity_country(
-        base_dir_results_summaries[BAU]), country = True)
+        base_dir_results_summaries[BASE]), country = True)
     
     chart_title = 'Annual Emissions'
     legend_title = ''
@@ -305,10 +307,10 @@ if base_run_dict.get('dual_emissions_country') == 'yes':
                         unit2, country = country)
         
 if base_run_dict.get('dual_emissions_stacked') == 'yes':
-    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                   country = True)
 
-    df2 = read_annual_emission_intensity_global(base_dir_results_summaries[BAU])
+    df2 = read_annual_emission_intensity_global(base_dir_results_summaries[BASE])
     
     chart_title = 'Annual Emissions'
     legend_title = ''
@@ -322,7 +324,7 @@ if base_run_dict.get('dual_emissions_stacked') == 'yes':
                                       unit2)
     
 if base_run_dict.get('emissions_limit') == 'yes':
-    df = read_annual_emission_limit(base_dir_data[BAU])
+    df = read_annual_emission_limit(base_dir_data[BASE])
     
     chart_title = 'Emission Limit'
     legend_title = ''
@@ -333,36 +335,49 @@ if base_run_dict.get('emissions_limit') == 'yes':
                            legend_title, file_name, 
                            COUNTRY_COLOR_DICT, unit)
     
-if base_run_dict.get('spatial_map') == 'yes':
+if base_run_dict.get('spatial_map_ASEAN') == 'yes':
     df1 = read_centerpoints(resources_data)
     df2 = read_centerpoints(custom_nodes_data)
-    nodes = get_node_list(read_technology_annual_activity(base_dir_results[BAU]))
+    nodes = get_node_list(read_technology_annual_activity(base_dir_results[BASE]))
 
     chart_title = 'System Map'
-    file_name = 'system_map'
+    file_name = 'system_map_ASEAN'
+    label = 'a'
     
-    test = format_spatial_map_ASEAN(df1, df2, nodes, base_path, 
+    format_spatial_map_ASEAN(df1, df2, nodes, base_path, 
                                     chart_title, file_name, 
-                                    COUNTRY_COLOR_DICT)
+                                    COUNTRY_COLOR_DICT, label)
+    
+if base_run_dict.get('spatial_map_ZIZABONA') == 'yes':
+    df1 = read_centerpoints(resources_data)
+    nodes = [x + 'XX' for x in zizabona_countries]
+
+    chart_title = 'System Map'
+    file_name = 'system_map_ZIZABONA'
+    label = 'b'
+    
+    format_spatial_map_ZIZABONA(df1, nodes, base_path, 
+                                chart_title, file_name, 
+                                COUNTRY_COLOR_DICT, label)
     
 if base_run_dict.get('multi_plot_cap_gen_genshares_emisssions') == 'yes':
     
-    df1 = read_capacity_country(base_dir_results_summaries[BAU])
+    df1 = read_capacity_country(base_dir_results_summaries[BASE])
     unit1 = 'GW'
 
-    df2 = read_technology_annual_activity(base_dir_results[BAU])
+    df2 = read_technology_annual_activity(base_dir_results[BASE])
     df2 = format_technology_col(df2, node = None)
     df2 = convert_pj_to_twh(df2)
     unit2 = 'TWh'    
     
-    df3 = read_generation_shares_global(base_dir_results_summaries[BAU])
+    df3 = read_generation_shares_global(base_dir_results_summaries[BASE])
     unit3 = '%'    
     
-    df4 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+    df4 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                   country = True)
     unit4 = 'Mt CO2'
 
-    df5 = read_annual_emission_intensity_global(base_dir_results_summaries[BAU])
+    df5 = read_annual_emission_intensity_global(base_dir_results_summaries[BASE])
     unit5 = 'gCO2/kWh'
     file_name = 'multi_plot_cap_gen_genshares_emissions'
     
@@ -375,23 +390,23 @@ if base_run_dict.get('multi_plot_cap_gen_genshares_emisssions') == 'yes':
     
 if base_run_dict.get('multi_plot_country_charts') == 'yes':
     
-    df1 = read_capacity_country(base_dir_results_summaries[BAU])
+    df1 = read_capacity_country(base_dir_results_summaries[BASE])
     unit1 = 'GW'
     
-    df2 = read_technology_annual_activity(base_dir_results[BAU])
+    df2 = read_technology_annual_activity(base_dir_results[BASE])
     df2 = format_technology_col(df2, node = None)
     df2 = convert_pj_to_twh(df2)
     unit2 = 'TWh'
     
-    df3 = read_generation_shares_country(base_dir_results_summaries[BAU])
+    df3 = read_generation_shares_country(base_dir_results_summaries[BASE])
     unit3 = '%'
     
-    df4 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+    df4 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                               country = True)
     unit4 = 'Mt CO2'
 
     df5 = format_annual_emissions(read_annual_emission_intensity_country(
-    base_dir_results_summaries[BAU]), country = True)
+    base_dir_results_summaries[BASE]), country = True)
     unit5 = 'gCO2/kWh'
     
     file_name = 'multi_plot_country_charts'
@@ -408,14 +423,14 @@ if base_run_dict.get('multi_plot_country_charts') == 'yes':
     
 '''Create charts for single scenario comparison to base.'''
 for scenario in scenarios:
-    capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
+    capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
     if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
 
         if base_scen_comparison_dict.get('pwr_cap_bar_dif_global') == 'yes':
-            df1 = read_new_capacity(base_dir_results[BAU])
+            df1 = read_new_capacity(base_dir_results[BASE])
             df1 = format_technology_col(df1, node = None)
             
-            df2 = read_new_capacity(scen_dir_results[BAU].get(scenario))
+            df2 = read_new_capacity(scen_dir_results[BASE].get(scenario))
             df2 = format_technology_col(df2, node = None)
             
             df3 = calculate_results_delta(df1, df2, ['TECH', 'YEAR'],
@@ -436,10 +451,10 @@ for scenario in scenarios:
             
     
         if base_scen_comparison_dict.get('pwr_cap_bar_dif_country') == 'yes':
-            df1 = read_new_capacity(base_dir_results[BAU])
+            df1 = read_new_capacity(base_dir_results[BASE])
             df1 = format_technology_col(df1, node = None)
             
-            df2 = read_new_capacity(scen_dir_results[BAU].get(scenario))
+            df2 = read_new_capacity(scen_dir_results[BASE].get(scenario))
             df2 = format_technology_col(df2, node = None)
             
             df3 = calculate_results_delta(df1, df2, ['COUNTRY', 'TECH', 'YEAR'],
@@ -461,10 +476,10 @@ for scenario in scenarios:
         if scenario in nodal_results.keys():
         
             if base_scen_comparison_dict.get('pwr_cap_bar_dif_node') == 'yes':
-                df1 = read_new_capacity(base_dir_results[BAU])
+                df1 = read_new_capacity(base_dir_results[BASE])
                 df1 = format_technology_col(df1, node = True)
                 
-                df2 = read_new_capacity(scen_dir_results[BAU].get(scenario))
+                df2 = read_new_capacity(scen_dir_results[BASE].get(scenario))
                 df2 = format_technology_col(df2, node = True)
                 
                 df3 = calculate_results_delta(df1, df2, ['NODE', 'TECH', 'YEAR'],
@@ -484,11 +499,11 @@ for scenario in scenarios:
                                                      end_year, 'NODE')
             
         if base_scen_comparison_dict.get('pwr_gen_bar_dif_global') == 'yes':
-            df1 = read_technology_annual_activity(base_dir_results[BAU])
+            df1 = read_technology_annual_activity(base_dir_results[BASE])
             df1 = format_technology_col(df1, node = None)
             df1 = convert_pj_to_twh(df1)
             
-            df2 = read_technology_annual_activity(scen_dir_results[BAU].get(scenario))
+            df2 = read_technology_annual_activity(scen_dir_results[BASE].get(scenario))
             df2 = format_technology_col(df2, node = None)
             df2 = convert_pj_to_twh(df2)
             
@@ -509,11 +524,11 @@ for scenario in scenarios:
                                          end_year)
             
         if base_scen_comparison_dict.get('pwr_gen_bar_dif_country') == 'yes':
-            df1 = read_technology_annual_activity(base_dir_results[BAU])
+            df1 = read_technology_annual_activity(base_dir_results[BASE])
             df1 = format_technology_col(df1, node = None)
             df1 = convert_pj_to_twh(df1)
             
-            df2 = read_technology_annual_activity(scen_dir_results[BAU].get(scenario))
+            df2 = read_technology_annual_activity(scen_dir_results[BASE].get(scenario))
             df2 = format_technology_col(df2, node = None)
             df2 = convert_pj_to_twh(df2)
             
@@ -536,11 +551,11 @@ for scenario in scenarios:
         if scenario in nodal_results.keys():
             
             if base_scen_comparison_dict.get('pwr_gen_bar_dif_node') == 'yes':
-                df1 = read_technology_annual_activity(base_dir_results[BAU])
+                df1 = read_technology_annual_activity(base_dir_results[BASE])
                 df1 = format_technology_col(df1, node = True)
                 df1 = convert_pj_to_twh(df1)
                 
-                df2 = read_technology_annual_activity(scen_dir_results[BAU].get(scenario))
+                df2 = read_technology_annual_activity(scen_dir_results[BASE].get(scenario))
                 df2 = format_technology_col(df2, node = True)
                 df2 = convert_pj_to_twh(df2)
                 
@@ -561,8 +576,8 @@ for scenario in scenarios:
                                                      end_year, 'NODE')
     
         if base_scen_comparison_dict.get('costs_dif_global') == 'yes':
-            df1 = read_total_discounted_cost(base_dir_results[BAU])
-            df2 = read_total_discounted_cost(scen_dir_results[BAU].get(scenario))
+            df1 = read_total_discounted_cost(base_dir_results[BASE])
+            df2 = read_total_discounted_cost(scen_dir_results[BASE].get(scenario))
             convert_million_to_billion(df1)
             convert_million_to_billion(df2)
             
@@ -577,10 +592,10 @@ for scenario in scenarios:
                              unit, country = None)
 
         if base_scen_comparison_dict.get('emissions_dif_global') == 'yes':
-            df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+            df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                           country = False)
             df2 = format_annual_emissions(read_annual_emissions(
-                scen_dir_results[BAU].get(scenario)), 
+                scen_dir_results[BASE].get(scenario)), 
                 country = False)
             
             chart_title = f'{scenario} Emissions - Delta'
@@ -594,8 +609,8 @@ for scenario in scenarios:
                              unit, country = None)
             
         if base_scen_comparison_dict.get('costs_dif_country') == 'yes':
-            df1 = read_total_cost_country(base_dir_results_summaries[BAU])
-            df2 = read_total_cost_country(scen_dir_results_summaries[BAU].get(scenario))
+            df1 = read_total_cost_country(base_dir_results_summaries[BASE])
+            df2 = read_total_cost_country(scen_dir_results_summaries[BASE].get(scenario))
             convert_million_to_billion(df1)
             convert_million_to_billion(df2)
             
@@ -610,10 +625,10 @@ for scenario in scenarios:
                                      unit)
             
         if base_scen_comparison_dict.get('emissions_dif_country') == 'yes':
-            df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+            df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                           country = True)
             df2 = format_annual_emissions(read_annual_emissions(
-                scen_dir_results[BAU].get(scenario)), 
+                scen_dir_results[BASE].get(scenario)), 
                 country = True)
             
             chart_title = f'{scenario} Emissions - Delta'
@@ -627,11 +642,11 @@ for scenario in scenarios:
                                      unit)           
             
         if base_scen_comparison_dict.get('pwr_gen_shares_dif_global') == 'yes':
-            df1 = read_generation_shares_global(base_dir_results_summaries[BAU])
-            df2 = read_generation_shares_global(scen_dir_results_summaries[BAU].get(scenario))
+            df1 = read_generation_shares_global(base_dir_results_summaries[BASE])
+            df2 = read_generation_shares_global(scen_dir_results_summaries[BASE].get(scenario))
             
-            df3 = read_headline_metrics(base_dir_results_summaries[BAU])
-            df4 = read_headline_metrics(scen_dir_results_summaries[BAU].get(scenario))
+            df3 = read_headline_metrics(base_dir_results_summaries[BASE])
+            df4 = read_headline_metrics(scen_dir_results_summaries[BASE].get(scenario))
             
             chart_title = 'Generation Shares - Delta'
             legend_title = ''
@@ -645,10 +660,10 @@ for scenario in scenarios:
         if base_scen_comparison_dict.get('headline_metrics_dif_global') == 'yes':
     
             # Set inputs for capacity subplot
-            capacity_base = read_new_capacity(base_dir_results[BAU])
+            capacity_base = read_new_capacity(base_dir_results[BASE])
             capacity_base = format_technology_col(capacity_base, node = None)
             
-            capacity_scen = read_new_capacity(scen_dir_results[BAU].get(scenario))
+            capacity_scen = read_new_capacity(scen_dir_results[BASE].get(scenario))
             capacity_scen = format_technology_col(capacity_scen, node = None)
             
             capacity = calculate_results_delta(capacity_base, capacity_scen, ['TECH'],
@@ -656,11 +671,11 @@ for scenario in scenarios:
             capacity_title = 'Capacity (GW)'
     
             # Set inputs for generation subplot
-            production_base = read_technology_annual_activity(base_dir_results[BAU])
+            production_base = read_technology_annual_activity(base_dir_results[BASE])
             production_base = format_technology_col(production_base, node = None)
             production_base = convert_pj_to_twh(production_base)
             
-            production_scen = read_technology_annual_activity(scen_dir_results[BAU].get(scenario))
+            production_scen = read_technology_annual_activity(scen_dir_results[BASE].get(scenario))
             production_scen = format_technology_col(production_scen, node = None)
             production_scen = convert_pj_to_twh(production_scen)
     
@@ -669,28 +684,28 @@ for scenario in scenarios:
             production_title = 'Generation (TWh)'
              
             # Set inputs for generation shares subplot
-            gen_shares_base = read_headline_metrics(base_dir_results_summaries[BAU])
-            gen_shares_scen = read_headline_metrics(scen_dir_results_summaries[BAU].get(scenario))
+            gen_shares_base = read_headline_metrics(base_dir_results_summaries[BASE])
+            gen_shares_scen = read_headline_metrics(scen_dir_results_summaries[BASE].get(scenario))
             gen_shares_title = 'Generation Share (%)'
             
             # Set inputs for emissions subplot
-            emissions_base = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+            emissions_base = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                           country = True)
             emissions_scen = format_annual_emissions(read_annual_emissions(
-                scen_dir_results[BAU].get(scenario)), 
+                scen_dir_results[BASE].get(scenario)), 
                 country = True)
             emissions_title = 'Emissions (Mt CO2)'
             
             # Set inputs for costs subplot
-            costs_base = read_total_discounted_cost(base_dir_results[BAU])
-            costs_scen = read_total_discounted_cost(scen_dir_results[BAU].get(scenario))           
+            costs_base = read_total_discounted_cost(base_dir_results[BASE])
+            costs_scen = read_total_discounted_cost(scen_dir_results[BASE].get(scenario))           
             convert_million_to_billion(costs_base)
             convert_million_to_billion(costs_scen)
             costs_title = 'Total Costs (Billion $)'
             
             # Set inputs for transmission capacity subplot
-            capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
-            max_capacity_trn = read_max_capacity_investment(scen_dir_data[BAU].get(scenario))
+            capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
+            max_capacity_trn = read_max_capacity_investment(scen_dir_data[BASE].get(scenario))
             trn_title = f'{scenario} Capacity (GW)'
     
             # Set chart inputs
@@ -715,15 +730,15 @@ for scenario in scenarios:
             
 '''Create charts for multi scenario comparison.'''
 if multi_scen_comparison_dict.get('emissions_dif') == 'yes':
-    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                   country = False)
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
             df2_dict[scenario] = format_annual_emissions(read_annual_emissions(
-                scen_dir_results[BAU].get(scenario)), 
+                scen_dir_results[BASE].get(scenario)), 
                 country = False)
 
     chart_title = 'Emissions - Delta'
@@ -735,15 +750,15 @@ if multi_scen_comparison_dict.get('emissions_dif') == 'yes':
                                     DUAL_EMISSIONS_COLOR_DICT, unit, axis_sort_delta)
     
 if multi_scen_comparison_dict.get('costs_dif') == 'yes':
-    df1 = read_total_discounted_cost(base_dir_results[BAU])
+    df1 = read_total_discounted_cost(base_dir_results[BASE])
     convert_million_to_billion(df1)    
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
             df2_dict[scenario] = read_total_discounted_cost(
-                scen_dir_results[BAU].get(scenario))
+                scen_dir_results[BASE].get(scenario))
             convert_million_to_billion(df2_dict[scenario])
 
     chart_title = 'System Costs - Delta'
@@ -755,13 +770,13 @@ if multi_scen_comparison_dict.get('costs_dif') == 'yes':
                                     DUAL_COSTS_COLOR_DICT, unit, axis_sort_delta)
     
 if multi_scen_comparison_dict.get('gen_shares_dif') == 'yes':
-    df1 = read_headline_metrics(base_dir_results_summaries[BAU]) 
+    df1 = read_headline_metrics(base_dir_results_summaries[BASE]) 
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
-            df2_dict[scenario] = read_headline_metrics(scen_dir_results_summaries[BAU].get(scenario))
+            df2_dict[scenario] = read_headline_metrics(scen_dir_results_summaries[BASE].get(scenario))
 
     chart_title = 'Generation Shares - Delta'
     file_name = 'gen_shares_delta_global'
@@ -777,8 +792,8 @@ if multi_scen_comparison_dict.get('trn_cap_dif') == 'yes':
     df2_dict = {}
     
     for scenario in scenarios:
-        df1_dict[scenario] = read_new_capacity(scen_dir_results[BAU].get(scenario))
-        df2_dict[scenario] = read_max_capacity_investment(scen_dir_data[BAU].get(scenario))
+        df1_dict[scenario] = read_new_capacity(scen_dir_results[BASE].get(scenario))
+        df2_dict[scenario] = read_max_capacity_investment(scen_dir_data[BASE].get(scenario))
 
     chart_title = 'Transmission Capacity'
     file_name = 'transmission_capacity_delta_global'
@@ -790,14 +805,14 @@ if multi_scen_comparison_dict.get('trn_cap_dif') == 'yes':
                                                 axis_sort_delta)
     
 if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
-    df1 = read_new_capacity(base_dir_results[BAU])
+    df1 = read_new_capacity(base_dir_results[BASE])
     df1 = format_technology_col(df1, node = None)
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
-            df2 = read_new_capacity(scen_dir_results[BAU].get(scenario))
+            df2 = read_new_capacity(scen_dir_results[BASE].get(scenario))
             df2 = format_technology_col(df2, node = None)
             
             df2_dict[scenario] = calculate_results_delta(df1, df2, ['TECH'],
@@ -814,15 +829,15 @@ if multi_scen_comparison_dict.get('capacity_dif') == 'yes':
                                                 axis_sort_delta)
     
 if multi_scen_comparison_dict.get('generation_dif') == 'yes':
-    df1 = read_technology_annual_activity(base_dir_results[BAU])
+    df1 = read_technology_annual_activity(base_dir_results[BASE])
     df1 = format_technology_col(df1, node = None)
     df1 = convert_pj_to_twh(df1)
     df2_dict = {}
     
     for scenario in scenarios:
-        capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
-            df2 = read_technology_annual_activity(scen_dir_results[BAU].get(scenario))
+            df2 = read_technology_annual_activity(scen_dir_results[BASE].get(scenario))
             df2 = format_technology_col(df2, node = None)
             df2 = convert_pj_to_twh(df2)
             
@@ -840,15 +855,15 @@ if multi_scen_comparison_dict.get('generation_dif') == 'yes':
                                                 axis_sort_delta)
     
 if multi_scen_comparison_dict.get('multi_plot_scen_comparison') == 'yes':
-    df1a = read_new_capacity(base_dir_results[BAU])
+    df1a = read_new_capacity(base_dir_results[BASE])
     df1a = format_technology_col(df1a, node = None)
     
-    df2a = read_technology_annual_activity(base_dir_results[BAU])
+    df2a = read_technology_annual_activity(base_dir_results[BASE])
     df2a = format_technology_col(df2a, node = None)
     df2a = convert_pj_to_twh(df2a)
     
-    df3 = read_headline_metrics(base_dir_results_summaries[BAU]) 
-    df4 = format_annual_emissions(read_annual_emissions(base_dir_results[BAU]), 
+    df3 = read_headline_metrics(base_dir_results_summaries[BASE]) 
+    df4 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
                                   country = False)
     
     df1_dict = {}
@@ -864,12 +879,12 @@ if multi_scen_comparison_dict.get('multi_plot_scen_comparison') == 'yes':
     file_name = 'multi_plot_scen_comparison'
 
     for scenario in scenarios:
-        capacity_trn = read_new_capacity(scen_dir_results[BAU].get(scenario))
+        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
         if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
-            df1b = read_new_capacity(scen_dir_results[BAU].get(scenario))
+            df1b = read_new_capacity(scen_dir_results[BASE].get(scenario))
             df1b = format_technology_col(df1b, node = None)
             
-            df2b = read_technology_annual_activity(scen_dir_results[BAU].get(scenario))
+            df2b = read_technology_annual_activity(scen_dir_results[BASE].get(scenario))
             df2b = format_technology_col(df2b, node = None)
             df2b = convert_pj_to_twh(df2b)
             
@@ -881,10 +896,10 @@ if multi_scen_comparison_dict.get('multi_plot_scen_comparison') == 'yes':
                                                          scenario, nodal_results,
                                                          node = None)
             
-            df3_dict[scenario] = read_headline_metrics(scen_dir_results_summaries[BAU].get(scenario))
+            df3_dict[scenario] = read_headline_metrics(scen_dir_results_summaries[BASE].get(scenario))
             
             df4_dict[scenario] = format_annual_emissions(read_annual_emissions(
-                scen_dir_results[BAU].get(scenario)), country = False)
+                scen_dir_results[BASE].get(scenario)), country = False)
 
     format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict, 
                                       df4, df4_dict, unit1, unit2, unit3, 
@@ -911,11 +926,11 @@ if sensitivity_dict.get('emissions_dif') == 'yes':
                     scen_dir_results[run].get(scenario)), 
                     country = False)
     
-        chart_title = 'Emissions - Delta'
+        chart_title = ''
         file_name = 'emissions_delta_global'
         unit = 'Mt CO2'
             
     a = format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, sensitivities_path, 
                                                   chart_title, file_name, 
                                                   SENSITIVTIES_COLOR_DICT, unit, axis_sort_delta,
-                                                  runs)
+                                                  runs, BASE)

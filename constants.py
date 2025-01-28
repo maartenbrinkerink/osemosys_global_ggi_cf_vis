@@ -46,6 +46,7 @@ DUAL_TRANSMISSION_COLOR_DICT = {
 }
 
 COUNTRY_COLOR_DICT = {
+    # ASEAN
     'BRN' : 'lightgrey', 
     'IDN' : 'lightcoral',
     'KHM' : 'black', 
@@ -56,11 +57,26 @@ COUNTRY_COLOR_DICT = {
     'SGP' : 'firebrick', 
     'THA' : 'violet', 
     'VNM' : 'gold',
+    
+    #ZiZaBoNa
+    'AGO' : 'limegreen', 
+    'BWA' : 'black',
+    'COD' : 'firebrick', 
+    'SWZ' : 'lightgrey', 
+    'LSO' : 'dodgerblue', 
+    'MOZ' : 'blue',
+    'MWI' : 'darkgreen', 
+    'NAM' : 'lightcoral', 
+    'ZAF' : 'indigo', 
+    'TZA' : 'violet', 
+    'ZMB' : 'gold',
+    'ZWE' : 'red'
     }
-
+    
 SENSITIVTIES_COLOR_DICT = {
-    'BAU' : 'blue',
-    'NoNuclear' : 'red'
+    'Baseline' : 'navy',
+    'NoNuclear' : 'green',
+    'PointTarget' : 'red'
     
     
     }

@@ -1225,7 +1225,7 @@ def format_stacked_bar_pwr_delta_multi_scenario(df_dict, out_dir,
 
 def format_spatial_map_ASEAN(df1, df2, nodes, base_path, 
                              chart_title, file_name, 
-                             color_dict):
+                             color_dict, label):
 
     df = pd.concat([df1, df2])
     df = df.loc[df['region'].isin(nodes)].sort_values(by = ['region']
@@ -1243,13 +1243,14 @@ def format_spatial_map_ASEAN(df1, df2, nodes, base_path,
 
     axs1.coastlines()
     axs1.set_extent([90, 142, -11, 27])
-
-        
+      
     for acountry in shpreader.Reader(country_shp).records():
         search = acountry.attributes['ISO_A3'].rstrip('\x00')
 
+
         if search in list(df['COUNTRY'].unique()):
             col = color_dict.get(search)
+            
         else:
             col = 'lightgrey'
 
@@ -1264,7 +1265,6 @@ def format_spatial_map_ASEAN(df1, df2, nodes, base_path,
                     'PHLMI' : [0.7, -1.3], 'PHLVI' : [2.5, 0], 'SGPXX' : [0.5, 0], 
                     'THACE' : [0, 0.4], 'THANO' : [0, 0.6], 'THASO' : [0.1, 0.4], 
                     'VNMCE' : [0, 0.4], 'VNMNO' : [-4, 0.5], 'VNMSO' : [0.2, -1.5]}
-    label_adjust_lat = {}
 
     for index, row in df.iterrows():
         axs1.scatter(row['long'], row['lat'], transform=ccrs.Geodetic(),
@@ -1275,6 +1275,62 @@ def format_spatial_map_ASEAN(df1, df2, nodes, base_path,
         
         axs1.text(row['long'] + adjust[0], row['lat'] + adjust[1], row['region'], 
                   name = 'Calibri', fontsize = 7, zorder=3, weight = 'bold')
+        
+    axs1.text(90.5, -11.5, label, name = 'Calibri', fontsize = 11, weight = 'bold')
+ 
+    plt.show()
+
+    return fig.savefig(os.path.join(base_path, file_name), bbox_inches = 'tight')
+
+def format_spatial_map_ZIZABONA(df, nodes, base_path, 
+                                chart_title, file_name, 
+                                color_dict, label):
+
+    df = df.loc[df['region'].isin(nodes)].sort_values(by = ['region']
+                                                      ).reset_index(drop = True)
+    
+    df.insert(0, 'COUNTRY', df['region'].str[:3])
+
+    country_shp = shpreader.natural_earth(resolution='10m',
+                                          category='cultural',
+                                          name='admin_0_countries')
+    
+    fig = plt.figure()
+
+    axs1 = plt.axes(projection = ccrs.PlateCarree(), zorder = 1)
+
+    axs1.coastlines()
+    axs1.set_extent([5, 45, -35, 10])
+
+        
+    for acountry in shpreader.Reader(country_shp).records():
+        search = acountry.attributes['ISO_A3'].rstrip('\x00')
+
+        if search in list(df['COUNTRY'].unique()):
+            col = color_dict.get(search)
+        else:
+            col = 'lightgrey'
+
+        axs1.add_geometries([acountry.geometry], ccrs.PlateCarree(),
+                           facecolor= col, alpha = 0.5)
+
+    label_adjust = {'AGOXX' : [0.3, 0.6], 'BWAXX' : [0.3, 0.6], 'CODXX' : [0.3, 0.6], 
+                    'LSOXX' : [-4.2, -1.5], 'MOZXX' : [1, -0.5], 'MWIXX' : [0.3, 0.6], 
+                    'NAMXX' : [0.3, 0.6], 'SWZXX' : [-2, -2], 'TZAXX' : [-4.2, -1.5], 
+                    'ZAFXX' : [-4.2, -1.5], 'ZMBXX' : [0.3, 0.6], 'ZWEXX' : [0.3, 0.6]}
+
+
+    for index, row in df.iterrows():
+        axs1.scatter(row['long'], row['lat'], transform=ccrs.Geodetic(),
+                     facecolor = 'red', zorder=2, s = 5)
+        
+        adjust = label_adjust.get(row['region'])
+        
+        
+        axs1.text(row['long'] + adjust[0], row['lat'] + adjust[1], row['region'], 
+                  name = 'Calibri', fontsize = 7, zorder=3, weight = 'bold')
+        
+    axs1.text(5.5, -36, label, name = 'Calibri', fontsize = 11, weight = 'bold')
  
     plt.show()
 
@@ -1753,16 +1809,14 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
 def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir, 
                                                   chart_title, file_name, 
                                                   color_dict, unit, axis_sort,
-                                                  runs):
-    
-    fig, ax = plt.subplots()
-    
-    plot_df = {}
+                                                  runs, BASE):
+
+    plot_df = pd.DataFrame()
     
     for run in runs:
+        
         df1_dict[run].set_index('YEAR', inplace = True)
-
-        plot_df[run] = pd.DataFrame(columns = ['VALUE'])
+        data = pd.DataFrame(columns = ['VALUE'])
 
         for key in df2_dict[run]:
     
@@ -1773,23 +1827,177 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir,
             
             # Calculate model horizon Delta
             df3 = df.sum().fillna(0)
-            plot_df[run].loc[key] = df3
+            data.loc[key] = df3
             
-    return plot_df
+        if plot_df.empty:
+            plot_df = data.copy().rename(columns = {'VALUE' : run})
+        
+        else:
+            plot_df = pd.merge(plot_df, data, left_index = True, right_index = True, how = 'outer'
+                               ).rename(columns = {'VALUE' : run})
     
-    '''if axis_sort == True:
-        plot_df = plot_df.sort_values(by = ['VALUE'])
+    plot_df.sort_index(inplace = True)
+    plot_df = plot_df.reset_index(drop = False).rename(columns = {'index' : 'run',
+                                                                  BASE : 'Baseline'})
+
+    if axis_sort == True:
+        plot_df = plot_df.sort_values(by = ['Baseline'])
+
+    plt.rcParams['figure.figsize'] = [8, 3]
+    
+    ax = plot_df.plot(x = 'run', kind = 'bar', width = 0.7,
+                 color = [color_dict[run] for run in plot_df[runs]]
+                 )
+    
+    plt.legend(bbox_to_anchor=(0.8, -0.5), frameon = False, 
+              ncols = 3)
+    
+    plt.xticks(rotation = 75)
+    plt.margins(x=0)
+    plt.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    plt.ylabel(unit)
+    plt.xlabel('')
+    plt.title(chart_title)
+
+    return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir, 
+                                                                     chart_title, file_name, 
+                                                                     color_dict, unit, axis_sort,
+                                                                     runs, BASE):
+
+    plot_df = pd.DataFrame()
+    
+    for run in runs:
+        
+        df1_dict[run].set_index('YEAR', inplace = True)
+        data = pd.DataFrame(columns = ['VALUE'])
+
+        for key in df2_dict[run]:
+    
+            df2_dict[run][key].set_index('YEAR', inplace = True)
+               
+            # Calculate Delta by year
+            df = df2_dict[run][key][['VALUE']] - df1_dict[run][['VALUE']]
+            
+            # Calculate model horizon Delta
+            df3 = df.sum().fillna(0)
+            data.loc[key] = df3
+            
+        if plot_df.empty:
+            plot_df = data.copy().rename(columns = {'VALUE' : run})
+        
+        else:
+            plot_df = pd.merge(plot_df, data, left_index = True, right_index = True, how = 'outer'
+                               ).rename(columns = {'VALUE' : run})
+    
+    plot_df.sort_index(inplace = True)
+    plot_df = plot_df.reset_index(drop = False).rename(columns = {'index' : 'run',
+                                                                  BASE : 'Baseline'})
+    
+    if axis_sort == True:
+        plot_df = plot_df.sort_values(by = ['Baseline'])
+    
+    plt.rcParams['figure.figsize'] = [8, 3]
+    
+    ax = plot_df.plot(x = 'run', kind = 'bar', width = 0.7,
+                 color = [color_dict[run] for run in plot_df[runs]]
+                 )
+    
+    bars = ax.patches
+    hatches = ''.join(h*len(df) for h in 'x/O.')
+
+    for bar, hatch in zip(bars, hatches):
+        bar.set_hatch(hatch)
+    
+    plt.legend(bbox_to_anchor=(0.8, -0.5), frameon = False, 
+              ncols = 3)
+    
+    plt.xticks(rotation = 75)
+    plt.margins(x=0)
+    plt.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    plt.ylabel(unit)
+    plt.xlabel('')
+    plt.title(chart_title)
+
+    return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+
+def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir, 
+                                                       chart_title, file_name, 
+                                                       color_dict, unit, axis_sort):
+
+    df1['Metric'] = df1['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                      'Fossil energy share' : 'FOSSIL'})
+
+    df1.set_index('Metric', inplace = True)
+    df1.drop(columns = ['Unit'], inplace = True)
+    df1.loc['OTHER'] = 100 - df1.loc[df1.index == 'RENEWABLE'
+                                   ].iloc[0] - df1.loc[df1.index == 'FOSSIL'
+                                                      ].iloc[0]
+    
+    plot_df1 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df2 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    
+    for key, value in df2_dict.items():
+        
+        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                          'Fossil energy share' : 'FOSSIL'})
+    
+        value.set_index('Metric', inplace = True)
+        value.drop(columns = ['Unit'], inplace = True)
+        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
+                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
+                                                          ].iloc[0]
+                                                          
+        value = (value - df1)
+        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+                                  ].rename(index={'Value': key})
+        
+        gen_shares1 = value.clip(upper = 0)
+        gen_shares2 = value.clip(lower = 0)
+        
+        if plot_df1.empty:
+            plot_df1 = gen_shares1
+            plot_df2 = gen_shares2
+        else:
+            plot_df1 = pd.concat([plot_df1, gen_shares1])
+            plot_df2 = pd.concat([plot_df2, gen_shares2])
+            
+    if axis_sort == True:
+        plot_df1['sum'] = plot_df1.sum(axis=1)
+        plot_df1 = plot_df1.sort_values(by = ['sum']).drop(columns = ['sum'])
     else:
-        plot_df = plot_df.sort_index()
+        plot_df1 = plot_df1.sort_index()
     
-    ax.bar(plot_df.index, plot_df['VALUE'],
-            color = color_dict.get('bar'))
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    gen_shares_bot1 = 0
+    gen_shares_bot2 = 0
+    
+    fig, ax = plt.subplots()
+    
+    for i, col in enumerate(plot_df1.columns):           
+      ax.bar(plot_df1.index, plot_df1[col], bottom = gen_shares_bot1,
+              color = color_dict.get(col), label = col)
+      gen_shares_bot1 += np.array(plot_df1[col])
+      
+    for i, col in enumerate(plot_df2.columns):
+      ax.bar(plot_df2.index, plot_df2[col], bottom = gen_shares_bot2,
+             color = color_dict.get(col))
+      gen_shares_bot2 += np.array(plot_df2[col])
+      
+    # Subplot formatting
+    ax.set_ylim([min(plot_df1.sum(axis=1), default = 0) * 1.1, 
+                 max(plot_df2.sum(axis=1), default = 0) * 1.1])
+    ax.legend(frameon = False, reverse = True, ncols = 1)
     
     plt.xticks(rotation = 75)
     ax.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
     ax.set_ylabel(unit)
     ax.set_title(chart_title)
+    
 
-    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')'''
+    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 
