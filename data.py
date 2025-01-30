@@ -1897,19 +1897,14 @@ def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, d
     
     if axis_sort == True:
         plot_df = plot_df.sort_values(by = ['Baseline'])
-    
+        
+
     plt.rcParams['figure.figsize'] = [8, 3]
     
     ax = plot_df.plot(x = 'run', kind = 'bar', width = 0.7,
                  color = [color_dict[run] for run in plot_df[runs]]
                  )
-    
-    bars = ax.patches
-    hatches = ''.join(h*len(df) for h in 'x/O.')
 
-    for bar, hatch in zip(bars, hatches):
-        bar.set_hatch(hatch)
-    
     plt.legend(bbox_to_anchor=(0.8, -0.5), frameon = False, 
               ncols = 3)
     
@@ -1923,74 +1918,99 @@ def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, d
     return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 
 
-def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir, 
+def format_stacked_bar_gen_shares_delta_multi_scenario(df1_dict, df2_dict, out_dir, 
                                                        chart_title, file_name, 
-                                                       color_dict, unit, axis_sort):
-
-    df1['Metric'] = df1['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                      'Fossil energy share' : 'FOSSIL'})
-
-    df1.set_index('Metric', inplace = True)
-    df1.drop(columns = ['Unit'], inplace = True)
-    df1.loc['OTHER'] = 100 - df1.loc[df1.index == 'RENEWABLE'
-                                   ].iloc[0] - df1.loc[df1.index == 'FOSSIL'
-                                                      ].iloc[0]
+                                                       color_dict, unit, axis_sort,
+                                                       runs, BASE):
     
-    plot_df1 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
-    plot_df2 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df1 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df2 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
     
-    for key, value in df2_dict.items():
-        
-        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+    for run in runs:
+    
+        df1_dict[run]['Metric'] = df1_dict[run]['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
                           'Fossil energy share' : 'FOSSIL'})
     
-        value.set_index('Metric', inplace = True)
-        value.drop(columns = ['Unit'], inplace = True)
-        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
-                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
+        df1_dict[run].set_index('Metric', inplace = True)
+        df1_dict[run].drop(columns = ['Unit'], inplace = True)
+        df1_dict[run].loc['OTHER'] = 100 - df1_dict[run].loc[df1_dict[run].index == 'RENEWABLE'
+                                       ].iloc[0] - df1_dict[run].loc[df1_dict[run].index == 'FOSSIL'
                                                           ].iloc[0]
-                                                          
-        value = (value - df1)
-        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
-                                  ].rename(index={'Value': key})
+
+        for key, value in df2_dict[run].items():
+            value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                              'Fossil energy share' : 'FOSSIL'})
         
-        gen_shares1 = value.clip(upper = 0)
-        gen_shares2 = value.clip(lower = 0)
-        
-        if plot_df1.empty:
-            plot_df1 = gen_shares1
-            plot_df2 = gen_shares2
-        else:
-            plot_df1 = pd.concat([plot_df1, gen_shares1])
-            plot_df2 = pd.concat([plot_df2, gen_shares2])
+            value.set_index('Metric', inplace = True)
+            value.drop(columns = ['Unit'], inplace = True)
+            value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
+                                           ].iloc[0] - value.loc[value.index == 'FOSSIL'
+                                                              ].iloc[0]
+                                                              
+            value = (value - df1_dict[run])
+            value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+                                      ].rename(index={'Value': key})
             
-    if axis_sort == True:
-        plot_df1['sum'] = plot_df1.sum(axis=1)
-        plot_df1 = plot_df1.sort_values(by = ['sum']).drop(columns = ['sum'])
-    else:
-        plot_df1 = plot_df1.sort_index()
+            gen_shares1, gen_shares2 = value.clip(upper = 0), value.clip(lower = 0)
+            gen_shares1.insert(0, 'run', run), gen_shares2.insert(0, 'run', run)
+            
+            if plot_df1.empty:
+                plot_df1, plot_df2 = gen_shares1, gen_shares2
+                
+            else:
+                plot_df1 = pd.concat([plot_df1, gen_shares1])
+                plot_df2 = pd.concat([plot_df2, gen_shares2])
+
+    plot_df1.sort_index(inplace = True), plot_df2.sort_index(inplace = True)
+    plot_df1 = plot_df1.reset_index(drop = False).rename(columns = {'index' : 'scenario'})
+    plot_df2 = plot_df2.reset_index(drop = False).rename(columns = {'index' : 'scenario'})
+    
+    test2 = {'Baseline' : '/',
+            'NoNuclear' : '.',
+            'PointTarget' : 'o'}
     
     # Plot each layer of the bar, adding each bar to the 'bottom' so
     # the next bar starts higher.
-    gen_shares_bot1 = 0
-    gen_shares_bot2 = 0
+    scenarios = plot_df1['scenario'].unique()
+
+    fig, ax = plt.subplots(figsize=(8, 3))  
     
-    fig, ax = plt.subplots()
+    plt.rcParams['hatch.linewidth'] = 1.0
+
+    for group in ['OTHER', 'FOSSIL', 'RENEWABLE']:
+        
+        data = plot_df1[['scenario', 'run', group]]
+        data = data.pivot(index='scenario', columns='run', values=group).reset_index()
+        
+        ax = data.plot(x = 'scenario', kind = 'bar', width = 0.7,
+                     color = color_dict.get(group), ax = ax, legend = False,
+                     edgecolor = 'black')
+        
+        data = plot_df2[['scenario', 'run', group]]
+        data = data.pivot(index='scenario', columns='run', values=group).reset_index()
+             
+        ax = data.plot(x = 'scenario', kind = 'bar', width = 0.7,
+                     color = color_dict.get(group), ax = ax, legend = False,
+                     edgecolor = 'black')
+        
+    bars = ax.patches
+    n = 0
+    for bar in bars:
+        print(n, bar)
+        n = n + 1
     
-    for i, col in enumerate(plot_df1.columns):           
-      ax.bar(plot_df1.index, plot_df1[col], bottom = gen_shares_bot1,
-              color = color_dict.get(col), label = col)
-      gen_shares_bot1 += np.array(plot_df1[col])
-      
-    for i, col in enumerate(plot_df2.columns):
-      ax.bar(plot_df2.index, plot_df2[col], bottom = gen_shares_bot2,
-             color = color_dict.get(col))
-      gen_shares_bot2 += np.array(plot_df2[col])
-      
-    # Subplot formatting
-    ax.set_ylim([min(plot_df1.sum(axis=1), default = 0) * 1.1, 
-                 max(plot_df2.sum(axis=1), default = 0) * 1.1])
-    ax.legend(frameon = False, reverse = True, ncols = 1)
+    for bar in range(0,15):
+        bars[bar].set_hatch('*')
+        
+    for bar in range(16,31):
+        bars[bar].set_hatch('/')
+   # bars = bars[2]
+  #  bars = bars[3]
+    #hatches = ''.join(h*(len(plot_df2) * 2) for h in '*O.')
+
+    #for bar, hatch in zip(bars, hatches):
+     #   bar.set_hatch(hatch)
+  #  bars.set_hatch('*')
     
     plt.xticks(rotation = 75)
     ax.margins(x=0)
@@ -1998,6 +2018,6 @@ def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir,
     ax.set_ylabel(unit)
     ax.set_title(chart_title)
     
-
-    return fig.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+    return plot_df1, plot_df2
+   # return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 

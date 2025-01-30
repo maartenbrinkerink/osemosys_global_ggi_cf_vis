@@ -69,7 +69,8 @@ from data import(
     format_multi_plot_cap_gen_genshares_emissions,
     format_multi_plot_country_charts,
     format_multi_plot_scen_comparison,
-    format_bar_delta_multi_scenario_sensitivities
+    format_bar_delta_multi_scenario_sensitivities,
+    format_stacked_bar_gen_shares_delta_multi_scenario
     )
 
 from utils import(
@@ -930,7 +931,30 @@ if sensitivity_dict.get('emissions_dif') == 'yes':
         file_name = 'emissions_delta_global'
         unit = 'Mt CO2'
             
-    a = format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, sensitivities_path, 
+    format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, sensitivities_path, 
                                                   chart_title, file_name, 
                                                   SENSITIVTIES_COLOR_DICT, unit, axis_sort_delta,
                                                   runs, BASE)
+    
+if sensitivity_dict.get('gen_shares_dif') == 'yes':
+    
+    df1_dict = {}
+    df2_dict = {}
+    
+    for run in runs:
+        df1_dict[run] = read_headline_metrics(base_dir_results_summaries[run]) 
+        df2_dict[run] = {}
+        
+        for scenario in scenarios:
+            capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
+            if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
+                df2_dict[run][scenario] = read_headline_metrics(scen_dir_results_summaries[run].get(scenario))
+
+    chart_title = ''
+    file_name = 'gen_shares_delta_global'
+    unit = '%'
+    
+    a, b = format_stacked_bar_gen_shares_delta_multi_scenario(df1_dict, df2_dict, sensitivities_path, 
+                                                       chart_title, file_name, 
+                                                       BAR_GEN_SHARES_COLOR_DICT, unit,
+                                                       axis_sort_delta, runs, BASE)

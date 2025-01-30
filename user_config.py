@@ -139,7 +139,8 @@ multi_scen_comparison_dict = {
     }
 
 sensitivity_dict = {
-    'emissions_dif' : 'yes',
+    'emissions_dif' : 'no',
+    'gen_shares_dif' : 'yes',
     
     
     
