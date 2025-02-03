@@ -1,12 +1,13 @@
 '''Set paths.'''
 base_model = 'ASEAN'
 results_extension = ''
-results_folder = r'C:\Users\mbrinkerink\ASEAN'
-og_path = r'C:\Users\mbrinkerink\GitHub\osemosys_global'
+results_folder = r'C:\Users\maart\OneDrive\Documenten\Work\Consulting\CCG\Climate Finance\results\ASEAN'
+og_path = r'C:\Users\maart\Github\osemosys_global'
 
 BASE = 'Baseline'
 
 runs = ['Baseline', 
+        'LowTransmissionCosts',
         'NoNuclear',
         'PointTarget'
                  ]
@@ -139,12 +140,8 @@ multi_scen_comparison_dict = {
     }
 
 sensitivity_dict = {
-    'emissions_dif' : 'no',
+    'emissions_dif' : 'yes',
     'gen_shares_dif' : 'yes',
-    
-    
-    
-    
     }
 
 '''Set for which scenarios nodal level results to show and list which 
@@ -158,4 +155,4 @@ nodal_results = {
 
 '''Set to True if the axis labels need to be ordered by absolute size of the Delta.
 Set to False if the labels need to be ordered alphabetically.'''
-axis_sort_delta = True
+axis_sort_delta = False

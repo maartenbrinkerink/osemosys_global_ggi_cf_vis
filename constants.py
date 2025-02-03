@@ -75,8 +75,20 @@ COUNTRY_COLOR_DICT = {
     
 SENSITIVTIES_COLOR_DICT = {
     'Baseline' : 'navy',
+    'LowTransmissionCosts' : 'lightgrey',
     'NoNuclear' : 'green',
-    'PointTarget' : 'red'
+    'PointTarget' : 'red',
+    
+    
+    
+    }
+
+SENSITIVTIES_HATCH_DICT = {
+    'Baseline' : '',
+    'LowTransmissionCosts' : 'xxxx',
+    'NoNuclear' : '....',
+    'PointTarget' : '////'
+    
     
     
     }

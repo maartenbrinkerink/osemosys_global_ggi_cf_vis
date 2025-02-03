@@ -1846,7 +1846,8 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir,
     plt.rcParams['figure.figsize'] = [8, 3]
     
     ax = plot_df.plot(x = 'run', kind = 'bar', width = 0.7,
-                 color = [color_dict[run] for run in plot_df[runs]]
+                 color = [color_dict[run] for run in plot_df[runs]],
+                 edgecolor = 'black', linewidth = 0.5
                  )
     
     plt.legend(bbox_to_anchor=(0.8, -0.5), frameon = False, 
@@ -1854,7 +1855,7 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir,
     
     plt.xticks(rotation = 75)
     plt.margins(x=0)
-    plt.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
     plt.ylabel(unit)
     plt.xlabel('')
     plt.title(chart_title)
@@ -1863,65 +1864,9 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir,
 
 def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir, 
                                                                      chart_title, file_name, 
-                                                                     color_dict, unit, axis_sort,
+                                                                     color_dict, hatch_dict, 
+                                                                     unit, axis_sort,
                                                                      runs, BASE):
-
-    plot_df = pd.DataFrame()
-    
-    for run in runs:
-        
-        df1_dict[run].set_index('YEAR', inplace = True)
-        data = pd.DataFrame(columns = ['VALUE'])
-
-        for key in df2_dict[run]:
-    
-            df2_dict[run][key].set_index('YEAR', inplace = True)
-               
-            # Calculate Delta by year
-            df = df2_dict[run][key][['VALUE']] - df1_dict[run][['VALUE']]
-            
-            # Calculate model horizon Delta
-            df3 = df.sum().fillna(0)
-            data.loc[key] = df3
-            
-        if plot_df.empty:
-            plot_df = data.copy().rename(columns = {'VALUE' : run})
-        
-        else:
-            plot_df = pd.merge(plot_df, data, left_index = True, right_index = True, how = 'outer'
-                               ).rename(columns = {'VALUE' : run})
-    
-    plot_df.sort_index(inplace = True)
-    plot_df = plot_df.reset_index(drop = False).rename(columns = {'index' : 'run',
-                                                                  BASE : 'Baseline'})
-    
-    if axis_sort == True:
-        plot_df = plot_df.sort_values(by = ['Baseline'])
-        
-
-    plt.rcParams['figure.figsize'] = [8, 3]
-    
-    ax = plot_df.plot(x = 'run', kind = 'bar', width = 0.7,
-                 color = [color_dict[run] for run in plot_df[runs]]
-                 )
-
-    plt.legend(bbox_to_anchor=(0.8, -0.5), frameon = False, 
-              ncols = 3)
-    
-    plt.xticks(rotation = 75)
-    plt.margins(x=0)
-    plt.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
-    plt.ylabel(unit)
-    plt.xlabel('')
-    plt.title(chart_title)
-
-    return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
-
-
-def format_stacked_bar_gen_shares_delta_multi_scenario(df1_dict, df2_dict, out_dir, 
-                                                       chart_title, file_name, 
-                                                       color_dict, unit, axis_sort,
-                                                       runs, BASE):
     
     plot_df1 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
     plot_df2 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
@@ -1960,22 +1905,21 @@ def format_stacked_bar_gen_shares_delta_multi_scenario(df1_dict, df2_dict, out_d
             else:
                 plot_df1 = pd.concat([plot_df1, gen_shares1])
                 plot_df2 = pd.concat([plot_df2, gen_shares2])
+                
+    for scenario in plot_df1.index.unique():
+        data = plot_df1.loc[plot_df1.index == scenario]
 
-    plot_df1.sort_index(inplace = True), plot_df2.sort_index(inplace = True)
+        if not data.drop(columns = 'run').sum().sum() < 0:
+            plot_df1 = plot_df1.loc[plot_df1.index != scenario]
+            plot_df2 = plot_df2.loc[plot_df2.index != scenario]
+
     plot_df1 = plot_df1.reset_index(drop = False).rename(columns = {'index' : 'scenario'})
-    plot_df2 = plot_df2.reset_index(drop = False).rename(columns = {'index' : 'scenario'})
-    
-    test2 = {'Baseline' : '/',
-            'NoNuclear' : '.',
-            'PointTarget' : 'o'}
-    
+    plot_df2 = plot_df2.reset_index(drop = False).rename(columns = {'index' : 'scenario'})   
+       
     # Plot each layer of the bar, adding each bar to the 'bottom' so
     # the next bar starts higher.
-    scenarios = plot_df1['scenario'].unique()
 
     fig, ax = plt.subplots(figsize=(8, 3))  
-    
-    plt.rcParams['hatch.linewidth'] = 1.0
 
     for group in ['OTHER', 'FOSSIL', 'RENEWABLE']:
         
@@ -1984,40 +1928,61 @@ def format_stacked_bar_gen_shares_delta_multi_scenario(df1_dict, df2_dict, out_d
         
         ax = data.plot(x = 'scenario', kind = 'bar', width = 0.7,
                      color = color_dict.get(group), ax = ax, legend = False,
-                     edgecolor = 'black')
+                     edgecolor = 'black', linewidth = 0.5)
         
         data = plot_df2[['scenario', 'run', group]]
         data = data.pivot(index='scenario', columns='run', values=group).reset_index()
              
         ax = data.plot(x = 'scenario', kind = 'bar', width = 0.7,
                      color = color_dict.get(group), ax = ax, legend = False,
-                     edgecolor = 'black')
-        
+                     edgecolor = 'black', linewidth = 0.5)
+       
+    # Add hatches to bars
     bars = ax.patches
-    n = 0
-    for bar in bars:
-        print(n, bar)
-        n = n + 1
+    y = 0
     
-    for bar in range(0,15):
-        bars[bar].set_hatch('*')
+    runs_len = len(plot_df1['run'].unique())
+    scen_len = len(plot_df1['scenario'].unique())
+    
+    for run in plot_df1['run'].unique():
+        z = 0
+        # Range 1,7 is equal to number of tech groups * two delta's
+        for n in range(1,7):
+            # Set correct hatch per sensitivity run
+            for r in range(y + z, y + z + scen_len):
+                bars[r].set_hatch(hatch_dict.get(run))
+            
+            z = z + (runs_len * scen_len)
+            
+        y = y + scen_len
         
-    for bar in range(16,31):
-        bars[bar].set_hatch('/')
-   # bars = bars[2]
-  #  bars = bars[3]
-    #hatches = ''.join(h*(len(plot_df2) * 2) for h in '*O.')
+    # Add custom legends
+    legend = []
+    for key, value in color_dict.items():
+        legend.append(Patch(facecolor = value, label = key))
+        
+    fig.legend(handles = legend, bbox_to_anchor=(0.73, -0.24), 
+                     frameon = False, ncols = 3)
 
-    #for bar, hatch in zip(bars, hatches):
-     #   bar.set_hatch(hatch)
-  #  bars.set_hatch('*')
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    by_label = dict(sorted(by_label.items()))
     
+    leg = fig.legend(by_label.values(), by_label.keys(), 
+               bbox_to_anchor=(0.75, -0.31), frameon = False, 
+               ncols = 3)
+    
+    for lh in leg.legend_handles:
+        lh.set_facecolor('white')
+        lh.set_edgecolor('black')
+    
+    # Figure adjustments
     plt.xticks(rotation = 75)
     ax.margins(x=0)
-    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
+    ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
     ax.set_ylabel(unit)
+    ax.set_xlabel('')
     ax.set_title(chart_title)
-    
-    return plot_df1, plot_df2
-   # return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+    return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 
