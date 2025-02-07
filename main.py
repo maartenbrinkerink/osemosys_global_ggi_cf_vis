@@ -937,6 +937,32 @@ if sensitivity_dict.get('emissions_dif') == 'yes':
                                                   SENSITIVTIES_COLOR_DICT, unit, axis_sort_delta,
                                                   runs, BASE)
     
+if sensitivity_dict.get('costs_dif') == 'yes':
+    costs_runs = runs
+    costs_runs.remove('NoNuclear')
+
+    df1_dict = {}
+    df2_dict = {}
+    for run in costs_runs:
+        df1_dict[run] = read_total_discounted_cost(base_dir_results[run])
+        convert_million_to_billion(df1_dict[run]) 
+        df2_dict[run] = {}
+        for scenario in scenarios:
+
+            capacity_trn = read_new_capacity(scen_dir_results[run].get(scenario))
+            if not capacity_trn.loc[capacity_trn['TECHNOLOGY'] == f'TRN{scenario}'].empty:
+                df2_dict[run][scenario] = read_total_discounted_cost(scen_dir_results[run].get(scenario))
+                convert_million_to_billion(df2_dict[run][scenario])
+        
+        chart_title = ''
+        file_name = 'costs_delta_global'
+        unit = 'Billion $'
+
+    format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, sensitivities_path, 
+                                                  chart_title, file_name, 
+                                                  SENSITIVTIES_COLOR_DICT, unit, axis_sort_delta,
+                                                  costs_runs, BASE)    
+    
 if sensitivity_dict.get('gen_shares_dif') == 'yes':
     
     df1_dict = {}

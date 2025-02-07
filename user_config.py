@@ -8,8 +8,9 @@ BASE = 'Baseline'
 
 runs = ['Baseline', 
         'LowTransmissionCosts',
+        'HighGasPrice',
         'NoNuclear',
-        'PointTarget'
+        'PointTargets'
                  ]
 
 results_path = {}
@@ -141,7 +142,8 @@ multi_scen_comparison_dict = {
 
 sensitivity_dict = {
     'emissions_dif' : 'yes',
-    'gen_shares_dif' : 'yes',
+    'costs_dif' : 'yes',
+    'gen_shares_dif' : 'no',
     }
 
 '''Set for which scenarios nodal level results to show and list which 
