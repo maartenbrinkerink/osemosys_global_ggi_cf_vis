@@ -137,7 +137,7 @@ base_run_dict = {
     'dual_emissions_global' : 'no',
     'dual_emissions_country' : 'no',
     'dual_emissions_stacked' : 'no',
-    'demand_stacked' : 'yes',
+    'demand_stacked' : 'no',
     'emissions_limit' : 'no',
     'spatial_map_ASEAN' : 'no',
     'spatial_map_ZIZABONA' : 'no',    

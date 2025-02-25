@@ -25,9 +25,9 @@ BAR_TECH_COLOR_DICT = {
 STORAGE_LIST = ['SDS']
 
 BAR_GEN_SHARES_COLOR_DICT = {
-    'FOSSIL':'lightcoral',
-    'RENEWABLE':'palegreen',
-    'OTHER' : 'lightgrey',
+    'Fossil':'lightcoral',
+    'Renewable':'palegreen',
+    'Other' : 'lightgrey',
 }
 
 DUAL_COSTS_COLOR_DICT = {
@@ -94,9 +94,6 @@ SENSITIVTIES_HATCH_DICT = {
     #'LongDurationStorage' : ['', 'blue'],
     #'HighGasPrice' : ['...', 'blue'],
     'NoNuclear' : ['///', 'black'],
-    'PointTargets' : ['ooo', 'black'],
-    'NoTargets' : ['\\\\\\', 'black']
-    
-    
-    
+    'NoTargets' : ['ooo', 'black'],
+    'PointTargets' : ['\\\\\\', 'black']
     }

@@ -335,7 +335,7 @@ if base_run_dict.get('dual_emissions_stacked') == 'yes':
     
 if base_run_dict.get('demand_stacked') == 'yes':
     df1 = read_specified_annual_demand(base_dir_data[BASE])
-  #  df1 = convert_pj_to_twh(df1)
+    df1 = convert_pj_to_twh(df1)
     
     chart_title = 'Electricity Demand'
     legend_title = ''

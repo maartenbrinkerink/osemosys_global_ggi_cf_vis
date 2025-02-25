@@ -97,8 +97,8 @@ def format_stacked_bar_gen_shares(df, out_dir, chart_title,
     else:
         path = out_dir
     
-    df['OTHER'] = 100 - df['RENEWABLE'] - df['FOSSIL']
-    df = df[['YEAR', 'RENEWABLE', 'FOSSIL', 'OTHER']].groupby(['YEAR']).sum()
+    df['Other'] = 100 - df['Renewable'] - df['Fossil']
+    df = df[['YEAR', 'Renewable', 'Fossil', 'Other']].groupby(['YEAR']).sum()
     
     fig, ax = plt.subplots()
 
@@ -128,27 +128,27 @@ def format_stacked_bar_gen_shares_delta(df_in1, df_in2, df_in3, df_in4,
                                         file_name, color_dict, unit):
     
     # Calculate Delta's for timeseries (ts)
-    df_in1['OTHER'] = 100 - df_in1['RENEWABLE'] - df_in1['FOSSIL']
-    df_in1 = df_in1[['YEAR', 'RENEWABLE', 'FOSSIL', 'OTHER']].groupby(['YEAR']).sum()
+    df_in1['Other'] = 100 - df_in1['Renewable'] - df_in1['Fossil']
+    df_in1 = df_in1[['YEAR', 'Renewable', 'Fossil', 'Other']].groupby(['YEAR']).sum()
     
-    df_in2['OTHER'] = 100 - df_in2['RENEWABLE'] - df_in2['FOSSIL']
-    df_in2 = df_in2[['YEAR', 'RENEWABLE', 'FOSSIL', 'OTHER']].groupby(['YEAR']).sum()
+    df_in2['Other'] = 100 - df_in2['Renewable'] - df_in2['Fossil']
+    df_in2 = df_in2[['YEAR', 'Renewable', 'Fossil', 'Other']].groupby(['YEAR']).sum()
     
     df_ts_in = df_in2 - df_in1
     
     # Calculate Delta's for horizon (hz)
     for df in [df_in3, df_in4]:
-        df['Metric'] = df['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                          'Fossil energy share' : 'FOSSIL'})
+        df['Metric'] = df['Metric'].replace({'Renewable energy share' : 'Renewable',
+                          'Fossil energy share' : 'Fossil'})
 
         df.set_index('Metric', inplace = True)
         df.drop(columns = ['Unit'], inplace = True)
-        df.loc['OTHER'] = 100 - df.loc[df.index == 'RENEWABLE'
-                                       ].iloc[0] - df.loc[df.index == 'FOSSIL'
+        df.loc['Other'] = 100 - df.loc[df.index == 'Renewable'
+                                       ].iloc[0] - df.loc[df.index == 'Fossil'
                                                           ].iloc[0]
                                                           
     df_hz_in = df_in4 - df_in3
-    df_hz_in = df_hz_in.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']]
+    df_hz_in = df_hz_in.transpose()[['Renewable', 'Fossil', 'Other']]
     
     fig, axs = plt.subplots(1, 2, squeeze = False,
                             gridspec_kw = {'width_ratios' : [1, 10]})
@@ -895,17 +895,17 @@ def format_headline_metrics_global(capacity_in, production_in,
     # SUBPLOT - GENERATION SHARES
     # Calculate Delta's for horizon (hz)
     for df in [gen_shares_in1, gen_shares_in2]:
-        df['Metric'] = df['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                          'Fossil energy share' : 'FOSSIL'})
+        df['Metric'] = df['Metric'].replace({'Renewable energy share' : 'Renewable',
+                          'Fossil energy share' : 'Fossil'})
 
         df.set_index('Metric', inplace = True)
         df.drop(columns = ['Unit'], inplace = True)
-        df.loc['OTHER'] = 100 - df.loc[df.index == 'RENEWABLE'
-                                       ].iloc[0] - df.loc[df.index == 'FOSSIL'
+        df.loc['Other'] = 100 - df.loc[df.index == 'Renewable'
+                                       ].iloc[0] - df.loc[df.index == 'Fossil'
                                                           ].iloc[0]
                                                           
     df_hz_in = gen_shares_in2 - gen_shares_in1
-    df_hz_in = df_hz_in.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']]
+    df_hz_in = df_hz_in.transpose()[['Renewable', 'Fossil', 'Other']]
 
     gen_shares1 = df_hz_in.clip(upper = 0)
     gen_shares2 = df_hz_in.clip(lower = 0)
@@ -1057,31 +1057,31 @@ def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir,
                                                        chart_title, file_name, 
                                                        color_dict, unit, axis_sort):
 
-    df1['Metric'] = df1['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                      'Fossil energy share' : 'FOSSIL'})
+    df1['Metric'] = df1['Metric'].replace({'Renewable energy share' : 'Renewable',
+                      'Fossil energy share' : 'Fossil'})
 
     df1.set_index('Metric', inplace = True)
     df1.drop(columns = ['Unit'], inplace = True)
-    df1.loc['OTHER'] = 100 - df1.loc[df1.index == 'RENEWABLE'
-                                   ].iloc[0] - df1.loc[df1.index == 'FOSSIL'
+    df1.loc['Other'] = 100 - df1.loc[df1.index == 'Renewable'
+                                   ].iloc[0] - df1.loc[df1.index == 'Fossil'
                                                       ].iloc[0]
     
-    plot_df1 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
-    plot_df2 = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df1 = pd.DataFrame(columns = ['Renewable', 'Fossil', 'Other'])
+    plot_df2 = pd.DataFrame(columns = ['Renewable', 'Fossil', 'Other'])
     
     for key, value in df2_dict.items():
         
-        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                          'Fossil energy share' : 'FOSSIL'})
+        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'Renewable',
+                          'Fossil energy share' : 'Fossil'})
     
         value.set_index('Metric', inplace = True)
         value.drop(columns = ['Unit'], inplace = True)
-        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
-                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
+        value.loc['Other'] = 100 - value.loc[value.index == 'Renewable'
+                                       ].iloc[0] - value.loc[value.index == 'Fossil'
                                                           ].iloc[0]
                                                           
         value = (value - df1)
-        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+        value = value.transpose()[['Renewable', 'Fossil', 'Other']
                                   ].rename(index={'Value': key})
         
         gen_shares1 = value.clip(upper = 0)
@@ -1418,8 +1418,8 @@ def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
 
     # SET GEN SHARES GRAPH
     
-    df3['OTHER'] = 100 - df3['RENEWABLE'] - df3['FOSSIL']
-    df3 = df3[['YEAR', 'RENEWABLE', 'FOSSIL', 'OTHER']].groupby(['YEAR']).sum()
+    df3['Other'] = 100 - df3['Renewable'] - df3['Fossil']
+    df3 = df3[['YEAR', 'Renewable', 'Fossil', 'Other']].groupby(['YEAR']).sum()
 
     # Initialize the bottom at zero for the first set of bars.
     bottom3 = np.zeros(len(df3))
@@ -1529,8 +1529,8 @@ def format_multi_plot_country_charts(df1, df2, df3, df4, df5,
     # SET GEN SHARES GRAPH
     df3 = df3.loc[df3['COUNTRY'] == country].reset_index()
     
-    df3['OTHER'] = 100 - df3['RENEWABLE'] - df3['FOSSIL']
-    df3 = df3[['YEAR', 'RENEWABLE', 'FOSSIL', 'OTHER']].groupby(['YEAR']).sum()
+    df3['Other'] = 100 - df3['Renewable'] - df3['Fossil']
+    df3 = df3[['YEAR', 'Renewable', 'Fossil', 'Other']].groupby(['YEAR']).sum()
 
     # Initialize the bottom at zero for the first set of bars.
     bottom3 = np.zeros(len(df3))
@@ -1736,31 +1736,31 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
     # SET GEN SHARES CHART
     
 
-    df3['Metric'] = df3['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                      'Fossil energy share' : 'FOSSIL'})
+    df3['Metric'] = df3['Metric'].replace({'Renewable energy share' : 'Renewable',
+                      'Fossil energy share' : 'Fossil'})
 
     df3.set_index('Metric', inplace = True)
     df3.drop(columns = ['Unit'], inplace = True)
-    df3.loc['OTHER'] = 100 - df3.loc[df3.index == 'RENEWABLE'
-                                   ].iloc[0] - df3.loc[df3.index == 'FOSSIL'
+    df3.loc['Other'] = 100 - df3.loc[df3.index == 'Renewable'
+                                   ].iloc[0] - df3.loc[df3.index == 'Fossil'
                                                       ].iloc[0]
     
-    plot_df3a = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
-    plot_df3b = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df3a = pd.DataFrame(columns = ['Renewable', 'Fossil', 'Other'])
+    plot_df3b = pd.DataFrame(columns = ['Renewable', 'Fossil', 'Other'])
     
     for key, value in df3_dict.items():
         
-        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                          'Fossil energy share' : 'FOSSIL'})
+        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'Renewable',
+                          'Fossil energy share' : 'Fossil'})
     
         value.set_index('Metric', inplace = True)
         value.drop(columns = ['Unit'], inplace = True)
-        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
-                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
+        value.loc['Other'] = 100 - value.loc[value.index == 'Renewable'
+                                       ].iloc[0] - value.loc[value.index == 'Fossil'
                                                           ].iloc[0]
                                                           
         value = (value - df3)
-        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+        value = value.transpose()[['Renewable', 'Fossil', 'Other']
                                   ].rename(index={'Value': key})
         
         gen_shares1 = value.clip(upper = 0)
@@ -1915,32 +1915,32 @@ def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, d
                                                                      unit, axis_sort,
                                                                      runs, BASE):
     
-    plot_df1 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
-    plot_df2 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df1 = pd.DataFrame(columns = ['run', 'Renewable', 'Fossil', 'Other'])
+    plot_df2 = pd.DataFrame(columns = ['run', 'Renewable', 'Fossil', 'Other'])
     
     for run in runs:
     
-        df1_dict[run]['Metric'] = df1_dict[run]['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                          'Fossil energy share' : 'FOSSIL'})
+        df1_dict[run]['Metric'] = df1_dict[run]['Metric'].replace({'Renewable energy share' : 'Renewable',
+                          'Fossil energy share' : 'Fossil'})
     
         df1_dict[run].set_index('Metric', inplace = True)
         df1_dict[run].drop(columns = ['Unit'], inplace = True)
-        df1_dict[run].loc['OTHER'] = 100 - df1_dict[run].loc[df1_dict[run].index == 'RENEWABLE'
-                                       ].iloc[0] - df1_dict[run].loc[df1_dict[run].index == 'FOSSIL'
+        df1_dict[run].loc['Other'] = 100 - df1_dict[run].loc[df1_dict[run].index == 'Renewable'
+                                       ].iloc[0] - df1_dict[run].loc[df1_dict[run].index == 'Fossil'
                                                           ].iloc[0]
 
         for key, value in df2_dict[run].items():
-            value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                              'Fossil energy share' : 'FOSSIL'})
+            value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'Renewable',
+                              'Fossil energy share' : 'Fossil'})
         
             value.set_index('Metric', inplace = True)
             value.drop(columns = ['Unit'], inplace = True)
-            value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
-                                           ].iloc[0] - value.loc[value.index == 'FOSSIL'
+            value.loc['Other'] = 100 - value.loc[value.index == 'Renewable'
+                                           ].iloc[0] - value.loc[value.index == 'Fossil'
                                                               ].iloc[0]
                                                               
             value = (value - df1_dict[run])
-            value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+            value = value.transpose()[['Renewable', 'Fossil', 'Other']
                                       ].rename(index={'Value': key})
             
             gen_shares1, gen_shares2 = value.clip(upper = 0), value.clip(lower = 0)
@@ -1968,7 +1968,7 @@ def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, d
 
     fig, ax = plt.subplots(figsize=(8, 3))  
 
-    for group in ['OTHER', 'FOSSIL', 'RENEWABLE']:
+    for group in ['Other', 'Fossil', 'Renewable']:
         
         data = plot_df1[['scenario', 'run', group]]
         data = data.pivot(index='scenario', columns='run', values=group).reset_index()
@@ -2139,8 +2139,8 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
     
     # DATA PREP
     plot_df1 = pd.DataFrame()
-    plot_df2 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
-    plot_df3 = pd.DataFrame(columns = ['run', 'RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df2 = pd.DataFrame(columns = ['run', 'Renewable', 'Fossil', 'Other'])
+    plot_df3 = pd.DataFrame(columns = ['run', 'Renewable', 'Fossil', 'Other'])
     
     for run in runs:
         
@@ -2167,18 +2167,18 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
                                ).rename(columns = {'VALUE' : run})
             
         # sensitivity 2
-        df3_dict[run]['Metric'] = df3_dict[run]['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                          'Fossil energy share' : 'FOSSIL'})
+        df3_dict[run]['Metric'] = df3_dict[run]['Metric'].replace({'Renewable energy share' : 'Renewable',
+                          'Fossil energy share' : 'Fossil'})
 
         df3_dict[run].set_index('Metric', inplace = True)
         df3_dict[run].drop(columns = ['Unit'], inplace = True)
-        df3_dict[run].loc['OTHER'] = 100 - df3_dict[run].loc[df3_dict[run].index == 'RENEWABLE'
-                                       ].iloc[0] - df3_dict[run].loc[df3_dict[run].index == 'FOSSIL'
+        df3_dict[run].loc['Other'] = 100 - df3_dict[run].loc[df3_dict[run].index == 'Renewable'
+                                       ].iloc[0] - df3_dict[run].loc[df3_dict[run].index == 'Fossil'
                                                           ].iloc[0]
 
         for key, value in df4_dict[run].items():
-            value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
-                              'Fossil energy share' : 'FOSSIL'})
+            value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'Renewable',
+                              'Fossil energy share' : 'Fossil'})
             
 
         
@@ -2187,12 +2187,12 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
             
 
             
-            value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
-                                           ].iloc[0] - value.loc[value.index == 'FOSSIL'
+            value.loc['Other'] = 100 - value.loc[value.index == 'Renewable'
+                                           ].iloc[0] - value.loc[value.index == 'Fossil'
                                                               ].iloc[0]
                                                               
             value = (value - df3_dict[run])
-            value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+            value = value.transpose()[['Renewable', 'Fossil', 'Other']
                                       ].rename(index={'Value': key})
 
             gen_shares1, gen_shares2 = value.clip(upper = 0), value.clip(lower = 0)
@@ -2224,7 +2224,7 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
     for key in df7_dict:
         df7_dict[key].set_index('YEAR', inplace = True)
 
-    plot_df4 = pd.DataFrame(columns = [BASE, 'Project'])
+    plot_df4 = pd.DataFrame(columns = [BASE, 'Bilateral'])
     
     for key in df6_dict:
         
@@ -2248,27 +2248,27 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
     else:
         plot_df4 = plot_df4.sort_index()
 
-    fig, axs = plt.subplots(3, 1, squeeze = False,
+    fig, axs = plt.subplots(3, 1, squeeze = False, sharex = True,
                             gridspec_kw = {'height_ratios' : [1, 1, 1]},
-                            figsize=(10, 15))
+                            figsize=(9, 9))
     
     # PLOTTING SUBPLOT 1
     
-    plot_df1.plot(ax = axs[0, 0], x = 'run', kind = 'bar', width = 0.7,
+    plot_df1.plot(ax = axs[0, 0], x = 'run', kind = 'bar', width = 0.8,
                  color = [color_dict1[run] for run in plot_df1[runs]],
                  edgecolor = 'black', linewidth = 0.3
                  )
     
     
     # PLOTTING SUBPLOT 2
-    for group in ['OTHER', 'FOSSIL', 'RENEWABLE']:
+    for group in ['Other', 'Fossil', 'Renewable']:
         
         data = plot_df2[['scenario', 'run', group]]
 
         data = data.pivot(index='scenario', columns='run', values=group).reset_index()
 
         
-        data.plot(ax = axs[1, 0], x = 'scenario', kind = 'bar', width = 0.7,
+        data.plot(ax = axs[1, 0], x = 'scenario', kind = 'bar', width = 0.8,
                      color = color_dict2.get(group), legend = False,
                      edgecolor = 'black', linewidth = 0.3)
         
@@ -2276,7 +2276,7 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
 
         data = data.pivot(index='scenario', columns='run', values=group).reset_index()
              
-        data.plot(ax = axs[1, 0], x = 'scenario', kind = 'bar', width = 0.7,
+        data.plot(ax = axs[1, 0], x = 'scenario', kind = 'bar', width = 0.8,
                      color = color_dict2.get(group), legend = False,
                      edgecolor = 'black', linewidth = 0.3)
         
@@ -2301,24 +2301,30 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
         y = y + scen_len
         
     # PLOTTING SUBPLOT 3
-    plot_df4.plot(ax = axs[2, 0], use_index = True, kind = 'bar', width = 0.7,
+    plot_df4.plot(ax = axs[2, 0], use_index = True, kind = 'bar', width = 0.5,
                  edgecolor = 'black', linewidth = 0.3
                  )
     
     # LEGEND SUBPLOT 1
-    axs[0, 0].legend(#bbox_to_anchor=(0.97, -3), 
+    axs[0, 0].legend(bbox_to_anchor=(0.59, 1), 
                      loc = 'upper center',
-                     frameon = False, ncols = 3)
+                     #frameon = False, 
+                     ncols = 3,
+                     edgecolor = 'white', framealpha = 0.5
+                     )
     
     # LEGENDS SUBPLOT2
     legend2 = []
     for key, value in color_dict2.items():
         legend2.append(Patch(facecolor = value, label = key))
         
-    axs[1, 0].legend(handles = legend2, 
-               #bbox_to_anchor=(0.73, -0.24),
-               loc = 'upper center',
-               frameon = False, ncols = 3)
+    fig.legend(handles = legend2, 
+               bbox_to_anchor=(0.78, 0.62),
+               #loc = 'upper center',
+               #frameon = False, 
+               ncols = 3,
+               edgecolor = 'white', framealpha = 0.5               
+               )
 
     handles, labels = axs[1, 0].get_legend_handles_labels()
     
@@ -2326,8 +2332,12 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
     by_label = dict(sorted(by_label.items()))
 
     legend3 = axs[1, 0].legend(by_label.values(), by_label.keys(), 
-               bbox_to_anchor=(0.75, -0.31), frameon = False, 
-               ncols = 3)
+               bbox_to_anchor=(0.27, 0.25), 
+               #loc = 'lower center',
+               #frameon = False, 
+               ncols = 3,
+               edgecolor = 'white', framealpha = 0.5 
+               )
 
     n = 0
     for lh in legend3.legend_handles:
@@ -2336,8 +2346,12 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
         n = n + 1
     
     # LEGEND SUBPLOT 3
-    axs[2, 0].legend(#bbox_to_anchor=(0.97, -4), 
-                     frameon = False)
+    axs[2, 0].legend(bbox_to_anchor=(0.6, 1),
+                     loc = 'upper center',
+                     ncols = 2,
+                    # frameon = False,
+                     edgecolor = 'white', framealpha = 0.5
+                     )
     
     
     # FIGURE ADJUSTMENTS
@@ -2345,9 +2359,23 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
         ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
         ax.margins(x = 0)
         ax.tick_params(axis = 'x', labelrotation = 75)
+        ax.set_xlabel('')
+        ax.grid(which='major', axis='x', linestyle='--')
     
     axs[0, 0].set_ylabel(unit1)
     axs[1, 0].set_ylabel(unit2)
     axs[2, 0].set_ylabel(unit3)
-
+    
+    plt.subplots_adjust(hspace=0.05)
+    
+    # ADD LABELS
+    axs[0, 0].text(-0.03, -0.02, 'a', transform=axs[0, 0].transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    axs[1, 0].text(-0.03, -0.02, 'b', transform=axs[1, 0].transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    axs[2, 0].text(-0.03, -0.02, 'c', transform=axs[2, 0].transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
     return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
