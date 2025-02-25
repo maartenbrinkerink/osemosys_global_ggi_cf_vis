@@ -13,6 +13,11 @@ def read_new_capacity(path):
     
     return df
 
+def read_specified_annual_demand(path):
+    df = pd.read_csv(os.path.join(path, 'SpecifiedAnnualDemand.csv'))
+    
+    return df
+
 def read_technology_annual_activity(path):
     df = pd.read_csv(os.path.join(path, 'TotalTechnologyAnnualActivity.csv'))
     
@@ -52,7 +57,6 @@ def read_total_cost_global(path):
     
     return df
 
-# TotalCostGlobal is incomplete, DO NOT USE UNTIL FIXED
 def read_total_discounted_cost(path):
     df = pd.read_csv(os.path.join(path, 'TotalDiscountedCost.csv'))
     
@@ -60,6 +64,11 @@ def read_total_discounted_cost(path):
 
 def read_annual_emissions(path):
     df = pd.read_csv(os.path.join(path, 'AnnualEmissions.csv'))
+    
+    return df
+
+def read_annual_technology_emission(path):
+    df = pd.read_csv(os.path.join(path, 'AnnualTechnologyEmission.csv'))
     
     return df
 

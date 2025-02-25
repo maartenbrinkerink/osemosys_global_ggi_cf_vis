@@ -74,22 +74,28 @@ COUNTRY_COLOR_DICT = {
     }
     
 SENSITIVTIES_COLOR_DICT = {
-    'Baseline' : 'navy',
+    'Base' : 'navy',
+    'CoalPhaseOut' : 'limegreen',
     'LowTransmissionCosts' : 'lightgrey',
-    'HighGasPrice' : 'orange',
-    'NoNuclear' : 'green',
+    'LongDurationStorage' : 'aqua',
+    'HighGasPrice' : 'green',
+    'NoNuclear' : 'orange',
     'PointTargets' : 'red',
+    'NoTargets' : 'violet'
     
     
     
     }
 
 SENSITIVTIES_HATCH_DICT = {
-    'Baseline' : '',
-    'LowTransmissionCosts' : 'oooo',
-    'HighGasPrice' : '\\\\\\',
-    'NoNuclear' : '....',
-    'PointTargets' : '///'
+    'Base' : ['', 'black'],
+    'CoalPhaseOut' : ['...', 'black'],
+    #'LowTransmissionCosts' : ['///', 'black'],
+    #'LongDurationStorage' : ['', 'blue'],
+    #'HighGasPrice' : ['...', 'blue'],
+    'NoNuclear' : ['///', 'black'],
+    'PointTargets' : ['ooo', 'black'],
+    'NoTargets' : ['\\\\\\', 'black']
     
     
     

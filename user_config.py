@@ -4,13 +4,16 @@ results_extension = ''
 results_folder = r'C:\Users\maart\OneDrive\Documenten\Work\Consulting\CCG\Climate Finance\results\ASEAN'
 og_path = r'C:\Users\maart\Github\osemosys_global'
 
-BASE = 'Baseline'
+BASE = 'Base'
 
-runs = ['Baseline', 
-        'LowTransmissionCosts',
-        'HighGasPrice',
+runs = ['Base', 
+        'CoalPhaseOut',
+        #'LowTransmissionCosts',
+        #'LongDurationStorage',
+        #'HighGasPrice',
         'NoNuclear',
-        'PointTargets'
+        'PointTargets',
+        'NoTargets'
                  ]
 
 results_path = {}
@@ -28,27 +31,38 @@ resources_data = f'{og_path}\\resources\\data'
 custom_nodes_data = f'{resources_data}\\custom_nodes'
 
 '''Set scenarios that will be compared to the base_model.'''
-scenarios = [
-  'MYSPESGPXX',
-  'MYSPETHASO',
-  'IDNSMMYSPE',
-  'MYSSHPHLLU',
-  'BRNXXMYSSK',
-  'LAOXXTHANO',
-  'LAOXXVNMNO',
-  'MMRXXTHANO',
-  'KHMXXLAOXX',
-  'KHMXXTHACE',
-  'IDNKAMYSSH',
-  'IDNSMSGPXX',
-  'LAOXXMMRXX',
-  'SGPXXVNMSO',
-  'KHMXXSGPXX',
-  'MYSPEMYSSK',
-  'MYSSHMYSSK',
-  'IDNJWIDNKA',
-  'IDNJWIDNSM',
-    ]
+scenarios = {
+  'MYSPESGPXX' : ['TRNMYSPESGPXX'],
+  'MYSPETHASO' : ['TRNMYSPETHASO'],
+  'IDNSMMYSPE' : ['TRNIDNSMMYSPE'],
+  'MYSSHPHLLU' : ['TRNMYSSHPHLLU'],
+  'BRNXXMYSSK' : ['TRNBRNXXMYSSK'],
+  'LAOXXTHANO' : ['TRNLAOXXTHANO'],
+  'LAOXXVNMNO' : ['TRNLAOXXVNMNO'],
+  'MMRXXTHANO' : ['TRNMMRXXTHANO'],
+  'KHMXXLAOXX' : ['TRNKHMXXLAOXX'],
+  'KHMXXTHACE' : ['TRNKHMXXTHACE'],
+  'IDNKAMYSSH' : ['TRNIDNKAMYSSH'],
+  'IDNSMSGPXX' : ['TRNIDNSMSGPXX'],
+  'LAOXXMMRXX' : ['TRNLAOXXMMRXX'],
+  'SGPXXVNMSO' : ['TRNSGPXXVNMSO'],
+  'KHMXXSGPXX' : ['TRNKHMXXSGPXX'],
+  'MYSPEMYSSK' : ['TRNMYSPEMYSSK'],
+  'MYSSHMYSSK' : ['TRNMYSSHMYSSK'],
+  'IDNJWIDNKA' : ['TRNIDNJWIDNKA'],
+  'IDNJWIDNSM' : ['TRNIDNJWIDNSM'],
+    }
+    
+'''scenarios = {
+    'NAMXXZMBXX' : ['TRNNAMXXZMBXX'],
+    'ZMBXXZWEXX' : ['TRNZMBXXZWEXX'],
+    #'ZiZaBoNa' : ['TRNNAMXXZMBXX', 'TRNZMBXXZWEXX'],
+    'SAPP' : ['TRNAGOXXNAMXX', 'TRNAGOXXCODXX', 'TRNAGOXXZMBXX',
+              'TRNBWAXXZAFXX', 'TRNCODXXZMBXX', 'TRNMOZXXMWIXX', 
+              'TRNMWIXXTZAXX', 'TRNMOZXXZMBXX', 'TRNNAMXXZMBXX',
+              'TRNZAFXXZWEXX', 'TRNTZAXXZMBXX', 'TRNMOZXXTZAXX', 
+              'TRNZMBXXZWEXX', 'TRNMOZXXZWEXX']
+    }'''
 
 '''Set start and end year of model horizon.'''
 start_year = 2023
@@ -62,7 +76,7 @@ for run in runs:
     scen_dir_data[run] = {}
     scen_dir_results[run] = {}
     scen_dir_results_summaries[run] = {}
-    for scenario in scenarios:
+    for scenario in scenarios.keys():
         scen_dir_data[run][scenario] = f'{results_path[run]}\\{scenario}\\data'
         scen_dir_results[run][scenario] = f'{results_path[run]}\\{scenario}\\results'
         scen_dir_results_summaries[run][scenario] = f'{results_path[run]}\\{scenario}\\result_summaries'
@@ -78,6 +92,21 @@ countries = ['BRN',
              'SGP', 
              'THA', 
              'VNM']
+
+'''countries = [
+    'AGO',
+    'BWA',
+    'COD',
+    'LSO',
+    'MOZ',
+    'MWI',
+    'NAM',
+    'SWZ',
+    'TZA',
+    'ZAF',
+    'ZMB',
+    'ZWE',
+    ]'''
 
 zizabona_countries = [
     'AGO',
@@ -108,6 +137,7 @@ base_run_dict = {
     'dual_emissions_global' : 'no',
     'dual_emissions_country' : 'no',
     'dual_emissions_stacked' : 'no',
+    'demand_stacked' : 'yes',
     'emissions_limit' : 'no',
     'spatial_map_ASEAN' : 'no',
     'spatial_map_ZIZABONA' : 'no',    
@@ -140,10 +170,17 @@ multi_scen_comparison_dict = {
     'multi_plot_scen_comparison' : 'no',
     }
 
+multi_scen_comparison_dict_geo = {
+    'emissions_dif' : 'no',
+    }
+
 sensitivity_dict = {
-    'emissions_dif' : 'yes',
-    'costs_dif' : 'yes',
+    'emissions_dif' : 'no',
+    'emissions_dif_geo' : 'no',
+    'costs_dif' : 'no',
     'gen_shares_dif' : 'no',
+    'trn_cap_dif' : 'no',
+    'multi_plot_sensitivities' : 'yes',
     }
 
 '''Set for which scenarios nodal level results to show and list which 
@@ -154,6 +191,11 @@ nodal_results = {
     'IDNJWIDNKA' : ['IDN'],
     'IDNJWIDNSM' : ['IDN'],
     }
+
+'''Set to True if the scenario deltas are to be calculated at the system level. If set
+to False the delta will be calculated solely for the geographies connected to the transmission
+project.'''
+system_delta = True
 
 '''Set to True if the axis labels need to be ordered by absolute size of the Delta.
 Set to False if the labels need to be ordered alphabetically.'''
