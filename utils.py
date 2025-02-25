@@ -88,17 +88,6 @@ def calculate_results_delta(df1, df2, cols : list, scenario,
 
     return df
 
-def geo_filter_tech_emissions(df, scenario):
-    
-    geo1, geo2 = scenario[:5], scenario[5:]
-    if geo1[:3] == geo2[:3]:
-        df = df[df['TECHNOLOGY'].str.contains(f'{geo1}|{geo2}')]
-        
-    else:
-        df = df[df['EMISSION'].str.contains(f'{geo1[:3]}|{geo2[:3]}')]
-    
-    return df[['REGION', 'EMISSION', 'YEAR', 'VALUE']]
-
 def make_space_above(axes, topmargin=1):
     """ increase figure size to make topmargin (in inches) space for 
         titles, without changing the axes sizes"""

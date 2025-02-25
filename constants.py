@@ -40,24 +40,7 @@ DUAL_EMISSIONS_COLOR_DICT = {
     'line':'lightcoral',
 }
 
-DUAL_TRANSMISSION_COLOR_DICT = {
-    'new' : 'maroon',
-    'max' : 'aqua',
-}
-
 COUNTRY_COLOR_DICT = {
-    # ASEAN
-    'BRN' : 'lightgrey', 
-    'IDN' : 'lightcoral',
-    'KHM' : 'black', 
-    'LAO' : 'peru', 
-    'MMR' : 'dodgerblue', 
-    'MYS' : 'darkgreen', 
-    'PHL' : 'indigo', 
-    'SGP' : 'firebrick', 
-    'THA' : 'violet', 
-    'VNM' : 'gold',
-    
     #ZiZaBoNa
     'AGO' : 'limegreen', 
     'BWA' : 'black',
@@ -71,32 +54,4 @@ COUNTRY_COLOR_DICT = {
     'TZA' : 'violet', 
     'ZMB' : 'gold',
     'ZWE' : 'red'
-    }
-    
-SENSITIVTIES_COLOR_DICT = {
-    'Base' : 'navy',
-    'CoalPhaseOut' : 'limegreen',
-    'LowTransmissionCosts' : 'lightgrey',
-    'LongDurationStorage' : 'aqua',
-    'HighGasPrice' : 'green',
-    'NoNuclear' : 'orange',
-    'PointTargets' : 'red',
-    'NoTargets' : 'violet'
-    
-    
-    
-    }
-
-SENSITIVTIES_HATCH_DICT = {
-    'Base' : ['', 'black'],
-    'CoalPhaseOut' : ['...', 'black'],
-    #'LowTransmissionCosts' : ['///', 'black'],
-    #'LongDurationStorage' : ['', 'blue'],
-    #'HighGasPrice' : ['...', 'blue'],
-    'NoNuclear' : ['///', 'black'],
-    'PointTargets' : ['ooo', 'black'],
-    'NoTargets' : ['\\\\\\', 'black']
-    
-    
-    
     }
