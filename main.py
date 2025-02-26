@@ -9,7 +9,6 @@ the user can change the color mapping as used in different charts. Generated
 charts are saved to file.'''
 
 import os
-os.chdir(r'C:\Users\maart\Github\osemosys_global_ggi_cf_vis')
 
 from user_config import(
     figures_folder,
