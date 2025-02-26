@@ -20,14 +20,15 @@ custom_nodes_data = f'{resources_data}\\custom_nodes'
 
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = {
+    'BWAXXZWEXX' : ['TRNBWAXXZWEXX'],
     'NAMXXZMBXX' : ['TRNNAMXXZMBXX'],
     'ZMBXXZWEXX' : ['TRNZMBXXZWEXX'],
-    'ZiZaBoNa' : ['TRNNAMXXZMBXX', 'TRNZMBXXZWEXX'],
-    'SAPP' : ['TRNAGOXXNAMXX', 'TRNAGOXXCODXX', 'TRNAGOXXZMBXX',
-              'TRNBWAXXZAFXX', 'TRNCODXXZMBXX', 'TRNMOZXXMWIXX', 
-              'TRNMWIXXTZAXX', 'TRNMOZXXZMBXX', 'TRNNAMXXZMBXX',
-              'TRNZAFXXZWEXX', 'TRNTZAXXZMBXX', 'TRNMOZXXTZAXX', 
-              'TRNZMBXXZWEXX', 'TRNMOZXXZWEXX']
+    'ZiZaBoNa' : ['TRNBWAXXZWEXX', 'TRNNAMXXZMBXX', 'TRNZMBXXZWEXX'],
+    'SAPP' : ['TRNAGOXXNAMXX', 'TRNAGOXXCODXX', 'TRNAGOXXZMBXX', 
+              'TRNCODXXZMBXX', 'TRNMOZXXMWIXX', 'TRNMWIXXTZAXX', 
+              'TRNMOZXXZMBXX', 'TRNNAMXXZMBXX', 'TRNZAFXXZWEXX', 
+              'TRNTZAXXZMBXX', 'TRNMOZXXTZAXX', 'TRNZMBXXZWEXX', 
+              'TRNMOZXXZWEXX', 'TRNBWAXXZWEXX']
     }
 
 '''Set start and end year of model horizon.'''
