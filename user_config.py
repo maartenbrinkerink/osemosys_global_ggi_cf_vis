@@ -3,20 +3,20 @@
 figures_folder = 'ZiZaBoNa'
 
 # Set results path
-results_folder = r'C:\Users\maart\OneDrive\Documenten\Work\Consulting\CCG\Climate Finance\results\ZiZaBoNa'
+results_folder = r'C:/Users/maart/OneDrive/Documenten/Work/Consulting/CCG/Climate Finance/results/ZiZaBoNa'
 
 # Set OG path
-og_path = r'C:\Users\maart\Github\osemosys_global'
+og_path = r'C:/Users/maart/Github/osemosys_global'
 
 # Set name for the baseline scenario
 BASE = 'Base'
 
-base_dir_results = f'{results_folder}\\{BASE}\\results'
-base_dir_results_summaries = f'{results_folder}\\{BASE}\\result_summaries'
-base_dir_data = f'{results_folder}\\{BASE}\\data'
+base_dir_results = f'{results_folder}/{BASE}/results'
+base_dir_results_summaries = f'{results_folder}/{BASE}/result_summaries'
+base_dir_data = f'{results_folder}/{BASE}/data'
 
-resources_data = f'{og_path}\\resources\\data'
-custom_nodes_data = f'{resources_data}\\custom_nodes'
+resources_data = f'{og_path}/resources/data'
+custom_nodes_data = f'{resources_data}/custom_nodes'
 
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = {
@@ -40,9 +40,9 @@ scen_dir_results = {}
 scen_dir_results_summaries = {}
 
 for scenario in scenarios.keys():
-    scen_dir_data[scenario] = f'{results_folder}\\{scenario}\\data'
-    scen_dir_results[scenario] = f'{results_folder}\\{scenario}\\results'
-    scen_dir_results_summaries[scenario] = f'{results_folder}\\{scenario}\\result_summaries'
+    scen_dir_data[scenario] = f'{results_folder}/{scenario}/data'
+    scen_dir_results[scenario] = f'{results_folder}/{scenario}/results'
+    scen_dir_results_summaries[scenario] = f'{results_folder}/{scenario}/result_summaries'
 
 '''Set default model data.'''
 countries = [
