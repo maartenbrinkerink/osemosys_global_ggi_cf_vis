@@ -127,6 +127,10 @@ def format_stacked_bar_gen_shares_delta(df_in1, df_in2, df_in3, df_in4,
                                         out_dir, chart_title, legend_title, 
                                         file_name, color_dict, unit):
     
+    for df in [df_in1, df_in2]:
+        df.rename(columns = {'RENEWABLE' : 'Renewable',
+                             'FOSSIL' : 'Fossil'}, inplace = True)
+    
     # Calculate Delta's for timeseries (ts)
     df_in1['Other'] = 100 - df_in1['Renewable'] - df_in1['Fossil']
     df_in1 = df_in1[['YEAR', 'Renewable', 'Fossil', 'Other']].groupby(['YEAR']).sum()
@@ -674,13 +678,13 @@ def format_stacked_bar_pwr_delta_spatial(df_in1, df_in2, out_dir,
     legend_dict = dict(sorted(legend_dict.items()))
 
     fig.legend(legend_dict.values(), legend_dict.keys(), 
-               bbox_to_anchor=(0.7, (0.025 * rows)), frameon = False, 
+               bbox_to_anchor=(0.7, (0.015 * rows)), frameon = False, 
                reverse = True, title = legend_title,
                ncols = 4)
     
     # Add plot title
     if chart_title:
-        make_space_above(axs, topmargin=0.6) 
+        make_space_above(axs, topmargin=0.8) 
         plt.suptitle(chart_title)
     
     # Adjust subplot whitespace
@@ -2252,12 +2256,30 @@ def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict,
  
         plot_df4.loc[key] = [df1_out.iloc[0], df2_out.iloc[0]]
 
-    # PLOTTING BASE
-    if axis_sort == True:
-        plot_df1 = plot_df1.sort_values(by = [BASE])
-        plot_df4 = plot_df4.sort_values(by = [BASE])
-    else:
-        plot_df4 = plot_df4.sort_index()
+    idx = list(dict.fromkeys(list(plot_df1['run'].unique()) + list(plot_df2['scenario'].unique()) 
+          + list((plot_df3['scenario'].unique())) + list(plot_df4.index.unique())))
+    
+    for i in idx:
+        plot_df1.loc[len(plot_df1)] = {'run': i}
+        plot_df1 = plot_df1.drop_duplicates(subset=['run'], keep='first'
+                                 ).sort_values(by = ['run'])
+            
+        for run in runs:
+            plot_df2.loc[len(plot_df2)] = {'scenario' : i, 'run': run}
+            plot_df2 = plot_df2.drop_duplicates(subset=['scenario', 'run'], keep='first'
+                                     ).sort_values(by = ['run', 'scenario'])
+            
+            plot_df3.loc[len(plot_df3)] = {'scenario' : i, 'run': run}
+            plot_df3 = plot_df3.drop_duplicates(subset=['scenario', 'run'], keep='first'
+                                     ).sort_values(by = ['run', 'scenario'])
+            
+        if i not in plot_df4.index:
+        
+            plot_df4.loc[i] = 0
+            
+    plot_df2 = plot_df2.reset_index(drop = True)  
+    plot_df3 = plot_df3.reset_index(drop = True)  
+    plot_df4 = plot_df4.sort_index()
 
     fig, axs = plt.subplots(3, 1, squeeze = False, sharex = True,
                             gridspec_kw = {'height_ratios' : [1, 1, 1]},

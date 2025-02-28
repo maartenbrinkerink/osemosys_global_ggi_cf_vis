@@ -7,13 +7,13 @@ og_path = r'C:\Users\maart\Github\osemosys_global'
 BASE = 'Base'
 
 runs = ['Base', 
-        'CoalPhaseOut',
-        #'LowTransmissionCosts',
-        #'LongDurationStorage',
-        #'HighGasPrice',
-        #'NoNuclear',
-        'PointTargets',
-        'NoTargets'
+        #'CoalPhaseOut',
+        'LowTransmissionCosts',
+        'LongDurationStorage',
+        'HighGasPrice',
+        'NoNuclear',
+        #'PointTargets',
+        #'NoTargets'
                  ]
 
 results_path = {}
@@ -157,6 +157,42 @@ sensitivity_dict = {
     'multi_plot_sensitivities' : 'yes',
     'multi_plot_cap_gen_genshares_emisssions' : 'no',
     'multi_plot_scen_comparison' : 'no',
+    }
+
+'''Set for which sensitivity runs scenario specific charts are 
+to be generated.'''
+sensitivity_scenario_dict_runs = [
+            #'CoalPhaseOut',
+            #'LowTransmissionCosts',
+            #'LongDurationStorage',
+            #'HighGasPrice',
+            #'NoNuclear',
+            #'PointTargets',
+            #'NoTargets'
+    ]
+
+sensitivity_scen_comparison_dict = {
+    'pwr_cap_bar_dif_global' : 'no',
+    'pwr_gen_bar_dif_global' : 'no',
+    'pwr_cap_bar_dif_country' : 'no',
+    'pwr_gen_bar_dif_country' : 'no',
+    'pwr_cap_bar_dif_node' : 'no',
+    'pwr_gen_bar_dif_node' : 'no',
+    'costs_dif_global' : 'no',
+    'emissions_dif_global' : 'no',
+    #'costs_dif_country' : 'no', # Sub-global level costs incomplete
+    'emissions_dif_country' : 'no',
+    'pwr_gen_shares_dif_global' : 'no',
+    'headline_metrics_dif_global' : 'no',
+    }
+
+sensitivity_multi_scen_comparison_dict = {
+    'emissions_dif' : 'no',
+    'costs_dif' : 'no',
+    'gen_shares_dif' : 'no',
+    'trn_cap_dif' : 'no',
+    'capacity_dif' : 'no',
+    'generation_dif' : 'no',
     }
 
 '''Set for which scenarios nodal level results to show and list which 
