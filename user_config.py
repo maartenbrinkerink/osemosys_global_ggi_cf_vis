@@ -11,7 +11,7 @@ runs = ['Base',
         #'LowTransmissionCosts',
         #'LongDurationStorage',
         #'HighGasPrice',
-        'NoNuclear',
+        #'NoNuclear',
         'PointTargets',
         'NoTargets'
                  ]
@@ -22,13 +22,13 @@ base_dir_results_summaries = {}
 base_dir_data = {}
 
 for run in runs:
-    results_path[run] = f'{results_folder}\\{results_extension}{run}'
-    base_dir_results[run] = f'{results_path[run]}\\{base_model}\\results'
-    base_dir_results_summaries[run] = f'{results_path[run]}\\{base_model}\\result_summaries'
-    base_dir_data[run] = f'{results_path[run]}\\{base_model}\\data'
+    results_path[run] = f'{results_folder}/{results_extension}{run}'
+    base_dir_results[run] = f'{results_path[run]}/{base_model}/results'
+    base_dir_results_summaries[run] = f'{results_path[run]}/{base_model}/result_summaries'
+    base_dir_data[run] = f'{results_path[run]}/{base_model}/data'
 
-resources_data = f'{og_path}\\resources\\data'
-custom_nodes_data = f'{resources_data}\\custom_nodes'
+resources_data = f'{og_path}/resources/data'
+custom_nodes_data = f'{resources_data}/custom_nodes'
 
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = {
@@ -44,7 +44,7 @@ scenarios = {
   'KHMXXTHACE' : ['TRNKHMXXTHACE'],
   'IDNKAMYSSH' : ['TRNIDNKAMYSSH'],
   'IDNSMSGPXX' : ['TRNIDNSMSGPXX'],
-  'LAOXXMMRXX' : ['TRNLAOXXMMRXX'],
+ # 'LAOXXMMRXX' : ['TRNLAOXXMMRXX'],
   'SGPXXVNMSO' : ['TRNSGPXXVNMSO'],
   'KHMXXSGPXX' : ['TRNKHMXXSGPXX'],
   'MYSPEMYSSK' : ['TRNMYSPEMYSSK'],
@@ -52,17 +52,6 @@ scenarios = {
   'IDNJWIDNKA' : ['TRNIDNJWIDNKA'],
   'IDNJWIDNSM' : ['TRNIDNJWIDNSM'],
     }
-    
-'''scenarios = {
-    'NAMXXZMBXX' : ['TRNNAMXXZMBXX'],
-    'ZMBXXZWEXX' : ['TRNZMBXXZWEXX'],
-    #'ZiZaBoNa' : ['TRNNAMXXZMBXX', 'TRNZMBXXZWEXX'],
-    'SAPP' : ['TRNAGOXXNAMXX', 'TRNAGOXXCODXX', 'TRNAGOXXZMBXX',
-              'TRNBWAXXZAFXX', 'TRNCODXXZMBXX', 'TRNMOZXXMWIXX', 
-              'TRNMWIXXTZAXX', 'TRNMOZXXZMBXX', 'TRNNAMXXZMBXX',
-              'TRNZAFXXZWEXX', 'TRNTZAXXZMBXX', 'TRNMOZXXTZAXX', 
-              'TRNZMBXXZWEXX', 'TRNMOZXXZWEXX']
-    }'''
 
 '''Set start and end year of model horizon.'''
 start_year = 2023
@@ -77,9 +66,9 @@ for run in runs:
     scen_dir_results[run] = {}
     scen_dir_results_summaries[run] = {}
     for scenario in scenarios.keys():
-        scen_dir_data[run][scenario] = f'{results_path[run]}\\{scenario}\\data'
-        scen_dir_results[run][scenario] = f'{results_path[run]}\\{scenario}\\results'
-        scen_dir_results_summaries[run][scenario] = f'{results_path[run]}\\{scenario}\\result_summaries'
+        scen_dir_data[run][scenario] = f'{results_path[run]}/{scenario}/data'
+        scen_dir_results[run][scenario] = f'{results_path[run]}/{scenario}/results'
+        scen_dir_results_summaries[run][scenario] = f'{results_path[run]}/{scenario}/result_summaries'
 
 '''Set default model data.'''
 countries = ['BRN', 
@@ -92,21 +81,6 @@ countries = ['BRN',
              'SGP', 
              'THA', 
              'VNM']
-
-'''countries = [
-    'AGO',
-    'BWA',
-    'COD',
-    'LSO',
-    'MOZ',
-    'MWI',
-    'NAM',
-    'SWZ',
-    'TZA',
-    'ZAF',
-    'ZMB',
-    'ZWE',
-    ]'''
 
 zizabona_countries = [
     'AGO',
@@ -181,6 +155,8 @@ sensitivity_dict = {
     'gen_shares_dif' : 'no',
     'trn_cap_dif' : 'no',
     'multi_plot_sensitivities' : 'yes',
+    'multi_plot_cap_gen_genshares_emisssions' : 'no',
+    'multi_plot_scen_comparison' : 'no',
     }
 
 '''Set for which scenarios nodal level results to show and list which 

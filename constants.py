@@ -81,7 +81,8 @@ SENSITIVTIES_COLOR_DICT = {
     'HighGasPrice' : 'green',
     'NoNuclear' : 'orange',
     'PointTargets' : 'red',
-    'NoTargets' : 'violet'
+    'NoTargets' : 'violet',
+    'Bilateral' : 'pink',
     
     
     
@@ -90,10 +91,10 @@ SENSITIVTIES_COLOR_DICT = {
 SENSITIVTIES_HATCH_DICT = {
     'Base' : ['', 'black'],
     'CoalPhaseOut' : ['...', 'black'],
-    #'LowTransmissionCosts' : ['///', 'black'],
-    #'LongDurationStorage' : ['', 'blue'],
-    #'HighGasPrice' : ['...', 'blue'],
-    'NoNuclear' : ['///', 'black'],
-    'NoTargets' : ['ooo', 'black'],
+    'LowTransmissionCosts' : ['...', 'black'],
+    'LongDurationStorage' : ['///', 'black'],
+    'HighGasPrice' : ['ooo', 'black'],
+    'NoNuclear' : ['\\\\\\', 'black'],
+    'NoTargets' : ['///', 'black'],
     'PointTargets' : ['\\\\\\', 'black']
     }

@@ -76,7 +76,8 @@ from data import(
     format_bar_delta_multi_scenario_sensitivities,
     format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities,
     format_bar_delta_multi_scenario_geo_sensitivity,
-    format_bar_delta_multi_scenario_sensitivities_trn_capacity
+    format_bar_delta_multi_scenario_sensitivities_trn_capacity,
+    format_bar_delta_multi_scenario_sensitivities_multi_plot
     )
 
 from utils import(
@@ -137,10 +138,12 @@ try:
 except FileExistsError:
     pass
 
-try:
-    os.makedirs(sensitivities_path)
-except FileExistsError:
-    pass
+for run in runs:
+
+    try:
+        os.makedirs(f'{sensitivities_path}/{run}')
+    except FileExistsError:
+        pass
 
 '''Create charts for base model run.'''
 if base_run_dict.get('pwr_cap_bar_global') == 'yes':
@@ -404,9 +407,11 @@ if base_run_dict.get('multi_plot_cap_gen_genshares_emisssions') == 'yes':
     unit5 = 'gCO2/kWh'
     file_name = 'multi_plot_cap_gen_genshares_emissions'
     
+    chart_title = ''
+    
     format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
                                                    unit1, unit2, unit3, unit4, unit5,
-                                                   base_path, file_name, 
+                                                   base_path, file_name, chart_title,
                                                    BAR_TECH_COLOR_DICT,
                                                    BAR_GEN_SHARES_COLOR_DICT, 
                                                    COUNTRY_COLOR_DICT)
@@ -798,40 +803,6 @@ if multi_scen_comparison_dict_geo.get('emissions_dif') == 'yes':
                                     chart_title, file_name, 
                                     DUAL_EMISSIONS_COLOR_DICT, unit, 
                                     system_delta, axis_sort_delta)
-    
-if sensitivity_dict.get('emissions_dif_geo') == 'yes':
-    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
-                                  country = False)
-    
-    df2_dict = {}
-    df3_dict = {}
-    df4_dict = {}
-    
-    for scenario, trn in scenarios.items():
-        df3_dict[scenario] = geo_filter_tech_emissions(read_annual_technology_emission(
-            base_dir_results[BASE]), scenario)
-
-        df3_dict[scenario] = format_annual_emissions(df3_dict[scenario], country = False)
-        
-        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
-        if not capacity_trn.loc[capacity_trn['TECHNOLOGY'].isin(trn)].empty:
-            df2_dict[scenario] = format_annual_emissions(read_annual_emissions(
-                scen_dir_results[BASE].get(scenario)), 
-                country = False)
-            
-            df4_dict[scenario] = geo_filter_tech_emissions(read_annual_technology_emission(
-                scen_dir_results[BASE].get(scenario)), scenario)
-
-            df4_dict[scenario] = format_annual_emissions(df4_dict[scenario], country = False)
-
-    chart_title = ''
-    file_name = 'emissions_delta_global_geo'
-    unit = 'Mt CO2'
-            
-    format_bar_delta_multi_scenario_geo_sensitivity(df1, df2_dict, df3_dict, df4_dict, 
-                                    sensitivities_path, 
-                                    chart_title, file_name, unit, 
-                                    axis_sort_delta, BASE) 
 
 if multi_scen_comparison_dict.get('costs_dif') == 'yes':
     df1 = read_total_discounted_cost(base_dir_results[BASE])
@@ -1020,10 +991,46 @@ if sensitivity_dict.get('emissions_dif') == 'yes':
                                                   SENSITIVTIES_COLOR_DICT, unit, axis_sort_delta,
                                                   runs, BASE)
     
-if sensitivity_dict.get('costs_dif') == 'yes':
+if sensitivity_dict.get('emissions_dif_geo') == 'yes':
+    df1 = format_annual_emissions(read_annual_emissions(base_dir_results[BASE]), 
+                                  country = False)
+    
+    df2_dict = {}
+    df3_dict = {}
+    df4_dict = {}
+    
+    for scenario, trn in scenarios.items():
+        df3_dict[scenario] = geo_filter_tech_emissions(read_annual_technology_emission(
+            base_dir_results[BASE]), scenario)
 
+        df3_dict[scenario] = format_annual_emissions(df3_dict[scenario], country = False)
+        
+        capacity_trn = read_new_capacity(scen_dir_results[BASE].get(scenario))
+        if not capacity_trn.loc[capacity_trn['TECHNOLOGY'].isin(trn)].empty:
+            df2_dict[scenario] = format_annual_emissions(read_annual_emissions(
+                scen_dir_results[BASE].get(scenario)), 
+                country = False)
+            
+            df4_dict[scenario] = geo_filter_tech_emissions(read_annual_technology_emission(
+                scen_dir_results[BASE].get(scenario)), scenario)
+
+            df4_dict[scenario] = format_annual_emissions(df4_dict[scenario], country = False)
+
+    chart_title = ''
+    file_name = 'emissions_delta_global_geo'
+    unit = 'Mt CO2'
+            
+    format_bar_delta_multi_scenario_geo_sensitivity(df1, df2_dict, df3_dict, df4_dict, 
+                                    sensitivities_path, chart_title, file_name, 
+                                    SENSITIVTIES_COLOR_DICT, unit, 
+                                    axis_sort_delta, BASE) 
+    
+if sensitivity_dict.get('costs_dif') == 'yes':
+    
     costs_runs = runs.copy()
-    costs_runs.remove('NoNuclear')
+    
+    if 'NoNuclear' in costs_runs:
+        costs_runs.remove('NoNuclear')
 
     df1_dict = {}
     df2_dict = {}
@@ -1150,10 +1157,101 @@ if sensitivity_dict.get('multi_plot_sensitivities') == 'yes':
         unit2 = '%'
         unit3 = 'Mt CO2'
 
-    format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, df4_dict,
-                                                  df5, df6_dict, df7_dict, df8_dict,
-                                                  sensitivities_path, file_name, 
-                                                  SENSITIVTIES_COLOR_DICT, BAR_GEN_SHARES_COLOR_DICT,
-                                                  SENSITIVTIES_HATCH_DICT,
-                                                  unit1, unit2, unit3, axis_sort_delta,
-                                                  runs, BASE)
+    format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict, df3_dict, df4_dict,
+                                                             df5, df6_dict, df7_dict, df8_dict,
+                                                             sensitivities_path, file_name, 
+                                                             SENSITIVTIES_COLOR_DICT, BAR_GEN_SHARES_COLOR_DICT,
+                                                             SENSITIVTIES_HATCH_DICT,
+                                                             unit1, unit2, unit3, axis_sort_delta,
+                                                             runs, BASE)
+    
+if sensitivity_dict.get('multi_plot_cap_gen_genshares_emisssions') == 'yes':
+    for run in runs:
+    
+        df1 = read_capacity_country(base_dir_results_summaries[run])
+        unit1 = 'GW'
+    
+        df2 = read_technology_annual_activity(base_dir_results[run])
+        df2 = format_technology_col(df2, node = None)
+        df2 = convert_pj_to_twh(df2)
+        unit2 = 'TWh'    
+        
+        df3 = read_generation_shares_global(base_dir_results_summaries[run])
+        unit3 = '%'    
+        
+        df4 = format_annual_emissions(read_annual_emissions(base_dir_results[run]), 
+                                      country = True)
+        unit4 = 'Mt CO2'
+    
+        df5 = read_annual_emission_intensity_global(base_dir_results_summaries[run])
+        unit5 = 'gCO2/kWh'
+        file_name = f'multi_plot_cap_gen_genshares_emissions_{run}'
+        
+        chart_title = run
+        path = f'{sensitivities_path}/{run}'
+        
+        format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
+                                                      unit1, unit2, unit3, unit4, unit5,
+                                                      path, file_name, chart_title,
+                                                      BAR_TECH_COLOR_DICT,
+                                                      BAR_GEN_SHARES_COLOR_DICT, 
+                                                      COUNTRY_COLOR_DICT)
+        
+if sensitivity_dict.get('multi_plot_scen_comparison') == 'yes':
+    for run in runs:
+        df1a = read_new_capacity(base_dir_results[run])
+        df1a = format_technology_col(df1a, node = None)
+        
+        df2a = read_technology_annual_activity(base_dir_results[run])
+        df2a = format_technology_col(df2a, node = None)
+        df2a = convert_pj_to_twh(df2a)
+        
+        df3 = read_headline_metrics(base_dir_results_summaries[run]) 
+        df4 = format_annual_emissions(read_annual_emissions(base_dir_results[run]), 
+                                      country = False)
+        
+        df1_dict = {}
+        df2_dict = {}
+        df3_dict = {}
+        df4_dict = {}
+        
+        unit1 = 'GW'
+        unit2 = 'TWh'
+        unit3 = '%'
+        unit4 = 'Mt CO2'
+        
+        file_name = 'multi_plot_scen_comparison_{run}'
+    
+        for scenario, trn in scenarios.items():
+            capacity_trn = read_new_capacity(scen_dir_results[run].get(scenario))
+            if not capacity_trn.loc[capacity_trn['TECHNOLOGY'].isin(trn)].empty:
+                df1b = read_new_capacity(scen_dir_results[run].get(scenario))
+                df1b = format_technology_col(df1b, node = None)
+                
+                df2b = read_technology_annual_activity(scen_dir_results[run].get(scenario))
+                df2b = format_technology_col(df2b, node = None)
+                df2b = convert_pj_to_twh(df2b)
+                
+                df1_dict[scenario] = calculate_results_delta(df1a, df1b, ['TECH'],
+                                                             scenario, nodal_results,
+                                                             node = None)
+                
+                df2_dict[scenario] = calculate_results_delta(df2a, df2b, ['TECH'],
+                                                             scenario, nodal_results,
+                                                             node = None)
+                
+                df3_dict[scenario] = read_headline_metrics(scen_dir_results_summaries[run].get(scenario))
+                
+                df4_dict[scenario] = format_annual_emissions(read_annual_emissions(
+                    scen_dir_results[run].get(scenario)), country = False)
+                
+        chart_title = run
+        path = f'{sensitivities_path}/{run}'
+    
+        format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict, 
+                                          df4, df4_dict, unit1, unit2, unit3, 
+                                          unit4, BAR_TECH_COLOR_DICT,
+                                          BAR_GEN_SHARES_COLOR_DICT,
+                                          DUAL_EMISSIONS_COLOR_DICT,
+                                          path, file_name, 
+                                          chart_title, axis_sort_delta)

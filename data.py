@@ -1381,8 +1381,8 @@ def format_spatial_map_ZIZABONA(df, nodes, base_path,
 
 def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5, 
                                                    unit1, unit2, unit3, unit4, unit5,
-                                                   base_path, file_name, color_dict1,
-                                                   color_dict2, color_dict3):
+                                                   base_path, file_name, chart_title, 
+                                                   color_dict1, color_dict2, color_dict3):
     
     # SET PLOT BASE
     fig, axs = plt.subplots(2, 2, squeeze = False, 
@@ -1417,6 +1417,8 @@ def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
               ncols = 8)
 
     # SET GEN SHARES GRAPH
+    df3 = df3.rename(columns = {'RENEWABLE' : 'Renewable',
+                                 'FOSSIL' : 'Fossil'})
     
     df3['Other'] = 100 - df3['Renewable'] - df3['Fossil']
     df3 = df3[['YEAR', 'Renewable', 'Fossil', 'Other']].groupby(['YEAR']).sum()
@@ -1480,7 +1482,11 @@ def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
               name = 'Calibri', fontsize = 15, weight = 'bold')
        
     plt.subplots_adjust(wspace=0.22, hspace = 0.42)
-
+    
+    # Add plot title
+    if chart_title:
+        make_space_above(axs, topmargin=0.4) 
+        plt.suptitle(chart_title)
     
     return fig.savefig(os.path.join(base_path, file_name), bbox_inches = 'tight')
     
@@ -1594,7 +1600,7 @@ def format_multi_plot_country_charts(df1, df2, df3, df4, df5,
 def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict, 
                                       df4, df4_dict, unit1, unit2, unit3, unit4,
                                       color_dict1, color_dict2, color_dict3,
-                                      base_path, file_name, axis_sort):
+                                      base_path, file_name, chart_title, axis_sort):
     
     # SET PLOT BASE
     fig, axs = plt.subplots(2, 2, squeeze = False, 
@@ -1850,8 +1856,12 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
               name = 'Calibri', fontsize = 15, weight = 'bold')
        
     plt.subplots_adjust(wspace=0.24, hspace = 0.72)
-
     
+    # Add plot title
+    if chart_title:
+        make_space_above(axs, topmargin=0.4) 
+        plt.suptitle(chart_title)
+
     return fig.savefig(os.path.join(base_path, file_name), bbox_inches = 'tight')
 
 def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir, 
@@ -2038,7 +2048,7 @@ def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, d
 
 def format_bar_delta_multi_scenario_geo_sensitivity(df1, df2_dict, df3_dict, 
                                                     df4_dict, out_dir, 
-                                                    chart_title, file_name, 
+                                                    chart_title, file_name, color_dict,
                                                     unit, axis_sort, BASE):
     
     df1.set_index('YEAR', inplace = True)
@@ -2046,7 +2056,7 @@ def format_bar_delta_multi_scenario_geo_sensitivity(df1, df2_dict, df3_dict,
     for key in df3_dict:
         df3_dict[key].set_index('YEAR', inplace = True)
 
-    plot_df = pd.DataFrame(columns = [BASE, 'Project'])
+    plot_df = pd.DataFrame(columns = [BASE, 'Bilateral'])
     
     for key in df2_dict:
         
@@ -2068,11 +2078,12 @@ def format_bar_delta_multi_scenario_geo_sensitivity(df1, df2_dict, df3_dict,
         plot_df = plot_df.sort_values(by = [BASE])
     else:
         plot_df = plot_df.sort_index()
-        
-    ax = plot_df.plot(use_index = True, kind = 'bar', width = 0.7,
-                 edgecolor = 'black', linewidth = 0.3
-                 )
     
+    ax = plot_df.plot(use_index = True, kind = 'bar', width = 0.7,
+                 edgecolor = 'black', linewidth = 0.3, 
+                 color = [color_dict[run] for run in plot_df.columns],
+                 )
+
     plt.legend(frameon = False)
     plt.xticks(rotation = 75)
     ax.margins(x=0)
@@ -2131,11 +2142,11 @@ def format_bar_delta_multi_scenario_sensitivities_trn_capacity(df1_dict, out_dir
 
     return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 
-def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, df4_dict,
-                                                  df5, df6_dict, df7_dict, df8_dict, 
-                                                  out_dir, file_name, color_dict1, color_dict2, 
-                                                  hatch_dict, unit1, unit2, unit3, axis_sort, 
-                                                  runs, BASE):
+def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict, df3_dict, df4_dict,
+                                                             df5, df6_dict, df7_dict, df8_dict, 
+                                                             out_dir, file_name, color_dict1, color_dict2, 
+                                                             hatch_dict, unit1, unit2, unit3, axis_sort, 
+                                                             runs, BASE):
     
     # DATA PREP
     plot_df1 = pd.DataFrame()
@@ -2302,14 +2313,16 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
         
     # PLOTTING SUBPLOT 3
     plot_df4.plot(ax = axs[2, 0], use_index = True, kind = 'bar', width = 0.5,
-                 edgecolor = 'black', linewidth = 0.3
+                 edgecolor = 'black', linewidth = 0.3,
+                 color = [color_dict1[run] for run in plot_df4.columns],
                  )
+
     
     # LEGEND SUBPLOT 1
     axs[0, 0].legend(bbox_to_anchor=(0.59, 1), 
                      loc = 'upper center',
                      #frameon = False, 
-                     ncols = 3,
+                     ncols = 2,
                      edgecolor = 'white', framealpha = 0.5
                      )
     
@@ -2322,7 +2335,7 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
                bbox_to_anchor=(0.78, 0.62),
                #loc = 'upper center',
                #frameon = False, 
-               ncols = 3,
+               ncols = 4,
                edgecolor = 'white', framealpha = 0.5               
                )
 
@@ -2332,10 +2345,10 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
     by_label = dict(sorted(by_label.items()))
 
     legend3 = axs[1, 0].legend(by_label.values(), by_label.keys(), 
-               bbox_to_anchor=(0.27, 0.25), 
+               bbox_to_anchor=(0.365, 0.25), 
                #loc = 'lower center',
                #frameon = False, 
-               ncols = 3,
+               ncols = 2,
                edgecolor = 'white', framealpha = 0.5 
                )
 
@@ -2348,7 +2361,7 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
     # LEGEND SUBPLOT 3
     axs[2, 0].legend(bbox_to_anchor=(0.6, 1),
                      loc = 'upper center',
-                     ncols = 2,
+                     ncols = 4,
                     # frameon = False,
                      edgecolor = 'white', framealpha = 0.5
                      )
@@ -2369,13 +2382,13 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, df3_dict, 
     plt.subplots_adjust(hspace=0.05)
     
     # ADD LABELS
-    axs[0, 0].text(-0.03, -0.02, 'a', transform=axs[0, 0].transAxes, 
+    axs[0, 0].text(-0.03, -0.03, 'a', transform=axs[0, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    axs[1, 0].text(-0.03, -0.02, 'b', transform=axs[1, 0].transAxes, 
+    axs[1, 0].text(-0.03, -0.03, 'b', transform=axs[1, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    axs[2, 0].text(-0.03, -0.02, 'c', transform=axs[2, 0].transAxes, 
+    axs[2, 0].text(-0.03, -0.03, 'c', transform=axs[2, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
     return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
