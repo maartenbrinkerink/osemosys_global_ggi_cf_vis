@@ -88,6 +88,9 @@ def format_stacked_bar_gen_shares(df, out_dir, chart_title,
                                   legend_title, file_name, 
                                   color_dict, unit, 
                                   country):
+
+    df = df.rename(columns = {'RENEWABLE' : 'Renewable',
+                              'FOSSIL' : 'Fossil'})
     
     if country:
         df = df.loc[df['COUNTRY'] == country].reset_index()
@@ -1537,6 +1540,9 @@ def format_multi_plot_country_charts(df1, df2, df3, df4, df5,
               ncols = 8)
 
     # SET GEN SHARES GRAPH
+    df3 = df3.rename(columns = {'RENEWABLE' : 'Renewable',
+                                 'FOSSIL' : 'Fossil'})
+    
     df3 = df3.loc[df3['COUNTRY'] == country].reset_index()
     
     df3['Other'] = 100 - df3['Renewable'] - df3['Fossil']

@@ -7,11 +7,12 @@ og_path = r'C:\Users\maart\Github\osemosys_global'
 BASE = 'Base'
 
 runs = ['Base', 
-        #'CoalPhaseOut',
-        'LowTransmissionCosts',
-        'LongDurationStorage',
-        'HighGasPrice',
-        'NoNuclear',
+        'CoalPhaseOut',
+        #'CoalPhaseOut15%',
+        #'LowTransmissionCosts',
+        #'LongDurationStorage',
+        #'HighGasPrice',
+       # 'NoNuclear',
         #'PointTargets',
         #'NoTargets'
                  ]
@@ -32,25 +33,25 @@ custom_nodes_data = f'{resources_data}/custom_nodes'
 
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = {
-  'MYSPESGPXX' : ['TRNMYSPESGPXX'],
-  'MYSPETHASO' : ['TRNMYSPETHASO'],
-  'IDNSMMYSPE' : ['TRNIDNSMMYSPE'],
-  'MYSSHPHLLU' : ['TRNMYSSHPHLLU'],
-  'BRNXXMYSSK' : ['TRNBRNXXMYSSK'],
-  'LAOXXTHANO' : ['TRNLAOXXTHANO'],
-  'LAOXXVNMNO' : ['TRNLAOXXVNMNO'],
-  'MMRXXTHANO' : ['TRNMMRXXTHANO'],
-  'KHMXXLAOXX' : ['TRNKHMXXLAOXX'],
-  'KHMXXTHACE' : ['TRNKHMXXTHACE'],
-  'IDNKAMYSSH' : ['TRNIDNKAMYSSH'],
-  'IDNSMSGPXX' : ['TRNIDNSMSGPXX'],
+ # 'MYSPESGPXX' : ['TRNMYSPESGPXX'],
+  #'MYSPETHASO' : ['TRNMYSPETHASO'],
+  #'IDNSMMYSPE' : ['TRNIDNSMMYSPE'],
+  #'MYSSHPHLLU' : ['TRNMYSSHPHLLU'],
+  #'BRNXXMYSSK' : ['TRNBRNXXMYSSK'],
+  #'LAOXXTHANO' : ['TRNLAOXXTHANO'],
+  #'LAOXXVNMNO' : ['TRNLAOXXVNMNO'],
+  #'MMRXXTHANO' : ['TRNMMRXXTHANO'],
+  #'KHMXXLAOXX' : ['TRNKHMXXLAOXX'],
+ # 'KHMXXTHACE' : ['TRNKHMXXTHACE'],
+ # 'IDNKAMYSSH' : ['TRNIDNKAMYSSH'],
+ # 'IDNSMSGPXX' : ['TRNIDNSMSGPXX'],
  # 'LAOXXMMRXX' : ['TRNLAOXXMMRXX'],
-  'SGPXXVNMSO' : ['TRNSGPXXVNMSO'],
-  'KHMXXSGPXX' : ['TRNKHMXXSGPXX'],
+ # 'SGPXXVNMSO' : ['TRNSGPXXVNMSO'],
+ # 'KHMXXSGPXX' : ['TRNKHMXXSGPXX'],
   'MYSPEMYSSK' : ['TRNMYSPEMYSSK'],
-  'MYSSHMYSSK' : ['TRNMYSSHMYSSK'],
-  'IDNJWIDNKA' : ['TRNIDNJWIDNKA'],
-  'IDNJWIDNSM' : ['TRNIDNJWIDNSM'],
+ # 'MYSSHMYSSK' : ['TRNMYSSHMYSSK'],
+ # 'IDNJWIDNKA' : ['TRNIDNJWIDNKA'],
+  #'IDNJWIDNSM' : ['TRNIDNJWIDNSM'],
     }
 
 '''Set start and end year of model horizon.'''
@@ -99,49 +100,49 @@ zizabona_countries = [
 
 '''Set which visualisations to run.'''
 base_run_dict = {
-    'pwr_cap_bar_global' : 'no',
-    'pwr_cap_bar_country' : 'no',
-    'pwr_gen_bar_global' : 'no',
-    'pwr_gen_bar_country' : 'no',
-    'pwr_gen_shares_global' : 'no',
-    'pwr_gen_shares_country' : 'no',
-    'dual_costs_global' : 'no',
-   #'dual_costs_country' : 'no', # Sub-global level costs incomplete
-   #'pwr_costs_multi_country' : 'no', # Sub-global level costs incomplete
-    'dual_emissions_global' : 'no',
-    'dual_emissions_country' : 'no',
-    'dual_emissions_stacked' : 'no',
-    'demand_stacked' : 'no',
-    'emissions_limit' : 'no',
-    'spatial_map_ASEAN' : 'no',
-    'spatial_map_ZIZABONA' : 'no',    
-    'multi_plot_cap_gen_genshares_emisssions' : 'no',
-    'multi_plot_country_charts' : 'no',
+    'pwr_cap_bar_global' : 'yes',
+    'pwr_cap_bar_country' : 'yes',
+    'pwr_gen_bar_global' : 'yes',
+    'pwr_gen_bar_country' : 'yes',
+    'pwr_gen_shares_global' : 'yes',
+    'pwr_gen_shares_country' : 'yes',
+    'dual_costs_global' : 'yes',
+   #'dual_costs_country' : 'yes', # Sub-global level costs incomplete
+   #'pwr_costs_multi_country' : 'yes', # Sub-global level costs incomplete
+    'dual_emissions_global' : 'yes',
+    'dual_emissions_country' : 'yes',
+    'dual_emissions_stacked' : 'yes',
+    'demand_stacked' : 'yes',
+    'emissions_limit' : 'yes',
+    'spatial_map_ASEAN' : 'yes',
+    'spatial_map_ZIZABONA' : 'yes',    
+    'multi_plot_cap_gen_genshares_emisssions' : 'yes',
+    'multi_plot_country_charts' : 'yes',
     }
 
 base_scen_comparison_dict = {
-    'pwr_cap_bar_dif_global' : 'no',
-    'pwr_gen_bar_dif_global' : 'no',
-    'pwr_cap_bar_dif_country' : 'no',
-    'pwr_gen_bar_dif_country' : 'no',
-    'pwr_cap_bar_dif_node' : 'no',
-    'pwr_gen_bar_dif_node' : 'no',
-    'costs_dif_global' : 'no',
-    'emissions_dif_global' : 'no',
-    #'costs_dif_country' : 'no', # Sub-global level costs incomplete
-    'emissions_dif_country' : 'no',
-    'pwr_gen_shares_dif_global' : 'no',
-    'headline_metrics_dif_global' : 'no',
+    'pwr_cap_bar_dif_global' : 'yes',
+    'pwr_gen_bar_dif_global' : 'yes',
+    'pwr_cap_bar_dif_country' : 'yes',
+    'pwr_gen_bar_dif_country' : 'yes',
+    'pwr_cap_bar_dif_node' : 'yes',
+    'pwr_gen_bar_dif_node' : 'yes',
+    'costs_dif_global' : 'yes',
+    'emissions_dif_global' : 'yes',
+    #'costs_dif_country' : 'yes', # Sub-global level costs incomplete
+    'emissions_dif_country' : 'yes',
+    'pwr_gen_shares_dif_global' : 'yes',
+    'headline_metrics_dif_global' : 'yes',
     }
 
 multi_scen_comparison_dict = {
-    'emissions_dif' : 'no',
-    'costs_dif' : 'no',
-    'gen_shares_dif' : 'no',
-    'trn_cap_dif' : 'no',
-    'capacity_dif' : 'no',
-    'generation_dif' : 'no',
-    'multi_plot_scen_comparison' : 'no',
+    'emissions_dif' : 'yes',
+    'costs_dif' : 'yes',
+    'gen_shares_dif' : 'yes',
+    'trn_cap_dif' : 'yes',
+    'capacity_dif' : 'yes',
+    'generation_dif' : 'yes',
+    'multi_plot_scen_comparison' : 'yes',
     }
 
 multi_scen_comparison_dict_geo = {
@@ -149,20 +150,20 @@ multi_scen_comparison_dict_geo = {
     }
 
 sensitivity_dict = {
-    'emissions_dif' : 'no',
+    'emissions_dif' : 'yes',
     'emissions_dif_geo' : 'no',
-    'costs_dif' : 'no',
-    'gen_shares_dif' : 'no',
-    'trn_cap_dif' : 'no',
+    'costs_dif' : 'yes',
+    'gen_shares_dif' : 'yes',
+    'trn_cap_dif' : 'yes',
     'multi_plot_sensitivities' : 'yes',
-    'multi_plot_cap_gen_genshares_emisssions' : 'no',
-    'multi_plot_scen_comparison' : 'no',
+    'multi_plot_cap_gen_genshares_emisssions' : 'yes',
+    'multi_plot_scen_comparison' : 'yes',
     }
 
 '''Set for which sensitivity runs scenario specific charts are 
 to be generated.'''
 sensitivity_scenario_dict_runs = [
-            #'CoalPhaseOut',
+            'CoalPhaseOut',
             #'LowTransmissionCosts',
             #'LongDurationStorage',
             #'HighGasPrice',
@@ -172,27 +173,27 @@ sensitivity_scenario_dict_runs = [
     ]
 
 sensitivity_scen_comparison_dict = {
-    'pwr_cap_bar_dif_global' : 'no',
-    'pwr_gen_bar_dif_global' : 'no',
-    'pwr_cap_bar_dif_country' : 'no',
-    'pwr_gen_bar_dif_country' : 'no',
-    'pwr_cap_bar_dif_node' : 'no',
-    'pwr_gen_bar_dif_node' : 'no',
-    'costs_dif_global' : 'no',
-    'emissions_dif_global' : 'no',
-    #'costs_dif_country' : 'no', # Sub-global level costs incomplete
-    'emissions_dif_country' : 'no',
-    'pwr_gen_shares_dif_global' : 'no',
-    'headline_metrics_dif_global' : 'no',
+    'pwr_cap_bar_dif_global' : 'yes',
+    'pwr_gen_bar_dif_global' : 'yes',
+    'pwr_cap_bar_dif_country' : 'yes',
+    'pwr_gen_bar_dif_country' : 'yes',
+    'pwr_cap_bar_dif_node' : 'yes',
+    'pwr_gen_bar_dif_node' : 'yes',
+    'costs_dif_global' : 'yes',
+    'emissions_dif_global' : 'yes',
+    #'costs_dif_country' : 'yes', # Sub-global level costs incomplete
+    'emissions_dif_country' : 'yes',
+    'pwr_gen_shares_dif_global' : 'yes',
+    'headline_metrics_dif_global' : 'yes',
     }
 
 sensitivity_multi_scen_comparison_dict = {
-    'emissions_dif' : 'no',
-    'costs_dif' : 'no',
-    'gen_shares_dif' : 'no',
-    'trn_cap_dif' : 'no',
-    'capacity_dif' : 'no',
-    'generation_dif' : 'no',
+    'emissions_dif' : 'yes',
+    'costs_dif' : 'yes',
+    'gen_shares_dif' : 'yes',
+    'trn_cap_dif' : 'yes',
+    'capacity_dif' : 'yes',
+    'generation_dif' : 'yes',
     }
 
 '''Set for which scenarios nodal level results to show and list which 
