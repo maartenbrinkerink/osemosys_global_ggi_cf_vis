@@ -61,6 +61,7 @@ from data import(
     format_multi_plot_cap_gen_genshares_emissions,
     format_multi_plot_country_charts,
     format_multi_plot_scen_comparison,
+    format_multi_plot_scen_comparison_costs
     )
 
 from utils import(
@@ -809,3 +810,69 @@ if multi_scen_comparison_dict.get('multi_plot_scen_comparison') == 'yes':
                                       DUAL_EMISSIONS_COLOR_DICT,
                                       multi_scenario_path, file_name, 
                                       axis_sort_delta)
+    
+if multi_scen_comparison_dict.get('multi_plot_scen_comparison_costs') == 'yes':
+    df1a = read_new_capacity(base_dir_results)
+    df1a = format_technology_col(df1a, node = None)
+    
+    df2a = read_technology_annual_activity(base_dir_results)
+    df2a = format_technology_col(df2a, node = None)
+    df2a = convert_pj_to_twh(df2a)
+    
+    df3 = read_headline_metrics(base_dir_results_summaries) 
+    df4 = format_annual_emissions(read_annual_emissions(base_dir_results), 
+                                  country = False)
+    
+    df5 = read_total_discounted_cost(base_dir_results)
+    convert_million_to_billion(df5)   
+    
+    df1_dict = {}
+    df2_dict = {}
+    df3_dict = {}
+    df4_dict = {}
+    df5_dict = {}
+    
+    unit1 = 'GW'
+    unit2 = 'TWh'
+    unit3 = '%'
+    unit4 = 'Mt CO2'
+    unit5 = 'Billion $'
+    
+    file_name = 'multi_plot_scen_comparison_costs'
+
+    for scenario, trn in scenarios.items():
+        capacity_trn = read_new_capacity(scen_dir_results.get(scenario))
+        if not capacity_trn.loc[capacity_trn['TECHNOLOGY'].isin(trn)].empty:
+            df1b = read_new_capacity(scen_dir_results.get(scenario))
+            df1b = format_technology_col(df1b, node = None)
+            
+            df2b = read_technology_annual_activity(scen_dir_results.get(scenario))
+            df2b = format_technology_col(df2b, node = None)
+            df2b = convert_pj_to_twh(df2b)
+            
+            df1_dict[scenario] = calculate_results_delta(df1a, df1b, ['TECH'],
+                                                         scenario, nodal_results,
+                                                         node = None)
+            
+            df2_dict[scenario] = calculate_results_delta(df2a, df2b, ['TECH'],
+                                                         scenario, nodal_results,
+                                                         node = None)
+            
+            df3_dict[scenario] = read_headline_metrics(scen_dir_results_summaries.get(scenario))
+            
+            df4_dict[scenario] = format_annual_emissions(read_annual_emissions(
+                scen_dir_results.get(scenario)), country = False)
+            
+            df5_dict[scenario] = read_total_discounted_cost(
+                scen_dir_results.get(scenario))
+            convert_million_to_billion(df5_dict[scenario])
+
+    format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict, 
+                                      df4, df4_dict, df5, df5_dict, 
+                                      unit1, unit2, unit3, unit4, unit5,
+                                      BAR_TECH_COLOR_DICT,
+                                      BAR_GEN_SHARES_COLOR_DICT,
+                                      DUAL_EMISSIONS_COLOR_DICT,
+                                      DUAL_COSTS_COLOR_DICT,
+                                      multi_scenario_path, file_name,
+                                      scenarios)

@@ -10,6 +10,7 @@ import cartopy.io.shapereader as shpreader
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from typing import Dict
+from matplotlib.gridspec import GridSpec
 
 from utils import (
     get_years,
@@ -1577,7 +1578,7 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
     plot_df1a =  plot_df1a.reindex(plot_sum1.index).reindex(sorted(plot_df1a.columns), axis=1)
     plot_df1b =  plot_df1b.reindex(plot_sum1.index).reindex(sorted(plot_df1b.columns), axis=1)
     plot_df2a =  plot_df2a.reindex(plot_sum2.index).reindex(sorted(plot_df2a.columns), axis=1)
-    plot_df2b =  plot_df2b.reindex(plot_sum2.index).reindex(sorted(plot_df2b.columns), axis=1)    
+    plot_df2b =  plot_df2b.reindex(plot_sum2.index).reindex(sorted(plot_df2b.columns), axis=1)
         
     # Initialize the bottom at zero for the first set of bars.
     capacity_bot1 = 0
@@ -1740,6 +1741,351 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
               name = 'Calibri', fontsize = 15, weight = 'bold')
        
     plt.subplots_adjust(wspace=0.24, hspace = 0.72)
+
+    
+    return fig.savefig(os.path.join(base_path, file_name), bbox_inches = 'tight')
+
+def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict, 
+                                            df4, df4_dict, df5, df5_dict, 
+                                            unit1, unit2, unit3, unit4, unit5,
+                                            color_dict1, color_dict2, color_dict3,
+                                            color_dict4, base_path, file_name, 
+                                            scenarios):
+    
+    fig = plt.figure(figsize = (10, 8))
+
+    gs = GridSpec(2, 20, figure=fig)
+    ax1 = fig.add_subplot(gs[0, 0:6])
+    ax2 = fig.add_subplot(gs[0, 8:9])
+    ax3 = fig.add_subplot(gs[0, 11:17])
+    ax4 = fig.add_subplot(gs[0, 19:])
+
+    ax5 = fig.add_subplot(gs[1, 0:7])
+    ax6 = fig.add_subplot(gs[1, 9:])
+    # SET CAPACITY AND GENERATION CHARTS
+    plot_df1a = None
+    plot_df2a = None
+    
+    for key, value in df1_dict.items():
+
+        capacity1 = value.loc[value['DELTA'] < 0]
+        capacity2 = value.loc[value['DELTA'] > 0]
+       
+        capacity1 = capacity1.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        capacity2 = capacity2.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        
+        for idx in value.index:
+            if not capacity1.empty:
+                if not idx in capacity1.index:
+                    capacity1.loc[idx] = 0
+             
+            if not capacity2.empty:
+                if not idx in capacity2.index:
+                    capacity2.loc[idx] = 0
+        
+        capacity1 = pd.DataFrame(capacity1).transpose()
+        capacity2 = pd.DataFrame(capacity2).transpose()
+        
+        capacity1.rename(index = {'DELTA' : key}, inplace = True)
+        capacity2.rename(index = {'DELTA' : key}, inplace = True)
+
+        if plot_df1a is None:
+            plot_df1a = capacity1.copy()
+            plot_df1b = capacity2.copy()
+        else:
+            plot_df1a = pd.concat([plot_df1a, capacity1])
+            plot_df1b  = pd.concat([plot_df1b, capacity2])
+            
+    for key, value in df2_dict.items():
+
+        generation1 = value.loc[value['DELTA'] < 0]
+        generation2 = value.loc[value['DELTA'] > 0]
+       
+        generation1 = generation1.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        generation2 = generation2.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        
+        for idx in value.index:
+            if not generation1.empty:
+                if not idx in generation1.index:
+                    generation1.loc[idx] = 0
+             
+            if not generation2.empty:
+                if not idx in generation2.index:
+                    generation2.loc[idx] = 0
+        
+        generation1 = pd.DataFrame(generation1).transpose()
+        generation2 = pd.DataFrame(generation2).transpose()
+        
+        generation1.rename(index = {'DELTA' : key}, inplace = True)
+        generation2.rename(index = {'DELTA' : key}, inplace = True)
+
+        if plot_df2a is None:
+            plot_df2a = generation1.copy()
+            plot_df2b = generation2.copy()
+        else:
+            plot_df2a = pd.concat([plot_df2a, generation1])
+            plot_df2b  = pd.concat([plot_df2b, generation2])
+
+    plot_df1a = plot_df1a.fillna(0)
+    plot_df1b = plot_df1b.fillna(0)
+    plot_df2a = plot_df2a.fillna(0)
+    plot_df2b = plot_df2b.fillna(0)     
+
+
+    filter_list = list(scenarios.keys())[0:4]
+    data1 =  plot_df1a.loc[filter_list]
+    data2 =  plot_df1b.loc[filter_list]
+    data3 =  plot_df2a.loc[filter_list]
+    data4 =  plot_df2b.loc[filter_list]
+    
+    # Initialize the bottom at zero for the first set of bars.
+    capacity_bot1 = 0
+    capacity_bot2 = 0
+    generation_bot1 = 0
+    generation_bot2 = 0
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    for i, col in enumerate(data1.columns):
+      ax1.bar(filter_list, data1[col], bottom=capacity_bot1, 
+                    label=col, color = color_dict1.get(col), edgecolor = 'black', 
+                    linewidth = 0.3)
+      capacity_bot1 += np.array(data1[col])
+      
+    for i, col in enumerate(data2.columns):
+      ax1.bar(filter_list, data2[col], bottom=capacity_bot2, 
+             color = color_dict1.get(col), edgecolor = 'black', 
+             linewidth = 0.3)
+      capacity_bot2 += np.array(data2[col])
+      
+    for i, col in enumerate(data3.columns):
+      ax3.bar(filter_list, data3[col], bottom=generation_bot1, 
+                    label=col, color = color_dict1.get(col), edgecolor = 'black', 
+                    linewidth = 0.3)
+      generation_bot1 += np.array(data3[col])
+      
+    for i, col in enumerate(data4.columns):
+      ax3.bar(filter_list, data4[col], bottom=generation_bot2, 
+             color = color_dict1.get(col), edgecolor = 'black', 
+             linewidth = 0.3)
+      generation_bot2 += np.array(data4[col])   
+      
+    ax3.legend(bbox_to_anchor=(1.25, -0.52), frameon = False, 
+                     ncols = 7)
+
+    ax1.set_ylabel(unit1)
+    ax3.set_ylabel(unit2)
+    
+    ax1.set_ylim([min(data1.sum(axis=1), default = 0) * 1.1, 
+                        max(data2.sum(axis=1), default = 0) * 1.1])
+
+    ax3.set_ylim([min(data3.sum(axis=1), default = 0) * 1.1, 
+                        max(data4.sum(axis=1), default = 0) * 1.1])
+    
+    filter_list = list(scenarios.keys())[4:]
+    data1 =  plot_df1a.loc[filter_list]
+    data2 =  plot_df1b.loc[filter_list]
+    data3 =  plot_df2a.loc[filter_list]
+    data4 =  plot_df2b.loc[filter_list]
+    
+    # Initialize the bottom at zero for the first set of bars.
+    capacity_bot1 = 0
+    capacity_bot2 = 0
+    generation_bot1 = 0
+    generation_bot2 = 0
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    for i, col in enumerate(data1.columns):
+      ax2.bar(filter_list, data1[col], bottom=capacity_bot1, 
+                    label=col, color = color_dict1.get(col), edgecolor = 'black', 
+                    linewidth = 0.3)
+      capacity_bot1 += np.array(data1[col])
+      
+    for i, col in enumerate(data2.columns):
+      ax2.bar(filter_list, data2[col], bottom=capacity_bot2, 
+             color = color_dict1.get(col), edgecolor = 'black', 
+             linewidth = 0.3)
+      capacity_bot2 += np.array(data2[col])
+      
+    for i, col in enumerate(data3.columns):
+      ax4.bar(filter_list, data3[col], bottom=generation_bot1, 
+                    label=col, color = color_dict1.get(col), edgecolor = 'black', 
+                    linewidth = 0.3)
+      generation_bot1 += np.array(data3[col])
+      
+    for i, col in enumerate(data4.columns):
+      ax4.bar(filter_list, data4[col], bottom=generation_bot2, 
+             color = color_dict1.get(col), edgecolor = 'black', 
+             linewidth = 0.3)
+      generation_bot2 += np.array(data4[col])   
+      
+
+    ax2.set_ylabel(unit1)
+    ax4.set_ylabel(unit2)
+    
+    ax2.set_ylim([min(data1.sum(axis=1), default = 0) * 1.1, 
+                        max(data2.sum(axis=1), default = 0) * 1.1])
+
+    ax4.set_ylim([min(data3.sum(axis=1), default = 0) * 1.1, 
+                        max(data4.sum(axis=1), default = 0) * 1.1])
+    
+    # SET GEN SHARES CHART
+    
+
+    df3['Metric'] = df3['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                      'Fossil energy share' : 'FOSSIL'})
+
+    df3.set_index('Metric', inplace = True)
+    df3.drop(columns = ['Unit'], inplace = True)
+    df3.loc['OTHER'] = 100 - df3.loc[df3.index == 'RENEWABLE'
+                                   ].iloc[0] - df3.loc[df3.index == 'FOSSIL'
+                                                      ].iloc[0]
+    
+    plot_df3a = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    plot_df3b = pd.DataFrame(columns = ['RENEWABLE', 'FOSSIL', 'OTHER'])
+    
+    for key, value in df3_dict.items():
+        
+        value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'RENEWABLE',
+                          'Fossil energy share' : 'FOSSIL'})
+    
+        value.set_index('Metric', inplace = True)
+        value.drop(columns = ['Unit'], inplace = True)
+        value.loc['OTHER'] = 100 - value.loc[value.index == 'RENEWABLE'
+                                       ].iloc[0] - value.loc[value.index == 'FOSSIL'
+                                                          ].iloc[0]
+                                                          
+        value = (value - df3)
+        value = value.transpose()[['RENEWABLE', 'FOSSIL', 'OTHER']
+                                  ].rename(index={'Value': key})
+        
+        gen_shares1 = value.clip(upper = 0)
+        gen_shares2 = value.clip(lower = 0)
+        
+        if plot_df3a.empty:
+            plot_df3a = gen_shares1
+            plot_df3b = gen_shares2
+        else:
+            plot_df3a = pd.concat([plot_df3a, gen_shares1])
+            plot_df3b = pd.concat([plot_df3b, gen_shares2])
+            
+    plot_df3a =  plot_df3a.loc[list(scenarios.keys())]
+    
+    # Plot each layer of the bar, adding each bar to the 'bottom' so
+    # the next bar starts higher.
+    gen_shares_bot1 = 0
+    gen_shares_bot2 = 0
+    
+    for i, col in enumerate(plot_df3a.columns):           
+      ax5.bar(plot_df3a.index, plot_df3a[col], bottom = gen_shares_bot1,
+              color = color_dict2.get(col), label = col, edgecolor = 'black',
+              linewidth = 0.3)
+      gen_shares_bot1 += np.array(plot_df3a[col])
+      
+    for i, col in enumerate(plot_df3b.columns):
+      ax5.bar(plot_df3b.index, plot_df3b[col], bottom = gen_shares_bot2,
+             color = color_dict2.get(col), edgecolor = 'black', linewidth = 0.3)
+      gen_shares_bot2 += np.array(plot_df3b[col])
+      
+    # Subplot formatting
+    ax5.set_ylim([min(plot_df3a.sum(axis=1), default = 0) * 1.1, 
+                        max(plot_df3b.sum(axis=1), default = 0) * 1.1])
+    ax5.legend(frameon = False, reverse = True, ncols = 1)
+
+    ax5.set_ylabel(unit3)
+    
+    ax5.legend(bbox_to_anchor=(1.2, -0.52), frameon = False, 
+              ncols = 3)
+    
+    # SET DUAL EMISSIONS AND COSTS CHART
+    
+    df4.set_index('YEAR', inplace = True)
+    df5.set_index('YEAR', inplace = True)
+    plot_df4 = pd.DataFrame(columns = ['VALUE'])
+    plot_df5 = pd.DataFrame(columns = ['VALUE'])
+
+    for key in df4_dict:
+
+        df4_dict[key].set_index('YEAR', inplace = True)
+           
+        # Calculate Delta by year
+        data = df4_dict[key][['VALUE']] - df4[['VALUE']]
+        
+        # Calculate model horizon Delta
+        data = data.sum().fillna(0)
+        plot_df4.loc[key] = data
+        
+    for key in df5_dict:
+
+        df5_dict[key].set_index('YEAR', inplace = True)
+           
+        # Calculate Delta by year
+        data = df5_dict[key][['VALUE']] - df5[['VALUE']]
+        
+        # Calculate model horizon Delta
+        data = data.sum().fillna(0)
+        plot_df5.loc[key] = data
+        
+    plot_df4 = pd.merge(plot_df4, plot_df5, left_index = True, right_index = True
+                        ).rename(columns = {'VALUE_x' : 'emissions', 
+                                            'VALUE_y' : 'costs'})
+
+    plot_df4=  plot_df4.loc[list(scenarios.keys())]
+ 
+    plot_df4.emissions.plot(kind='bar', color= color_dict3.get('bar'), 
+                            ax=ax6, position=1, width = 0.3, label = unit4)
+    
+    ax6.set_ylabel(unit4)
+    
+    ax7 = ax6.twinx()
+    
+    plot_df4.costs.plot(kind='bar', color= color_dict4.get('bar'), 
+                        ax=ax7, position=0, width = 0.3, label = unit5)
+    
+    ax7.set_ylabel(unit5)
+    
+    ax6.legend(bbox_to_anchor=(0.53, -0.52), frameon = False)
+    ax7.legend(bbox_to_anchor=(0.83, -0.52), frameon = False)
+    
+    ax1_ylims = ax6.axes.get_ylim()           # Find y-axis limits set by the plotter
+    ax1_yratio = ax1_ylims[0] / ax1_ylims[1]  # Calculate ratio of lowest limit to highest limit
+    
+    ax2_ylims = ax7.axes.get_ylim()           # Find y-axis limits set by the plotter
+    ax2_yratio = ax2_ylims[0] / ax2_ylims[1]  # Calculate ratio of lowest limit to highest limit
+
+    if ax1_yratio < ax2_yratio: 
+        ax7.set_ylim(bottom = ax2_ylims[1]*ax1_yratio)
+    else:
+        ax6.set_ylim(bottom = ax1_ylims[1]*ax2_yratio)    
+
+    # PLT ADJUSTMENTS
+    for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
+        ax.margins(x = 0)
+        ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.3)
+        ax.tick_params(axis = 'x', labelrotation = 75)
+        
+    ax1.text(-0.1, -0.07, 'a', transform=ax1.transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    ax2.text(-0.7, -0.07, 'b', transform=ax2.transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    ax3.text(-0.1, -0.07, 'c', transform=ax3.transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    ax4.text(-0.7, -0.07, 'd', transform=ax4.transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    ax5.text(-0.1, -0.07, 'e', transform=ax5.transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    ax6.text(-0.05, -0.07, 'f', transform=ax6.transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+       
+    plt.subplots_adjust(#wspace=4, 
+                        hspace = 0.8
+                        )
 
     
     return fig.savefig(os.path.join(base_path, file_name), bbox_inches = 'tight')
