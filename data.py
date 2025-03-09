@@ -1564,7 +1564,7 @@ def format_multi_plot_country_charts(df1, df2, df3, df4, df5,
 
     # SET EMISSIONS GRAPH
     df4 = df4.loc[df4['COUNTRY'] == country][['YEAR', 'VALUE']]
-    df5 = df4.loc[df5['COUNTRY'] == country][['YEAR', 'VALUE']]
+    df5 = df5.loc[df5['COUNTRY'] == country][['YEAR', 'VALUE']]
     
     df4.set_index('YEAR', inplace = True)
     df5.set_index('YEAR', inplace = True)
