@@ -76,7 +76,7 @@ base_run_dict = {
     'emissions_limit' : 'no',
     'spatial_map_ZIZABONA' : 'no',    
     'multi_plot_cap_gen_genshares_emisssions' : 'no',
-    'multi_plot_country_charts' : 'no',
+    'multi_plot_country_charts' : 'yes',
     }
 
 base_scen_comparison_dict = {
@@ -99,7 +99,7 @@ multi_scen_comparison_dict = {
     'capacity_dif' : 'no',
     'generation_dif' : 'no',
     'multi_plot_scen_comparison' : 'no',
-    'multi_plot_scen_comparison_costs' : 'yes',
+    'multi_plot_scen_comparison_costs' : 'no',
     }
 
 '''Set for which scenarios nodal level results to show and list which 

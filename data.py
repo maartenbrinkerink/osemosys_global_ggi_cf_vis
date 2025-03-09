@@ -675,13 +675,13 @@ def format_stacked_bar_pwr_delta_spatial(df_in1, df_in2, out_dir,
     legend_dict = dict(sorted(legend_dict.items()))
 
     fig.legend(legend_dict.values(), legend_dict.keys(), 
-               bbox_to_anchor=(0.7, (0.025 * rows)), frameon = False, 
+               bbox_to_anchor=(0.7, (0.018 * rows)), frameon = False, 
                reverse = True, title = legend_title,
                ncols = 4)
     
     # Add plot title
     if chart_title:
-        make_space_above(axs, topmargin=0.6) 
+        make_space_above(axs, topmargin=0.7) 
         plt.suptitle(chart_title)
     
     # Adjust subplot whitespace
@@ -775,7 +775,7 @@ def format_bar_delta_country(df_in1, df_in2, out_dir,
     legend_dict = dict(sorted(legend_dict.items()))
 
     fig.legend(legend_dict.values(), legend_dict.keys(), 
-               bbox_to_anchor=(0.7, (0.025 * rows)), frameon = False, 
+               bbox_to_anchor=(0.7, (0.02 * rows)), frameon = False, 
                title = legend_title, ncols = 4)
     
     # Add plot title
@@ -1439,7 +1439,7 @@ def format_multi_plot_country_charts(df1, df2, df3, df4, df5,
 
     # SET EMISSIONS GRAPH
     df4 = df4.loc[df4['COUNTRY'] == country][['YEAR', 'VALUE']]
-    df5 = df4.loc[df5['COUNTRY'] == country][['YEAR', 'VALUE']]
+    df5 = df5.loc[df5['COUNTRY'] == country][['YEAR', 'VALUE']]
     
     df4.set_index('YEAR', inplace = True)
     df5.set_index('YEAR', inplace = True)

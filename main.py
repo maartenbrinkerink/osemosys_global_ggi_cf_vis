@@ -9,6 +9,7 @@ the user can change the color mapping as used in different charts. Generated
 charts are saved to file.'''
 
 import os
+os.chdir(r'C:\Users\maart\Github\osemosys_global_ggi_cf_vis')
 
 from user_config import(
     figures_folder,
@@ -281,7 +282,7 @@ if base_run_dict.get('dual_emissions_country') == 'yes':
     
     df2 = format_annual_emissions(read_annual_emission_intensity_country(
         base_dir_results_summaries), country = True)
-    
+
     chart_title = 'Annual Emissions'
     legend_title = ''
     file_name = 'dual_emissions'
@@ -366,6 +367,7 @@ if base_run_dict.get('multi_plot_cap_gen_genshares_emisssions') == 'yes':
     unit4 = 'Mt CO2'
 
     df5 = read_annual_emission_intensity_global(base_dir_results_summaries)
+
     unit5 = 'gCO2/kWh'
     file_name = 'multi_plot_cap_gen_genshares_emissions'
     
@@ -395,6 +397,7 @@ if base_run_dict.get('multi_plot_country_charts') == 'yes':
 
     df5 = format_annual_emissions(read_annual_emission_intensity_country(
     base_dir_results_summaries), country = True)
+ 
     unit5 = 'gCO2/kWh'
     
     file_name = 'multi_plot_country_charts'
