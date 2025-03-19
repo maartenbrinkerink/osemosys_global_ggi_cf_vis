@@ -1,9 +1,9 @@
 '''Set paths.'''
 # Set name for folder in Figures
-figures_folder = 'ZiZaBoNa_1%_ForcedBuilts'
+figures_folder = 'ZiZaBoNa_ForcedBuilts'
 
 # Set results path
-results_folder = r'C:/Users/maart/OneDrive/Documenten/Work/Consulting/CCG/Climate Finance/results/ZiZaBoNa_1%_ForcedBuilts'
+results_folder = r'C:/Users/maart/OneDrive/Documenten/Work/Consulting/CCG/Climate Finance/results/ZiZaBoNa_ForcedBuilts'
 
 # Set OG path
 og_path = r'C:/Users/maart/Github/osemosys_global'
@@ -15,8 +15,8 @@ base_dir_results = f'{results_folder}/{BASE}/results'
 base_dir_results_summaries = f'{results_folder}/{BASE}/result_summaries'
 base_dir_data = f'{results_folder}/{BASE}/data'
 
-resources_data = f'{og_path}/resources/data'
-custom_nodes_data = f'{resources_data}/custom_nodes'
+resources_data_default = f'{og_path}/resources/data'
+resources_data_custom = f'{og_path}/resources/data/custom'
 
 '''Set scenarios that will be compared to the base_model.'''
 scenarios = {
@@ -28,7 +28,20 @@ scenarios = {
               'TRNCODXXZMBXX', 'TRNMOZXXMWIXX', 'TRNMWIXXTZAXX', 
               'TRNMOZXXZMBXX', 'TRNNAMXXZMBXX', 'TRNZAFXXZWEXX', 
               'TRNTZAXXZMBXX', 'TRNMOZXXTZAXX', 'TRNZMBXXZWEXX', 
-              'TRNMOZXXZWEXX', 'TRNBWAXXZWEXX']
+              'TRNMOZXXZWEXX', 'TRNBWAXXZWEXX'],
+    'SAPPNoZiZaBoNa' : ['TRNAGOXXNAMXX', 'TRNAGOXXCODXX', 'TRNAGOXXZMBXX', 
+                        'TRNCODXXZMBXX', 'TRNMOZXXMWIXX', 'TRNMWIXXTZAXX', 
+                        'TRNMOZXXZMBXX', 'TRNZAFXXZWEXX', 'TRNTZAXXZMBXX', 
+                        'TRNMOZXXTZAXX', 'TRNMOZXXZWEXX']
+    }
+
+scenarios_rename = {
+    'BWAXXZWEXX' : 'BWA-ZWE',
+    'NAMXXZMBXX' : 'NAM-ZMB',
+    'ZMBXXZWEXX' : 'ZMB-ZWE',
+    'ZiZaBoNa' : 'ZZBN',
+    'SAPP' : 'SAPP',
+    'SAPPNoZiZaBoNa' : 'SAPP-no-ZZBN'
     }
 
 '''Set start and end year of model horizon.'''
@@ -76,7 +89,7 @@ base_run_dict = {
     'emissions_limit' : 'no',
     'spatial_map_ZIZABONA' : 'no',    
     'multi_plot_cap_gen_genshares_emisssions' : 'no',
-    'multi_plot_country_charts' : 'yes',
+    'multi_plot_country_charts' : 'no',
     }
 
 base_scen_comparison_dict = {
@@ -99,7 +112,7 @@ multi_scen_comparison_dict = {
     'capacity_dif' : 'no',
     'generation_dif' : 'no',
     'multi_plot_scen_comparison' : 'no',
-    'multi_plot_scen_comparison_costs' : 'no',
+    'multi_plot_scen_comparison_costs' : 'yes',
     }
 
 '''Set for which scenarios nodal level results to show and list which 

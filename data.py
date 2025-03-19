@@ -1754,14 +1754,14 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
     
     fig = plt.figure(figsize = (10, 8))
 
-    gs = GridSpec(2, 20, figure=fig)
-    ax1 = fig.add_subplot(gs[0, 0:6])
-    ax2 = fig.add_subplot(gs[0, 8:9])
-    ax3 = fig.add_subplot(gs[0, 11:17])
-    ax4 = fig.add_subplot(gs[0, 19:])
+    gs = GridSpec(2, 40, figure=fig)
+    ax1 = fig.add_subplot(gs[1, 0:12])
+    ax2 = fig.add_subplot(gs[1, 14:18])
+    ax3 = fig.add_subplot(gs[1, 21:34])
+    ax4 = fig.add_subplot(gs[1, 36:])
 
-    ax5 = fig.add_subplot(gs[1, 0:7])
-    ax6 = fig.add_subplot(gs[1, 9:])
+    ax5 = fig.add_subplot(gs[0, 0:14])
+    ax6 = fig.add_subplot(gs[0, 17:])
     # SET CAPACITY AND GENERATION CHARTS
     plot_df1a = None
     plot_df2a = None
@@ -1832,7 +1832,7 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
     plot_df2b = plot_df2b.fillna(0)     
 
 
-    filter_list = list(scenarios.keys())[0:4]
+    filter_list = list(scenarios.values())[0:4]
     data1 =  plot_df1a.loc[filter_list]
     data2 =  plot_df1b.loc[filter_list]
     data3 =  plot_df2a.loc[filter_list]
@@ -1882,7 +1882,10 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
     ax3.set_ylim([min(data3.sum(axis=1), default = 0) * 1.1, 
                         max(data4.sum(axis=1), default = 0) * 1.1])
     
-    filter_list = list(scenarios.keys())[4:]
+    ax1.set_frame_on(False)
+    ax3.set_frame_on(False)
+    
+    filter_list = list(scenarios.values())[4:]
     data1 =  plot_df1a.loc[filter_list]
     data2 =  plot_df1b.loc[filter_list]
     data3 =  plot_df2a.loc[filter_list]
@@ -1921,8 +1924,11 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
       generation_bot2 += np.array(data4[col])   
       
 
-    ax2.set_ylabel(unit1)
-    ax4.set_ylabel(unit2)
+  #  ax2.set_ylabel(unit1)
+   # ax4.set_ylabel(unit2)
+   
+    ax2.set_frame_on(False)
+    ax4.set_frame_on(False)
     
     ax2.set_ylim([min(data1.sum(axis=1), default = 0) * 1.1, 
                         max(data2.sum(axis=1), default = 0) * 1.1])
@@ -1970,7 +1976,7 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
             plot_df3a = pd.concat([plot_df3a, gen_shares1])
             plot_df3b = pd.concat([plot_df3b, gen_shares2])
             
-    plot_df3a =  plot_df3a.loc[list(scenarios.keys())]
+    plot_df3a =  plot_df3a.loc[list(scenarios.values())]
     
     # Plot each layer of the bar, adding each bar to the 'bottom' so
     # the next bar starts higher.
@@ -2031,7 +2037,7 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
                         ).rename(columns = {'VALUE_x' : 'emissions', 
                                             'VALUE_y' : 'costs'})
 
-    plot_df4=  plot_df4.loc[list(scenarios.keys())]
+    plot_df4 = plot_df4.loc[list(scenarios.values())]
  
     plot_df4.emissions.plot(kind='bar', color= color_dict3.get('bar'), 
                             ax=ax6, position=1, width = 0.3, label = unit4)
@@ -2065,26 +2071,26 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
         ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.3)
         ax.tick_params(axis = 'x', labelrotation = 75)
         
-    ax1.text(-0.1, -0.07, 'a', transform=ax1.transAxes, 
+    ax1.text(-0.1, -0.07, 'c', transform=ax1.transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    ax2.text(-0.7, -0.07, 'b', transform=ax2.transAxes, 
+    #ax2.text(-0.7, -0.07, 'd', transform=ax2.transAxes, 
+   #           name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    ax3.text(-0.1, -0.07, 'd', transform=ax3.transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    ax3.text(-0.1, -0.07, 'c', transform=ax3.transAxes, 
+   # ax4.text(-0.7, -0.07, 'f', transform=ax4.transAxes, 
+   #           name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    ax5.text(-0.1, -0.07, 'a', transform=ax5.transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    ax4.text(-0.7, -0.07, 'd', transform=ax4.transAxes, 
-              name = 'Calibri', fontsize = 15, weight = 'bold')
-    
-    ax5.text(-0.1, -0.07, 'e', transform=ax5.transAxes, 
-              name = 'Calibri', fontsize = 15, weight = 'bold')
-    
-    ax6.text(-0.05, -0.07, 'f', transform=ax6.transAxes, 
+    ax6.text(-0.05, -0.07, 'b', transform=ax6.transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
        
-    plt.subplots_adjust(#wspace=4, 
-                        hspace = 0.8
+    plt.subplots_adjust(wspace=2, 
+                        hspace = 0.7
                         )
 
     
