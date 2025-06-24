@@ -57,7 +57,9 @@ def format_stacked_bar_pwr(df, out_dir, chart_title,
 
 def format_stacked_bar_demand(df, out_dir, chart_title, 
                               legend_title, file_name, 
-                              color_dict, unit):
+                              color_dict, unit, start_year, end_year):
+    
+    df = df.loc[df['YEAR'].between(start_year, end_year)]
 
     df['FUEL'] = df['FUEL'].str[:6].str[3:]
     
@@ -226,7 +228,10 @@ def format_stacked_bar_gen_shares_delta(df_in1, df_in2, df_in3, df_in4,
 def format_bar_line(df1, df2, out_dir, chart_title, 
                     legend_title, file_name, 
                     color_dict, unit1, 
-                    unit2, country):
+                    unit2, start_year, end_year, country):
+    
+    df1 = df1.loc[df1['YEAR'].between(start_year, end_year)]
+    df2 = df2.loc[df2['YEAR'].between(start_year, end_year)]
     
     if country:
         df1 = df1.loc[df1['COUNTRY'] == country][['YEAR', 'VALUE']]
@@ -1273,7 +1278,7 @@ def format_spatial_map_ZIZABONA(df, nodes, base_path,
 def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5, 
                                                    unit1, unit2, unit3, unit4, unit5,
                                                    base_path, file_name, color_dict1,
-                                                   color_dict2, color_dict3):
+                                                   color_dict2, color_dict3, start_year, end_year):
     
     # SET PLOT BASE
     fig, axs = plt.subplots(2, 2, squeeze = False, 
@@ -1281,7 +1286,13 @@ def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
                                            'width_ratios' : [1, 1]},
                             figsize = (10, 6)
                             )
-    
+
+    df1 = df1.loc[df1['YEAR'].between(start_year, end_year)]
+    df2 = df2.loc[df2['YEAR'].between(start_year, end_year)]
+    df3 = df3.loc[df3['YEAR'].between(start_year, end_year)]
+    df4 = df4.loc[df4['YEAR'].between(start_year, end_year)]
+    df5 = df5.loc[df5['YEAR'].between(start_year, end_year)]    
+
     # SET CAPACITY AND GENERATION GRAPHS
     df1 = df1.groupby(['YEAR', 'TECH'])['VALUE'].sum().unstack().fillna(0)
     df2 = df2.groupby(['YEAR', 'TECH'])['VALUE'].sum().unstack().fillna(0)
@@ -1378,7 +1389,14 @@ def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
 def format_multi_plot_country_charts(df1, df2, df3, df4, df5, 
                                      unit1, unit2, unit3, unit4, unit5,
                                      base_path, file_name, color_dict1,
-                                     color_dict2, color_dict3, country):
+                                     color_dict2, color_dict3, country,
+                                     start_year, end_year):
+    
+    df1 = df1.loc[df1['YEAR'].between(start_year, end_year)]
+    df2 = df2.loc[df2['YEAR'].between(start_year, end_year)]
+    df3 = df3.loc[df3['YEAR'].between(start_year, end_year)]
+    df4 = df4.loc[df4['YEAR'].between(start_year, end_year)]
+    df5 = df5.loc[df5['YEAR'].between(start_year, end_year)]   
     
     # SET PLOT BASE
     fig, axs = plt.subplots(2, 2, squeeze = False, 
@@ -1882,8 +1900,8 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
     ax3.set_ylim([min(data3.sum(axis=1), default = 0) * 1.1, 
                         max(data4.sum(axis=1), default = 0) * 1.1])
     
-    ax1.set_frame_on(False)
-    ax3.set_frame_on(False)
+    #ax1.set_frame_on(False)
+   # ax3.set_frame_on(False)
     
     filter_list = list(scenarios.values())[4:]
     data1 =  plot_df1a.loc[filter_list]
@@ -1927,8 +1945,8 @@ def format_multi_plot_scen_comparison_costs(df1_dict, df2_dict, df3, df3_dict,
   #  ax2.set_ylabel(unit1)
    # ax4.set_ylabel(unit2)
    
-    ax2.set_frame_on(False)
-    ax4.set_frame_on(False)
+   # ax2.set_frame_on(False)
+   # ax4.set_frame_on(False)
     
     ax2.set_ylim([min(data1.sum(axis=1), default = 0) * 1.1, 
                         max(data2.sum(axis=1), default = 0) * 1.1])

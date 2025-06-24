@@ -228,7 +228,7 @@ if base_run_dict.get('dual_costs_global') == 'yes':
     format_bar_line(df1, df2, base_path, chart_title, 
                     legend_title, file_name, 
                     DUAL_COSTS_COLOR_DICT, unit1, 
-                    unit2, country = None)
+                    unit2, start_year, end_year, country = None)
     
 if base_run_dict.get('dual_costs_country') == 'yes':
     df1 = read_total_cost_country(base_dir_results_summaries)
@@ -246,7 +246,7 @@ if base_run_dict.get('dual_costs_country') == 'yes':
         format_bar_line(df1, df2, base_path, chart_title, 
                         legend_title, file_name, 
                         DUAL_COSTS_COLOR_DICT, unit1, 
-                        unit2, country = country)
+                        unit2, start_year, end_year, country = country)
         
 if base_run_dict.get('pwr_costs_multi_country') == 'yes':
     df = read_pwr_cost_country(base_dir_results_summaries)
@@ -275,7 +275,7 @@ if base_run_dict.get('dual_emissions_global') == 'yes':
     format_bar_line(df1, df2, base_path, chart_title, 
                     legend_title, file_name, 
                     DUAL_EMISSIONS_COLOR_DICT, unit1, 
-                    unit2, country = None)
+                    unit2, start_year, end_year, country = None)
     
 if base_run_dict.get('dual_emissions_country') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
@@ -294,7 +294,7 @@ if base_run_dict.get('dual_emissions_country') == 'yes':
         format_bar_line(df1, df2, base_path, chart_title, 
                         legend_title, file_name, 
                         DUAL_EMISSIONS_COLOR_DICT, unit1, 
-                        unit2, country = country)
+                        unit2, start_year, end_year, country = country)
         
 if base_run_dict.get('dual_emissions_stacked') == 'yes':
     df1 = format_annual_emissions(read_annual_emissions(base_dir_results), 
@@ -324,7 +324,7 @@ if base_run_dict.get('demand_stacked') == 'yes':
 
     format_stacked_bar_demand(df1, base_path, chart_title, 
                               legend_title, file_name, 
-                              COUNTRY_COLOR_DICT, unit)
+                              COUNTRY_COLOR_DICT, unit, start_year, end_year)
     
 if base_run_dict.get('emissions_limit') == 'yes':
     df = read_annual_emission_limit(base_dir_data)
@@ -377,7 +377,7 @@ if base_run_dict.get('multi_plot_cap_gen_genshares_emisssions') == 'yes':
                                                    base_path, file_name, 
                                                    BAR_TECH_COLOR_DICT,
                                                    BAR_GEN_SHARES_COLOR_DICT, 
-                                                   COUNTRY_COLOR_DICT)
+                                                   COUNTRY_COLOR_DICT, start_year, end_year)
     
 if base_run_dict.get('multi_plot_country_charts') == 'yes':
     
@@ -410,7 +410,8 @@ if base_run_dict.get('multi_plot_country_charts') == 'yes':
                                          base_path, file_name, 
                                          BAR_TECH_COLOR_DICT,
                                          BAR_GEN_SHARES_COLOR_DICT, 
-                                         DUAL_EMISSIONS_COLOR_DICT, country)
+                                         DUAL_EMISSIONS_COLOR_DICT, country,
+                                         start_year, end_year)
         
     
 '''Create charts for single scenario comparison to base.'''

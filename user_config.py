@@ -1,9 +1,9 @@
 '''Set paths.'''
 # Set name for folder in Figures
-figures_folder = 'ZiZaBoNa_ForcedBuilts'
+figures_folder = 'ZiZaBoNa'
 
 # Set results path
-results_folder = r'C:/Users/maart/OneDrive/Documenten/Work/Consulting/CCG/Climate Finance/results/ZiZaBoNa_ForcedBuilts'
+results_folder = r'C:/Users/maart/OneDrive/Documenten/Work/Consulting/CCG/Climate Finance/results/ZiZaBoNa'
 
 # Set OG path
 og_path = r'C:/Users/maart/Github/osemosys_global'
@@ -15,7 +15,7 @@ base_dir_results = f'{results_folder}/{BASE}/results'
 base_dir_results_summaries = f'{results_folder}/{BASE}/result_summaries'
 base_dir_data = f'{results_folder}/{BASE}/data'
 
-resources_data_default = f'{og_path}/resources/data'
+resources_data_default = f'{og_path}/resources/data/default'
 resources_data_custom = f'{og_path}/resources/data/custom'
 
 '''Set scenarios that will be compared to the base_model.'''
@@ -45,7 +45,7 @@ scenarios_rename = {
     }
 
 '''Set start and end year of model horizon.'''
-start_year = 2023
+start_year = 2025
 end_year = 2050
 
 scen_dir_data = {}
@@ -75,43 +75,43 @@ countries = [
 
 '''Set which visualisations to run.'''
 base_run_dict = {
-    'pwr_cap_bar_global' : 'no',
-    'pwr_cap_bar_country' : 'no',
-    'pwr_gen_bar_global' : 'no',
-    'pwr_gen_bar_country' : 'no',
-    'pwr_gen_shares_global' : 'no',
-    'pwr_gen_shares_country' : 'no',
-    'dual_costs_global' : 'no',
-    'dual_emissions_global' : 'no',
-    'dual_emissions_country' : 'no',
-    'dual_emissions_stacked' : 'no',
-    'demand_stacked' : 'no',
-    'emissions_limit' : 'no',
-    'spatial_map_ZIZABONA' : 'no',    
-    'multi_plot_cap_gen_genshares_emisssions' : 'no',
-    'multi_plot_country_charts' : 'no',
+    'pwr_cap_bar_global' : 'yes',
+    'pwr_cap_bar_country' : 'yes',
+    'pwr_gen_bar_global' : 'yes',
+    'pwr_gen_bar_country' : 'yes',
+    'pwr_gen_shares_global' : 'yes',
+    'pwr_gen_shares_country' : 'yes',
+    'dual_costs_global' : 'yes',
+    'dual_emissions_global' : 'yes',
+    'dual_emissions_country' : 'yes',
+    'dual_emissions_stacked' : 'yes',
+    'demand_stacked' : 'yes',
+    'emissions_limit' : 'yes',
+    'spatial_map_ZIZABONA' : 'yes',    
+    'multi_plot_cap_gen_genshares_emisssions' : 'yes',
+    'multi_plot_country_charts' : 'yes',
     }
 
 base_scen_comparison_dict = {
-    'pwr_cap_bar_dif_global' : 'no',
-    'pwr_gen_bar_dif_global' : 'no',
-    'pwr_cap_bar_dif_country' : 'no',
-    'pwr_gen_bar_dif_country' : 'no',
-    'pwr_cap_bar_dif_node' : 'no',
-    'pwr_gen_bar_dif_node' : 'no',
-    'costs_dif_global' : 'no',
-    'emissions_dif_global' : 'no',
-    'emissions_dif_country' : 'no',
-    'pwr_gen_shares_dif_global' : 'no',
+    'pwr_cap_bar_dif_global' : 'yes',
+    'pwr_gen_bar_dif_global' : 'yes',
+    'pwr_cap_bar_dif_country' : 'yes',
+    'pwr_gen_bar_dif_country' : 'yes',
+    'pwr_cap_bar_dif_node' : 'yes',
+    'pwr_gen_bar_dif_node' : 'yes',
+    'costs_dif_global' : 'yes',
+    'emissions_dif_global' : 'yes',
+    'emissions_dif_country' : 'yes',
+    'pwr_gen_shares_dif_global' : 'yes',
     }
 
 multi_scen_comparison_dict = {
-    'emissions_dif' : 'no',
-    'costs_dif' : 'no',
-    'gen_shares_dif' : 'no',
-    'capacity_dif' : 'no',
-    'generation_dif' : 'no',
-    'multi_plot_scen_comparison' : 'no',
+    'emissions_dif' : 'yes',
+    'costs_dif' : 'yes',
+    'gen_shares_dif' : 'yes',
+    'capacity_dif' : 'yes',
+    'generation_dif' : 'yes',
+    'multi_plot_scen_comparison' : 'yes',
     'multi_plot_scen_comparison_costs' : 'yes',
     }
 
