@@ -30,6 +30,7 @@ def format_stacked_bar_pwr(df, out_dir, chart_title,
         path = out_dir
 
     df = df.groupby(['YEAR', 'TECH'])['VALUE'].sum().unstack().fillna(0)
+    df = df.reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
     
     fig, ax = plt.subplots()
 
@@ -436,6 +437,8 @@ def format_stacked_bar_pwr_delta(df_in1, df_in2, out_dir,
 
     df1 = df1.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
     df2 = df2.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
+    df1 = df1.reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
+    df2 = df2.reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
 
     for idx in years:
         if not df1.empty:
@@ -567,6 +570,7 @@ def format_stacked_bar_pwr_delta_spatial(df_in1, df_in2, out_dir,
         df1 = df1.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
         df2 = df2.groupby(['YEAR', 'TECH'])['DELTA'].sum().unstack().fillna(0)
 
+
         for idx in years:
             if not df1.empty:
                 if not idx in df1.index:
@@ -576,8 +580,8 @@ def format_stacked_bar_pwr_delta_spatial(df_in1, df_in2, out_dir,
                 if not idx in df2.index:
                     df2.loc[idx] = 0
                 
-        df1.sort_index(inplace = True)
-        df2.sort_index(inplace = True)
+        df1 = df1.reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
+        df2 = df2.reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
 
         # Initialize the bottom at zero for the first set of bars.
         bottom1 = np.zeros(len(df1))
@@ -618,6 +622,8 @@ def format_stacked_bar_pwr_delta_spatial(df_in1, df_in2, out_dir,
     
         df3 = df3.groupby(['TECH'])['DELTA'].sum().fillna(0)
         df4 = df4.groupby(['TECH'])['DELTA'].sum().fillna(0)
+        df3 = df3.reindex(color_dict.keys(), axis=0).dropna(axis=0, how='all')
+        df4 = df4.reindex(color_dict.keys(), axis=0).dropna(axis=0, how='all')
 
         for idx in df_in2.index.get_level_values("TECH"):
             if not idx in df3.index:
@@ -628,7 +634,9 @@ def format_stacked_bar_pwr_delta_spatial(df_in1, df_in2, out_dir,
         
         df3 = pd.DataFrame(df3.sort_index()).transpose()
         df4 = pd.DataFrame(df4.sort_index()).transpose()
-    
+        df3 = df3.reindex(df3.index).reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
+        df4 = df4.reindex(df4.index).reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
+
         # Initialize the bottom at zero for the first set of bars.
         bottom3 = np.zeros(len(df3))
         bottom4 = np.zeros(len(df4))
@@ -829,6 +837,8 @@ def format_headline_metrics_global(capacity_in, production_in,
     
     capacity1 = pd.DataFrame(capacity1.sort_index()).transpose()
     capacity2 = pd.DataFrame(capacity2.sort_index()).transpose()
+    capacity1 = capacity1.reindex(capacity_dict.keys(), axis=1).dropna(axis=1, how='all')
+    capacity2 = capacity2.reindex(capacity_dict.keys(), axis=1).dropna(axis=1, how='all')
 
     # Initialize the bottom at zero for the first set of bars.
     capacity_bot1 = 0
@@ -869,6 +879,8 @@ def format_headline_metrics_global(capacity_in, production_in,
     
     production1 = pd.DataFrame(production1.sort_index()).transpose()
     production2 = pd.DataFrame(production2.sort_index()).transpose()
+    production1 = production1.reindex(production_dict.keys(), axis=1).dropna(axis=1, how='all')
+    production2 = production2.reindex(production_dict.keys(), axis=1).dropna(axis=1, how='all')
 
     # Initialize the bottom at zero for the first set of bars.
     production_bot1 = 0
@@ -1052,7 +1064,7 @@ def format_bar_delta_multi_scenario(df1, df2_dict, out_dir,
     ax.bar(plot_df.index, plot_df['VALUE'],
             color = color_dict.get('bar'), edgecolor = 'black', linewidth = 0.3)
     
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     ax.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
     ax.set_ylabel(unit)
@@ -1129,7 +1141,7 @@ def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir,
                  max(plot_df2.sum(axis=1), default = 0) * 1.1])
     ax.legend(frameon = False, reverse = True, ncols = 1)
     
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     ax.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
     ax.set_ylabel(unit)
@@ -1140,22 +1152,27 @@ def format_stacked_bar_gen_shares_delta_multi_scenario(df1, df2_dict, out_dir,
 
 def format_transmission_capacity_multi_scenario(df1_dict, df2_dict, out_dir, 
                                                 chart_title, file_name, 
-                                                color_dict, unit, axis_sort):
-    
+                                                color_dict, unit, axis_sort,
+                                                scenarios_rename):
+
     plot_df1 = pd.DataFrame(columns = ['VALUE'])
     plot_df2 = pd.DataFrame(columns = ['VALUE'])
     
     
+    scen_dict = dict(zip(scenarios_rename.values(), scenarios_rename.keys()))
+    
     for key, value in df1_dict.items():
-        df1 = value.loc[value['TECHNOLOGY'] == f'TRN{key}'
+        scen = scen_dict.get(key)
+        df1 = value.loc[value['TECHNOLOGY'] == f'TRN{scen}'
                         ].reset_index(drop = True)
         if not df1.empty:
             plot_df1.loc[key] = df1['VALUE'].iloc[0]
         else:
             plot_df1.loc[key] = 0
-            
+    
     for key, value in df2_dict.items():
-        df2 = value.loc[(value['TECHNOLOGY'] == f'TRN{key}') & 
+        scen = scen_dict.get(key)
+        df2 = value.loc[(value['TECHNOLOGY'] == f'TRN{scen}') & 
                         (value['VALUE'] != 0)
                         ].reset_index(drop = True)
         
@@ -1180,7 +1197,7 @@ def format_transmission_capacity_multi_scenario(df1_dict, df2_dict, out_dir,
     
     ax.legend(frameon = False, ncols = 1)
 
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     ax.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
     ax.set_ylabel(unit)
@@ -1194,7 +1211,7 @@ def format_stacked_bar_pwr_delta_multi_scenario(df_dict, out_dir,
                                                 color_dict, unit, axis_sort):
     
     plot_df1 = None
-    
+
     for key, value in df_dict.items():
 
         capacity1 = value.loc[value['DELTA'] < 0]
@@ -1236,10 +1253,14 @@ def format_stacked_bar_pwr_delta_multi_scenario(df_dict, out_dir,
         plot_sum = (plot_df1.sum(axis=1) * -1 + plot_df2.sum(axis=1)
                     ).sort_index()
 
+
     plot_df1 = plot_df1.reindex(plot_sum.index
                                 ).reindex(sorted(plot_df1.columns), axis=1)
     plot_df2 = plot_df2.reindex(plot_sum.index
                                 ).reindex(sorted(plot_df2.columns), axis=1)
+
+    plot_df1 = plot_df1.reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
+    plot_df2 = plot_df2.reindex(color_dict.keys(), axis=1).dropna(axis=1, how='all')
     
     # Initialize the bottom at zero for the first set of bars.
     capacity_bot1 = 0
@@ -1262,7 +1283,7 @@ def format_stacked_bar_pwr_delta_multi_scenario(df_dict, out_dir,
     ax.legend(frameon = False, ncols = 1, bbox_to_anchor=(1, 1.03),
               reverse = True)
 
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     ax.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.3)
     ax.set_ylabel(unit)
@@ -1401,6 +1422,8 @@ def format_multi_plot_cap_gen_genshares_emissions(df1, df2, df3, df4, df5,
     # SET CAPACITY AND GENERATION GRAPHS
     df1 = df1.groupby(['YEAR', 'TECH'])['VALUE'].sum().unstack().fillna(0)
     df2 = df2.groupby(['YEAR', 'TECH'])['VALUE'].sum().unstack().fillna(0)
+    df1 = df1.reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
+    df2 = df2.reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
     
     # Initialize the bottom at zero for the first set of bars.
     bottom1 = np.zeros(len(df1))
@@ -1517,6 +1540,8 @@ def format_multi_plot_country_charts(df1, df2, df3, df4, df5,
     
     df1 = df1.groupby(['YEAR', 'TECH'])['VALUE'].sum().unstack().fillna(0)
     df2 = df2.groupby(['YEAR', 'TECH'])['VALUE'].sum().unstack().fillna(0)
+    df1 = df1.reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
+    df2 = df2.reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
     
     # Initialize the bottom at zero for the first set of bars.
     bottom1 = np.zeros(len(df1))
@@ -1610,7 +1635,9 @@ def format_multi_plot_country_charts(df1, df2, df3, df4, df5,
 def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict, 
                                       df4, df4_dict, unit1, unit2, unit3, unit4,
                                       color_dict1, color_dict2, color_dict3,
-                                      base_path, file_name, chart_title, axis_sort):
+                                      base_path, file_name, chart_title, axis_sort,
+                                      #scenarios_rename
+                                      ):
     
     # SET PLOT BASE
     fig, axs = plt.subplots(2, 2, squeeze = False, 
@@ -1700,53 +1727,57 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
         plot_sum2 = (plot_df2a.sum(axis=1) * -1 + plot_df2b.sum(axis=1)
                     ).sort_index()
 
-    plot_df1a =  plot_df1a.reindex(plot_sum1.index).reindex(sorted(plot_df1a.columns), axis=1)
-    plot_df1b =  plot_df1b.reindex(plot_sum1.index).reindex(sorted(plot_df1b.columns), axis=1)
-    plot_df2a =  plot_df2a.reindex(plot_sum2.index).reindex(sorted(plot_df2a.columns), axis=1)
-    plot_df2b =  plot_df2b.reindex(plot_sum2.index).reindex(sorted(plot_df2b.columns), axis=1)    
-        
+    plot_df1a =  plot_df1a.reindex(plot_sum1.index
+                                   ).reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
+    plot_df1b =  plot_df1b.reindex(plot_sum1.index
+                                   ).reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
+    plot_df2a =  plot_df2a.reindex(plot_sum2.index
+                                   ).reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
+    plot_df2b =  plot_df2b.reindex(plot_sum2.index
+                                   ).reindex(color_dict1.keys(), axis=1).dropna(axis=1, how='all')
+    
     # Initialize the bottom at zero for the first set of bars.
     capacity_bot1 = 0
     capacity_bot2 = 0
     generation_bot1 = 0
     generation_bot2 = 0
-    
+
     # Plot each layer of the bar, adding each bar to the 'bottom' so
     # the next bar starts higher.
     for i, col in enumerate(plot_df1a.columns):
-      axs[0, 0].bar(plot_df1a.index, plot_df1a[col], bottom=capacity_bot1, 
+      axs[1, 0].bar(plot_df1a.index, plot_df1a[col], bottom=capacity_bot1, 
                     label=col, color = color_dict1.get(col), edgecolor = 'black', 
                     linewidth = 0.3)
       capacity_bot1 += np.array(plot_df1a[col])
       
     for i, col in enumerate(plot_df1b.columns):
-      axs[0, 0].bar(plot_df1b.index, plot_df1b[col], bottom=capacity_bot2, 
+      axs[1, 0].bar(plot_df1b.index, plot_df1b[col], bottom=capacity_bot2, 
              color = color_dict1.get(col), edgecolor = 'black', 
              linewidth = 0.3)
       capacity_bot2 += np.array(plot_df1b[col])
       
     for i, col in enumerate(plot_df2a.columns):
-      axs[0, 1].bar(plot_df2a.index, plot_df2a[col], bottom=generation_bot1, 
+      axs[1, 1].bar(plot_df2a.index, plot_df2a[col], bottom=generation_bot1, 
                     label=col, color = color_dict1.get(col), edgecolor = 'black', 
                     linewidth = 0.3)
       generation_bot1 += np.array(plot_df2a[col])
       
     for i, col in enumerate(plot_df2b.columns):
-      axs[0, 1].bar(plot_df2b.index, plot_df2b[col], bottom=generation_bot2, 
+      axs[1, 1].bar(plot_df2b.index, plot_df2b[col], bottom=generation_bot2, 
              color = color_dict1.get(col), edgecolor = 'black', 
              linewidth = 0.3)
       generation_bot2 += np.array(plot_df2b[col])   
       
-    axs[0, 1].legend(bbox_to_anchor=(0.85, -0.47), frameon = False, 
+    axs[1, 1].legend(bbox_to_anchor=(0.85, -0.47), frameon = False, 
                      ncols = 7)
 
-    axs[0, 0].set_ylabel(unit1)
-    axs[0, 1].set_ylabel(unit2)
+    axs[1, 0].set_ylabel(unit1)
+    axs[1, 1].set_ylabel(unit2)
     
-    axs[0, 0].set_ylim([min(plot_df1a.sum(axis=1), default = 0) * 1.1, 
+    axs[1, 0].set_ylim([min(plot_df1a.sum(axis=1), default = 0) * 1.1, 
                         max(plot_df1b.sum(axis=1), default = 0) * 1.1])
 
-    axs[0, 1].set_ylim([min(plot_df2a.sum(axis=1), default = 0) * 1.1, 
+    axs[1, 1].set_ylim([min(plot_df2a.sum(axis=1), default = 0) * 1.1, 
                         max(plot_df2b.sum(axis=1), default = 0) * 1.1])
     
     # SET GEN SHARES CHART
@@ -1801,26 +1832,32 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
     gen_shares_bot2 = 0
     
     for i, col in enumerate(plot_df3a.columns):           
-      axs[1, 0].bar(plot_df3a.index, plot_df3a[col], bottom = gen_shares_bot1,
+      axs[0, 0].bar(plot_df3a.index, plot_df3a[col], bottom = gen_shares_bot1,
               color = color_dict2.get(col), label = col, edgecolor = 'black',
               linewidth = 0.3)
       gen_shares_bot1 += np.array(plot_df3a[col])
       
     for i, col in enumerate(plot_df3b.columns):
-      axs[1, 0].bar(plot_df3b.index, plot_df3b[col], bottom = gen_shares_bot2,
+      axs[0, 0].bar(plot_df3b.index, plot_df3b[col], bottom = gen_shares_bot2,
              color = color_dict2.get(col), edgecolor = 'black', linewidth = 0.3)
       gen_shares_bot2 += np.array(plot_df3b[col])
       
     # Subplot formatting
-    axs[1, 0].set_ylim([min(plot_df3a.sum(axis=1), default = 0) * 1.1, 
+    axs[0, 0].set_ylim([min(plot_df3a.sum(axis=1), default = 0) * 1.1, 
                         max(plot_df3b.sum(axis=1), default = 0) * 1.1])
-    axs[1, 0].legend(frameon = False, reverse = True, ncols = 1)
 
-    axs[1, 0].set_ylabel(unit3)
+    axs[0, 0].set_ylabel(unit3)
     
-    axs[1, 0].legend(bbox_to_anchor=(1.05, -0.47), frameon = False, 
+    axs[0, 0].legend(bbox_to_anchor=(1, -0.47), frameon = False, 
               ncols = 3)
-    
+
+    for xtick in axs[0, 0].get_xticklabels():
+        val = plot_df3b.loc[plot_df3b.index == xtick.get_text()]['Fossil'].iloc[0]
+        if val > 0:
+            xtick.set_color('red')
+        else:
+            xtick.set_color('green')
+        
     # SET EMISSIONS CHART
     
     df4.set_index('YEAR', inplace = True)
@@ -1842,30 +1879,37 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
     else:
         plot_df4 = plot_df4.sort_index()
     
-    axs[1, 1].bar(plot_df4.index, plot_df4['VALUE'],
+    axs[0, 1].bar(plot_df4.index, plot_df4['VALUE'],
                   color = color_dict3.get('bar'))
     
-    axs[1, 1].set_ylabel(unit4)
+    axs[0, 1].set_ylabel(unit4)
+    
+    for xtick in axs[0, 1].get_xticklabels():
+        val = plot_df4.loc[plot_df4.index == xtick.get_text()]['VALUE'].iloc[0]
+        if val > 0:
+            xtick.set_color('red')
+        else:
+            xtick.set_color('green')
 
     # PLT ADJUSTMENTS
     for ax in axs.ravel():
         ax.margins(x = 0)
         ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.3)
-        ax.tick_params(axis = 'x', labelrotation = 75)
+        ax.tick_params(axis = 'x', labelrotation = 65)
         
-    axs[0, 0].text(-0.16, 0, 'a', transform=axs[0, 0].transAxes, 
+    axs[0, 0].text(-0.11, -0.1, 'a', transform=axs[0, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    axs[0, 1].text(1.05, 0, 'b', transform=axs[0, 0].transAxes, 
+    axs[0, 1].text(1.09, -0.1, 'b', transform=axs[0, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    axs[1, 0].text(-0.16, -1.72, 'c', transform=axs[0, 0].transAxes, 
+    axs[1, 0].text(-0.11, -1.75, 'c', transform=axs[0, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
-    axs[1, 1].text(1.05, -1.72, 'd', transform=axs[0, 0].transAxes, 
+    axs[1, 1].text(1.09, -1.75, 'd', transform=axs[0, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
        
-    plt.subplots_adjust(wspace=0.24, hspace = 0.72)
+    plt.subplots_adjust(wspace=0.24, hspace = 0.65)
     
     # Add plot title
     if chart_title:
@@ -1877,7 +1921,7 @@ def format_multi_plot_scen_comparison(df1_dict, df2_dict, df3, df3_dict,
 def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir, 
                                                   chart_title, file_name, 
                                                   color_dict, unit, axis_sort,
-                                                  runs, BASE):
+                                                  runs, BASE, scenarios_rename):
 
     plot_df = pd.DataFrame()
     
@@ -1903,9 +1947,11 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir,
         else:
             plot_df = pd.merge(plot_df, data, left_index = True, right_index = True, how = 'outer'
                                ).rename(columns = {'VALUE' : run})
-    
+
     plot_df.sort_index(inplace = True)
     plot_df = plot_df.reset_index(drop = False).rename(columns = {'index' : 'run'})
+    
+    plot_df['run'] = plot_df['run'].map(scenarios_rename)    
 
     if axis_sort == True:
         plot_df = plot_df.sort_values(by = [BASE])
@@ -1920,7 +1966,7 @@ def format_bar_delta_multi_scenario_sensitivities(df1_dict, df2_dict, out_dir,
     plt.legend(bbox_to_anchor=(0.97, -0.45), frameon = False, 
               ncols = 3)
     
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     plt.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
     plt.ylabel(unit)
@@ -2047,7 +2093,7 @@ def format_stacked_bar_gen_shares_delta_multi_scenario_sensitivities(df1_dict, d
         n = n + 1
     
     # Figure adjustments
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     ax.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
     ax.set_ylabel(unit)
@@ -2095,7 +2141,7 @@ def format_bar_delta_multi_scenario_geo_sensitivity(df1, df2_dict, df3_dict,
                  )
 
     plt.legend(frameon = False)
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     ax.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.1)
     ax.set_ylabel(unit)
@@ -2106,7 +2152,7 @@ def format_bar_delta_multi_scenario_geo_sensitivity(df1, df2_dict, df3_dict,
 def format_bar_delta_multi_scenario_sensitivities_trn_capacity(df1_dict, out_dir, 
                                                                chart_title, file_name, 
                                                                color_dict, unit, axis_sort,
-                                                               runs, BASE):
+                                                               runs, BASE, scenarios_rename):
 
     plot_df = pd.DataFrame(columns = ['VALUE'])
     
@@ -2129,6 +2175,7 @@ def format_bar_delta_multi_scenario_sensitivities_trn_capacity(df1_dict, out_dir
     
     plot_df.sort_index(inplace = True)
     plot_df = plot_df.reset_index(drop = False).rename(columns = {'index' : 'run'})
+    plot_df['run'] = plot_df['run'].map(scenarios_rename)
 
     if axis_sort == True:
         plot_df = plot_df.sort_values(by = [BASE])
@@ -2143,7 +2190,7 @@ def format_bar_delta_multi_scenario_sensitivities_trn_capacity(df1_dict, out_dir
     plt.legend(bbox_to_anchor=(0.97, -0.45), frameon = False, 
               ncols = 3)
     
-    plt.xticks(rotation = 75)
+    plt.xticks(rotation = 65)
     plt.margins(x=0)
     ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
     plt.ylabel(unit)
@@ -2152,11 +2199,11 @@ def format_bar_delta_multi_scenario_sensitivities_trn_capacity(df1_dict, out_dir
 
     return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
 
-def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict, df3_dict, df4_dict,
+def format_bar_delta_multi_scenario_sensitivities_multi_plot_bilateral(df1_dict, df2_dict, df3_dict, df4_dict,
                                                              df5, df6_dict, df7_dict, df8_dict, 
                                                              out_dir, file_name, color_dict1, color_dict2, 
                                                              hatch_dict, unit1, unit2, unit3, axis_sort, 
-                                                             runs, BASE):
+                                                             runs, BASE, scenarios_rename):
     
     # DATA PREP
     plot_df1 = pd.DataFrame()
@@ -2228,6 +2275,7 @@ def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict,
 
     plot_df1.sort_index(inplace = True)
     plot_df1 = plot_df1.reset_index(drop = False).rename(columns = {'index' : 'run'})
+
     
     for scenario in plot_df2.index.unique():
         data = plot_df2.loc[plot_df2.index == scenario]
@@ -2261,6 +2309,11 @@ def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict,
         df2_out = df2_out.sum().fillna(0)
  
         plot_df4.loc[key] = [df1_out.iloc[0], df2_out.iloc[0]]
+
+    # rename scenario names
+    plot_df1['run'] = plot_df1['run'].map(scenarios_rename)
+    plot_df2['scenario'] = plot_df2['scenario'].map(scenarios_rename)    
+    plot_df3['scenario'] = plot_df3['scenario'].map(scenarios_rename)    
 
     idx = list(dict.fromkeys(list(plot_df1['run'].unique()) + list(plot_df2['scenario'].unique()) 
           + list((plot_df3['scenario'].unique())) + list(plot_df4.index.unique())))
@@ -2399,7 +2452,7 @@ def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict,
     for ax in axs.ravel():
         ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
         ax.margins(x = 0)
-        ax.tick_params(axis = 'x', labelrotation = 75)
+        ax.tick_params(axis = 'x', labelrotation = 65)
         ax.set_xlabel('')
         ax.grid(which='major', axis='x', linestyle='--')
     
@@ -2417,6 +2470,242 @@ def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict,
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
     axs[2, 0].text(-0.03, -0.03, 'c', transform=axs[2, 0].transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')
+
+def format_bar_delta_multi_scenario_sensitivities_multi_plot(df1_dict, df2_dict, df3_dict, df4_dict,
+                                                             out_dir, file_name, color_dict1, color_dict2, 
+                                                             hatch_dict, unit1, unit2, axis_sort, 
+                                                             runs, BASE, scenarios_rename):
+    
+    # DATA PREP
+    plot_df1 = pd.DataFrame()
+    plot_df2 = pd.DataFrame(columns = ['run', 'Renewable', 'Fossil', 'Other'])
+    plot_df3 = pd.DataFrame(columns = ['run', 'Renewable', 'Fossil', 'Other'])
+    
+    for run in runs:
+        
+        # sensitivity 1
+        df1_dict[run].set_index('YEAR', inplace = True)
+        data = pd.DataFrame(columns = ['VALUE'])
+        
+        for key in df2_dict[run]:
+    
+            df2_dict[run][key].set_index('YEAR', inplace = True)
+               
+            # Calculate Delta by year
+            df = df2_dict[run][key][['VALUE']] - df1_dict[run][['VALUE']]
+            
+            # Calculate model horizon Delta
+            df3 = df.sum().fillna(0)
+            data.loc[key] = df3
+            
+        if plot_df1.empty:
+            plot_df1 = data.copy().rename(columns = {'VALUE' : run})
+        
+        else:
+            plot_df1 = pd.merge(plot_df1, data, left_index = True, right_index = True, how = 'outer'
+                               ).rename(columns = {'VALUE' : run})
+            
+        # sensitivity 2
+        df3_dict[run]['Metric'] = df3_dict[run]['Metric'].replace({'Renewable energy share' : 'Renewable',
+                          'Fossil energy share' : 'Fossil'})
+
+        df3_dict[run].set_index('Metric', inplace = True)
+        df3_dict[run].drop(columns = ['Unit'], inplace = True)
+        df3_dict[run].loc['Other'] = 100 - df3_dict[run].loc[df3_dict[run].index == 'Renewable'
+                                       ].iloc[0] - df3_dict[run].loc[df3_dict[run].index == 'Fossil'
+                                                          ].iloc[0]
+                                                           
+        for key, value in df4_dict[run].items():
+            value['Metric'] = value['Metric'].replace({'Renewable energy share' : 'Renewable',
+                              'Fossil energy share' : 'Fossil'})
+            
+
+        
+            value.set_index('Metric', inplace = True)
+            value.drop(columns = ['Unit'], inplace = True)
+            
+
+            
+            value.loc['Other'] = 100 - value.loc[value.index == 'Renewable'
+                                           ].iloc[0] - value.loc[value.index == 'Fossil'
+                                                              ].iloc[0]
+                                                              
+            value = (value - df3_dict[run])
+            value = value.transpose()[['Renewable', 'Fossil', 'Other']
+                                      ].rename(index={'Value': key})
+
+            gen_shares1, gen_shares2 = value.clip(upper = 0), value.clip(lower = 0)
+            gen_shares1.insert(0, 'run', run), gen_shares2.insert(0, 'run', run)
+            
+            if plot_df2.empty:
+                plot_df2, plot_df3 = gen_shares1, gen_shares2
+                
+            else:
+                plot_df2 = pd.concat([plot_df2, gen_shares1])
+                plot_df3 = pd.concat([plot_df3, gen_shares2])        
+                
+    for df in [plot_df2, plot_df3]:
+        df['Other'] = df['Renewable'] + df['Fossil'] + df['Other']
+        df['Fossil'] = df['Renewable'] + df['Fossil']
+
+    plot_df1.sort_index(inplace = True)
+    plot_df1 = plot_df1.reset_index(drop = False).rename(columns = {'index' : 'run'})
+
+    
+    for scenario in plot_df2.index.unique():
+        data = plot_df2.loc[plot_df2.index == scenario]
+
+        if not data.drop(columns = 'run').sum().sum() < 0:
+            plot_df2 = plot_df2.loc[plot_df2.index != scenario]
+            plot_df3 = plot_df3.loc[plot_df3.index != scenario]
+
+    plot_df2 = plot_df2.reset_index(drop = False).rename(columns = {'index' : 'scenario'})
+    plot_df3 = plot_df3.reset_index(drop = False).rename(columns = {'index' : 'scenario'})
+
+    # rename scenario names
+    plot_df1['run'] = plot_df1['run'].map(scenarios_rename)
+    plot_df2['scenario'] = plot_df2['scenario'].map(scenarios_rename)    
+    plot_df3['scenario'] = plot_df3['scenario'].map(scenarios_rename)    
+
+    idx = list(dict.fromkeys(list(plot_df1['run'].unique()) + list(plot_df2['scenario'].unique()) 
+          + list((plot_df3['scenario'].unique()))))
+    
+    for i in idx:
+        plot_df1.loc[len(plot_df1)] = {'run': i}
+        plot_df1 = plot_df1.drop_duplicates(subset=['run'], keep='first'
+                                 ).sort_values(by = ['run'])
+            
+        for run in runs:
+            plot_df2.loc[len(plot_df2)] = {'scenario' : i, 'run': run}
+            plot_df2 = plot_df2.drop_duplicates(subset=['scenario', 'run'], keep='first'
+                                     ).sort_values(by = ['run', 'scenario'])
+            
+            plot_df3.loc[len(plot_df3)] = {'scenario' : i, 'run': run}
+            plot_df3 = plot_df3.drop_duplicates(subset=['scenario', 'run'], keep='first'
+                                     ).sort_values(by = ['run', 'scenario'])
+            
+    plot_df2 = plot_df2.reset_index(drop = True).fillna(0)
+    plot_df3 = plot_df3.reset_index(drop = True).fillna(0)
+
+    fig, axs = plt.subplots(2, 1, squeeze = False, 
+                            gridspec_kw = {'height_ratios' : [1, 1]},
+                            figsize=(9, 9))
+    
+    # PLOTTING SUBPLOT 1
+    
+    plot_df1.plot(ax = axs[0, 0], x = 'run', kind = 'bar', width = 0.8,
+                 color = [color_dict1[run] for run in plot_df1[runs]],
+                 edgecolor = 'black', linewidth = 0.3
+                 )
+
+    # PLOTTING SUBPLOT 2
+    for group in ['Other', 'Fossil', 'Renewable']:
+
+        data1 = plot_df2[['scenario', 'run', group]]
+
+        data1 = data1.pivot(index='scenario', columns='run', values=group).reset_index()
+  
+        data1.plot(ax = axs[1, 0], x = 'scenario', kind = 'bar', width = 0.8,
+                     color = color_dict2.get(group), legend = False,
+                     edgecolor = 'black', linewidth = 0.3)
+
+        data2 = plot_df3[['scenario', 'run', group]]
+
+        data2 = data2.pivot(index='scenario', columns='run', values=group).reset_index()
+             
+        data2.plot(ax = axs[1, 0], x = 'scenario', kind = 'bar', width = 0.8,
+                     color = color_dict2.get(group), legend = False,
+                     edgecolor = 'black', linewidth = 0.3)
+        
+    # Add hatches to bars
+    bars = axs[1, 0].patches
+    y = 0
+
+    runs_len = len(plot_df2['run'].unique())
+    scen_len = len(plot_df2['scenario'].unique())
+
+    for run in plot_df2['run'].unique():
+        z = 0
+        # Range 1,7 is equal to number of tech groups * two delta's
+        for n in range(1,7):
+            # Set correct hatch per sensitivity run
+            for r in range(y + z, y + z + scen_len):
+                bars[r].set_hatch(hatch_dict.get(run)[0])
+                bars[r].set_edgecolor(hatch_dict.get(run)[1])
+            
+            z = z + (runs_len * scen_len)
+            
+        y = y + scen_len
+    
+    # LEGEND SUBPLOT 1
+    axs[0, 0].legend(bbox_to_anchor=(0.728, 1), 
+                     #loc = 'upper center',
+                     #frameon = False, 
+                     ncols = 1,
+                     edgecolor = 'white', framealpha = 1
+                     )
+    
+    # LEGENDS SUBPLOT2
+    legend2 = []
+    for key, value in color_dict2.items():
+        legend2.append(Patch(facecolor = value, label = key, edgecolor = 'grey',
+                             linewidth = 0.5))
+        
+    fig.legend(handles = legend2, 
+               bbox_to_anchor=(0.585, 0.11),
+               loc = 'lower center',
+               #frameon = False, 
+               ncols = 1,
+               edgecolor = 'white', framealpha = 1               
+               )
+
+    handles, labels = axs[1, 0].get_legend_handles_labels()
+    
+    by_label = dict(zip(labels, handles))
+    by_label = dict(sorted(by_label.items()))
+
+    legend3 = axs[1, 0].legend(by_label.values(), by_label.keys(), 
+               bbox_to_anchor=(0.61, 1), 
+               loc = 'upper center',
+              # frameon = False, 
+               ncols = 1,
+               edgecolor = 'white', framealpha = 1 
+               )
+
+    n = 0
+    for lh in legend3.legend_handles:
+        lh.set_facecolor('white')
+        lh.set_edgecolor(list(hatch_dict.values())[n][1])
+        n = n + 1
+    
+
+    for xtick in axs[0, 0].get_xticklabels():
+        xtick.set_color('green')
+        
+    for xtick in axs[1, 0].get_xticklabels():
+        xtick.set_color('green')
+    
+    # FIGURE ADJUSTMENTS
+    for ax in axs.ravel():
+        ax.axhline(y=0, color='black', linestyle='-', linewidth = 0.5)
+        ax.margins(x = 0)
+        ax.set_xlabel('')
+        ax.grid(which='major', axis='x', linestyle='--', color = 'green')
+        ax.set_axisbelow(True)
+    
+    axs[0, 0].set_ylabel(unit1)
+    axs[1, 0].set_ylabel(unit2)
+    
+    plt.subplots_adjust(hspace=0.45)
+    
+    # ADD LABELS
+    axs[0, 0].text(-0.03, -0.03, 'a', transform=axs[0, 0].transAxes, 
+              name = 'Calibri', fontsize = 15, weight = 'bold')
+    
+    axs[1, 0].text(-0.03, -0.03, 'b', transform=axs[1, 0].transAxes, 
               name = 'Calibri', fontsize = 15, weight = 'bold')
     
     return plt.savefig(os.path.join(out_dir, file_name), bbox_inches = 'tight')

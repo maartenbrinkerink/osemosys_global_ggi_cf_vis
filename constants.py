@@ -1,25 +1,26 @@
 '''constants for vis-script for GGI-Climate Finance project'''
 
+# NOTE: The order of the keys will set the order of the technologies in figure legends.
 BAR_TECH_COLOR_DICT = {
-    'BIO':'darkgreen',
     'CCG':'brown',
     'CCS': 'khaki',
     'COA':'black',
     #'COG':'peru',
-    #'CSP':'wheat',
-    'GEO':'red',
-    'HYD':'blue',
     'OCG':'lightsalmon',
     'OIL':'lightgrey',
     #'OTH':'teal',
     #'PET':'grey',
-    'SPV':'gold',
     'URN':'limegreen',
     'WAS':'darkkhaki',
+    #'CSP':'wheat',
+    'BIO':'darkgreen',
+    'GEO':'red',
+    'HYD':'blue',
+    'SDS': 'aqua',
+    'SPV':'gold',
     #'WAV':'red',
     'WOF':'violet',
     'WON':'blueviolet',
-    'SDS': 'aqua',
 }
 
 STORAGE_LIST = ['SDS']
@@ -75,16 +76,16 @@ COUNTRY_COLOR_DICT = {
     
 SENSITIVTIES_COLOR_DICT = {
     'Base' : 'navy',
-    'CoalPhaseOut' : 'limegreen',
-    'CoalPhaseOut0%' : 'red',    
-    'CoalPhaseOut15%' : 'aqua',
-    #'LowTransmissionCosts' : 'lightgrey',
-   # 'LongDurationStorage' : 'aqua',
-   # 'HighGasPrice' : 'green',
-   # 'NoNuclear' : 'orange',
-    #'PointTargets' : 'red',
+    #'CoalPhaseOut' : 'limegreen',
+    #'CoalPhaseOut0%' : 'red',    
+    #'CoalPhaseOut15%' : 'aqua',
+    'LowTransmissionCosts' : 'lightgrey',
+    'LongDurationStorage' : 'aqua',
+    'HighGasPrice' : 'green',
+    'NoNuclear' : 'orange',
+    'PointTargets' : 'red',
     #'NoTargets' : 'violet',
-    'Bilateral' : 'pink',
+  #  'Bilateral' : 'pink',
     
     
     
@@ -92,13 +93,13 @@ SENSITIVTIES_COLOR_DICT = {
 
 SENSITIVTIES_HATCH_DICT = {
     'Base' : ['', 'black'],
-    'CoalPhaseOut' : ['...', 'black'],
-    'CoalPhaseOut0%' : ['\\\\\\', 'black'],
-    'CoalPhaseOut15%' : ['///', 'black'],
-    #'LowTransmissionCosts' : ['...', 'black'],
-    #'LongDurationStorage' : ['///', 'black'],
-    #'HighGasPrice' : ['ooo', 'black'],
-   # 'NoNuclear' : ['\\\\\\', 'black'],
+    #'CoalPhaseOut' : ['...', 'black'],
+    #'CoalPhaseOut0%' : ['\\\\\\', 'black'],
+    #'CoalPhaseOut15%' : ['///', 'black'],
+    'LowTransmissionCosts' : ['...', 'black'],
+    'LongDurationStorage' : ['///', 'black'],
+    'HighGasPrice' : ['ooo', 'black'],
+    'NoNuclear' : ['\\\\\\', 'black'],
     #'NoTargets' : ['///', 'black'],
-    #'PointTargets' : ['\\\\\\', 'black']
+    'PointTargets' : ['*', 'black']
     }
